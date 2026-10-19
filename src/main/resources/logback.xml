@@ -1,0 +1,47 @@
+<configuration>
+
+  <!-- In the user's home, because an installed app cannot write next to itself in Program Files. -->
+  <property name="LOG_DIR" value="${user.home}/.mist/logs"/>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="APP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/mist-app.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/mist-app.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>14</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Database operation log: date | user | OPERATION | collection | details | OK/FAILED -->
+  <appender name="DB" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/mist-db.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/mist-db.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss} | user=%X{user:-anonymous} | %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="com.mist.db" level="INFO" additivity="false">
+    <appender-ref ref="DB"/>
+  </logger>
+
+  <logger name="org.hibernate" level="WARN"/>
+  <logger name="org.mongodb.driver" level="WARN"/>
+  <logger name="com.mongodb.hibernate" level="WARN"/>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="APP"/>
+  </root>
+</configuration>

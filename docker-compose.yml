@@ -1,0 +1,23 @@
+# MongoDB 7.0 for local development, as the single-node replica set rs0 that transactions need.
+# The healthcheck also initiates the replica set on first start.
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: mist-mongo
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mist-mongo-data:/data/db
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - "try { rs.status().ok } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]}).ok }"
+      interval: 5s
+      retries: 20
+
+volumes:
+  mist-mongo-data:
