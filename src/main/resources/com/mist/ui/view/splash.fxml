@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
+
+<!-- Rebuilt from docs/brand/mist-splash.svg (1280 x 720). -->
+<StackPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.mist.ui.controller.SplashController"
+           styleClass="mist-bg-void" prefWidth="1280" prefHeight="720">
+
+  <!-- Rings and orb, at the kit's coordinates. -->
+  <Pane>
+    <Circle styleClass="mist-ring" centerX="1055" centerY="362" radius="308"/>
+    <Circle styleClass="mist-ring" centerX="1055" centerY="362" radius="220"/>
+    <Circle styleClass="mist-fill-acid" centerX="1055" centerY="362" radius="118"/>
+  </Pane>
+
+  <!-- MIST mark and wordmark. -->
+  <HBox alignment="CENTER_LEFT" styleClass="pl-24,gap-[32px]">
+    <Group>
+      <SVGPath styleClass="mist-fill-acid"
+               content="M0 18C0 8.059 8.059 0 18 0H139C148.941 0 157 8.059 157 18C157 27.941 148.941 36 139 36H18C8.059 36 0 27.941 0 18Z"/>
+      <SVGPath styleClass="mist-fill-acid"
+               content="M33 62C33 51.507 41.507 43 52 43H141C151.493 43 160 51.507 160 62C160 72.493 151.493 81 141 81H52C41.507 81 33 72.493 33 62Z"/>
+      <SVGPath styleClass="mist-fill-acid"
+               content="M0 106C0 95.507 8.507 87 19 87H108C118.493 87 127 95.507 127 106C127 116.493 118.493 125 108 125H19C8.507 125 0 116.493 0 106Z"/>
+    </Group>
+    <Label fx:id="wordmark" text="%app.title" styleClass="mist-text-fog,mist-wordmark,font-bold"/>
+  </HBox>
+
+  <!-- Tagline and loading bar. -->
+  <VBox fx:id="brandBlock" alignment="BOTTOM_LEFT" styleClass="p-24,gap-[24px]">
+    <Label fx:id="tagline" text="%splash.tagline" styleClass="mist-text-ash,text-base"/>
+    <ProgressBar fx:id="progress" styleClass="mist-progress-thin,w-[350px]"/>
+  </VBox>
+</StackPane>

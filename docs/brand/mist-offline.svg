@@ -1,0 +1,12 @@
+<svg width="640" height="420" viewBox="0 0 640 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="420" rx="20" fill="#E4E8E0"/>
+  <g transform="translate(248 78)" fill="#0A0C0B">
+    <path d="M0 18C0 8.059 8.059 0 18 0H126C135.941 0 144 8.059 144 18C144 27.941 135.941 36 126 36H18C8.059 36 0 27.941 0 18Z"/>
+    <path d="M33 62C33 51.507 41.507 43 52 43H128C138.493 43 147 51.507 147 62C147 72.493 138.493 81 128 81H52C41.507 81 33 72.493 33 62Z"/>
+    <path d="M0 106C0 95.507 8.507 87 19 87H95C105.493 87 114 95.507 114 106C114 116.493 105.493 125 95 125H19C8.507 125 0 116.493 0 106Z"/>
+  </g>
+  <circle cx="389" cy="199" r="19" fill="#C6FF3D" stroke="#0A0C0B" stroke-width="5"/>
+  <path d="M380 190L398 208M398 190L380 208" stroke="#0A0C0B" stroke-width="4"/>
+  <text x="320" y="284" fill="#0A0C0B" text-anchor="middle" font-family="Space Grotesk, Arial, sans-serif" font-size="25" font-weight="600">La niebla está más densa.</text>
+  <text x="320" y="316" fill="#686E69" text-anchor="middle" font-family="Space Grotesk, Arial, sans-serif" font-size="13">Sin conexión. Tus juegos instalados siguen disponibles.</text>
+</svg>

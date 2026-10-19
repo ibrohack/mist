@@ -1,0 +1,17 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#0A0C0B"/>
+  <g opacity=".14" stroke="#C6FF3D">
+    <circle cx="1055" cy="362" r="308"/>
+    <circle cx="1055" cy="362" r="220"/>
+  </g>
+  <circle cx="1055" cy="362" r="118" fill="#C6FF3D"/>
+  <g transform="translate(96 272)" fill="#C6FF3D">
+    <path d="M0 18C0 8.059 8.059 0 18 0H139C148.941 0 157 8.059 157 18C157 27.941 148.941 36 139 36H18C8.059 36 0 27.941 0 18Z"/>
+    <path d="M33 62C33 51.507 41.507 43 52 43H141C151.493 43 160 51.507 160 62C160 72.493 151.493 81 141 81H52C41.507 81 33 72.493 33 62Z"/>
+    <path d="M0 106C0 95.507 8.507 87 19 87H108C118.493 87 127 95.507 127 106C127 116.493 118.493 125 108 125H19C8.507 125 0 116.493 0 106Z"/>
+  </g>
+  <text x="286" y="372" fill="#F2F5EE" font-family="Space Grotesk, Arial, sans-serif" font-size="104" font-weight="700" letter-spacing="7">MIST</text>
+  <text x="98" y="590" fill="#818782" font-family="Space Grotesk, Arial, sans-serif" font-size="16" letter-spacing="2">PREPARANDO TU PRÓXIMO MUNDO</text>
+  <rect x="98" y="624" width="350" height="3" fill="#252A26"/>
+  <rect x="98" y="624" width="214" height="3" fill="#C6FF3D"/>
+</svg>

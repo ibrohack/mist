@@ -1,0 +1,136 @@
+/* MIST JavaFX theme — base tokens and controls */
+.root {
+  -mist-acid: #c6ff3d;
+  -mist-void: #0a0c0b;
+  -mist-surface: #151916;
+  -mist-fog: #f2f5ee;
+  -mist-ash: #818782;
+  -mist-border: #343a35;
+  -mist-track: #252a26;
+  -fx-font-family: "Space Grotesk";
+  -fx-background-color: -mist-void;
+  -fx-text-fill: -mist-fog;
+
+  /* Modena derives every control from these, so controls without a brand rule still start dark. */
+  -fx-base: -mist-surface;
+  -fx-background: -mist-void;
+  -fx-control-inner-background: -mist-surface;
+  -fx-accent: -mist-acid;
+  -fx-focus-color: -mist-acid;
+  -fx-faint-focus-color: transparent;
+}
+
+.button {
+  -fx-background-color: -mist-acid;
+  -fx-background-radius: 3;
+  -fx-text-fill: -mist-void;
+  -fx-font-weight: 700;
+  -fx-padding: 10 18;
+  -fx-cursor: hand;
+}
+
+.button:hover {
+  -fx-background-color: derive(-mist-acid, 12%);
+}
+
+.text-field {
+  -fx-background-color: -mist-surface;
+  -fx-background-radius: 3;
+  -fx-border-color: -mist-border;
+  -fx-border-radius: 3;
+  -fx-prompt-text-fill: -mist-ash;
+  -fx-text-fill: -mist-fog;
+  -fx-padding: 10 12;
+}
+
+.list-view,
+.scroll-pane,
+.viewport {
+  -fx-background-color: -mist-void;
+}
+
+.list-cell {
+  -fx-background-color: transparent;
+  -fx-text-fill: -mist-fog;
+  -fx-padding: 10 14;
+}
+
+.list-cell:selected {
+  -fx-background-color: -mist-surface;
+  -fx-border-color: transparent transparent transparent -mist-acid;
+  -fx-border-width: 0 0 0 3;
+}
+
+.progress-bar > .track {
+  -fx-background-color: -mist-track;
+}
+
+.progress-bar > .bar {
+  -fx-background-color: -mist-acid;
+  -fx-background-insets: 0;
+}
+
+/*
+ * Brand utilities. Colors come only from these classes; TailwindFX handles spacing, layout, typography and effects.
+ * A node never carries a TailwindFX utility and a mist-* class that set the same property, because TailwindFX
+ * writes inline styles and those beat this sheet.
+ */
+.mist-bg-void {
+  -fx-background-color: -mist-void;
+}
+
+.mist-bg-surface {
+  -fx-background-color: -mist-surface;
+}
+
+.mist-text-fog {
+  -fx-text-fill: -mist-fog;
+}
+
+.mist-text-ash {
+  -fx-text-fill: -mist-ash;
+}
+
+.mist-text-acid {
+  -fx-text-fill: -mist-acid;
+}
+
+.mist-fill-acid {
+  -fx-fill: -mist-acid;
+}
+
+.mist-ring {
+  -fx-fill: transparent;
+  -fx-stroke: -mist-acid;
+  -fx-opacity: 0.14;
+}
+
+.mist-rounded {
+  -fx-background-radius: 3;
+  -fx-border-radius: 3;
+}
+
+.mist-accent-left {
+  -fx-border-color: transparent transparent transparent -mist-acid;
+  -fx-border-width: 0 0 0 3;
+}
+
+.mist-progress-thin {
+  -fx-padding: 0;
+}
+
+.mist-progress-thin > .track,
+.mist-progress-thin > .bar {
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+}
+
+.mist-progress-thin > .bar {
+  -fx-padding: 0;
+  -fx-pref-height: 3px;
+}
+
+/* The kit's wordmark size; TailwindFX 0.1.2 has no 104 px size and turns text-[104px] into a text color. */
+.mist-wordmark {
+  -fx-font-size: 104px;
+}

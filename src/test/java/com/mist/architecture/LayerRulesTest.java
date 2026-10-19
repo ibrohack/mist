@@ -55,6 +55,13 @@ class LayerRulesTest {
     }
 
     @Test
+    void tailwindStaysBehindStyles() {
+        noClasses().that().doNotHaveFullyQualifiedName("com.mist.ui.Styles")
+                .should().dependOnClassesThat().resideInAPackage("io.github.yasmramos.tailwindfx..")
+                .check(MIST);
+    }
+
+    @Test
     void exceptionsExtendMistException() {
         classes().that().resideInAPackage("com.mist.exception").and().doNotHaveSimpleName("package-info")
                 .should().beAssignableTo(MistException.class)

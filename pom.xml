@@ -175,6 +175,25 @@
         </executions>
       </plugin>
 
+      <!-- TwFXML.process only compiles arbitrary values such as w-[350px]; static utilities such as p-24 need this
+           generated stylesheet (target/classes/css/tailwindfx-generated.css), built from the classes used in src/main. -->
+      <plugin>
+        <groupId>io.github.yasmramos</groupId>
+        <artifactId>tailwindfx-maven-plugin</artifactId>
+        <version>${tailwindfx.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <sourceDirectory>${project.basedir}/src/main</sourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

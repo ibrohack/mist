@@ -1,0 +1,8 @@
+<svg width="640" height="420" viewBox="0 0 640 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="420" rx="20" fill="#151916"/>
+  <circle cx="320" cy="176" r="100" stroke="#343A35"/>
+  <circle cx="320" cy="176" r="64" fill="#C6FF3D"/>
+  <path d="M260 139H376M279 176H380M260 213H347" stroke="#0A0C0B" stroke-width="15" stroke-linecap="round"/>
+  <text x="320" y="320" fill="#F2F5EE" text-anchor="middle" font-family="Space Grotesk, Arial, sans-serif" font-size="25" font-weight="600">Tu biblioteca espera una historia.</text>
+  <text x="320" y="351" fill="#818782" text-anchor="middle" font-family="Space Grotesk, Arial, sans-serif" font-size="13">Explora el catálogo y encuentra tu próximo mundo.</text>
+</svg>
