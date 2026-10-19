@@ -7,6 +7,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -39,12 +40,25 @@ public final class AppConfig {
      * @throws IllegalStateException if {@code mist.properties} is missing or a setting is blank
      */
     public static AppConfig load() {
+        return load(System.getenv(), System.getProperties());
+    }
+
+    /**
+     * Loads the settings from {@code mist.properties}, then applies overrides from the given environment and system
+     * properties. Tests use it to stay independent of the machine's real environment.
+     *
+     * @param environment      environment variables, such as {@link System#getenv()}
+     * @param systemProperties system properties, such as {@link System#getProperties()}
+     * @return the effective settings
+     * @throws IllegalStateException if {@code mist.properties} is missing or a setting is blank
+     */
+    static AppConfig load(Map<String, String> environment, Properties systemProperties) {
         Properties properties = readDefaults();
         for (String key : KEYS) {
-            override(properties, key, System.getenv(key.toUpperCase(Locale.ROOT).replace('.', '_')));
+            override(properties, key, environment.get(key.toUpperCase(Locale.ROOT).replace('.', '_')));
         }
         for (String key : KEYS) {
-            override(properties, key, System.getProperty(key));
+            override(properties, key, systemProperties.getProperty(key));
         }
         return from(properties);
     }
