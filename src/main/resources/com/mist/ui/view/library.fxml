@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Rebuilt from docs/brand/mist-splash.svg (1280 x 720). -->
+
+<StackPane minHeight="480" minWidth="800" prefHeight="720" prefWidth="1280"
+           styleClass="mist-bg-void, library-root" stylesheets="@library.css"
+           xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.mist.ui.controller.LibraryController">
+   <children>
+      <SplitPane dividerPositions="0.24" styleClass="library-split">
+         <items>
+
+            <!-- Sidebar: search + game list. Keeps its width when the window resizes. -->
+            <VBox minWidth="220" maxWidth="420" prefWidth="300" spacing="12"
+                  styleClass="sidebar" SplitPane.resizableWithParent="false">
+               <children>
+                  <TextField fx:id="searchField" promptText="Search library…" styleClass="search-field" />
+                  <ListView fx:id="gameList" styleClass="game-list" VBox.vgrow="ALWAYS">
+                     <placeholder>
+                        <Label styleClass="empty-label" text="No games found" />
+                     </placeholder>
+                  </ListView>
+               </children>
+            </VBox>
+
+            <!-- Content: scrollable grid that re-wraps tiles as the width changes. -->
+            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER"
+                        minWidth="400" styleClass="grid-scroll">
+               <content>
+                  <TilePane fx:id="gameGrid" hgap="18" vgap="18" prefTileWidth="180"
+                            prefTileHeight="260" tileAlignment="TOP_LEFT" styleClass="game-grid" />
+               </content>
+            </ScrollPane>
+
+         </items>
+      </SplitPane>
+   </children>
+</StackPane>
