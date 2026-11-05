@@ -1,0 +1,121 @@
+/* library.css - place next to library.fxml (resources/com/mist/ui/view/) */
+
+.library-root {
+    -fx-background-color: #0b0f14;
+    -fx-font-family: "Segoe UI", "Inter", system-ui, sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* ---------- Split pane ---------- */
+.library-split {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.library-split > .split-pane-divider {
+    -fx-background-color: #1c2631;
+    -fx-padding: 0 0.5 0 0.5;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    -fx-padding: 14;
+}
+
+.search-field {
+    -fx-background-color: #18212b;
+    -fx-background-radius: 8;
+    -fx-border-color: #243140;
+    -fx-border-radius: 8;
+    -fx-text-fill: #e6edf3;
+    -fx-prompt-text-fill: #6b7a8a;
+    -fx-padding: 9 12 9 12;
+}
+.search-field:focused {
+    -fx-border-color: #5b8def;
+    -fx-effect: dropshadow(gaussian, rgba(91,141,239,0.35), 8, 0, 0, 0);
+}
+
+.game-list {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.game-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-text-fill: #b4c0cc;
+    -fx-padding: 9 12 9 12;
+}
+.game-list .list-cell:hover {
+    -fx-background-color: #18212b;
+    -fx-text-fill: #e6edf3;
+}
+.game-list .list-cell:selected,
+.game-list:focused .list-cell:selected {
+    -fx-background-color: #22324a;
+    -fx-text-fill: #ffffff;
+}
+.game-list .list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+.empty-label {
+    -fx-text-fill: #6b7a8a;
+}
+
+/* ---------- Grid area ---------- */
+.grid-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+.grid-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+.game-grid {
+    -fx-background-color: transparent;
+    -fx-padding: 24;
+}
+
+/* Handy styles for the tiles you add to the grid in code:
+   tile.getStyleClass().add("game-card"); */
+.game-card {
+    -fx-background-color: #131b24;
+    -fx-background-radius: 12;
+    -fx-border-color: #1f2b38;
+    -fx-border-radius: 12;
+    -fx-cursor: hand;
+}
+.game-card:hover {
+    -fx-background-color: #18232f;
+    -fx-border-color: #5b8def;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 16, 0.1, 0, 4);
+}
+
+/* ---------- Slim scrollbars ---------- */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical {
+    -fx-pref-width: 10;
+}
+.scroll-bar .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #2a3948;
+    -fx-background-radius: 6;
+}
+.scroll-bar .thumb:hover {
+    -fx-background-color: #3a4f66;
+}
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: " ";
+}
