@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<!-- Rebuilt from docs/brand/mist-splash.svg (1280 x 720). -->
+
+<HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mist.ui.controller.HeaderController">
+   <children>
+      <ImageView fx:id="Logo" fitHeight="50.0" fitWidth="50.0">
+         <image>
+            <Image url="@../images/mist-icon-256.png" />
+         </image>
+         <HBox.margin>
+            <Insets left="20.0" />
+         </HBox.margin>
+      </ImageView>
+      <Label fx:id="LblStore" text="Store">
+         <font>
+            <Font size="24.0" />
+         </font>
+         <HBox.margin>
+            <Insets left="20.0" />
+         </HBox.margin>
+      </Label>
+      <Label fx:id="LblLibrary" text="Library">
+         <font>
+            <Font size="24.0" />
+         </font>
+         <HBox.margin>
+            <Insets left="20.0" />
+         </HBox.margin>
+      </Label>
+      <Region prefHeight="100.0" prefWidth="221.0" HBox.hgrow="ALWAYS" />
+      <Label fx:id="LblCart" text="Cart">
+         <font>
+            <Font size="24.0" />
+         </font>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+      </Label>
+      <Circle fx:id="Profile" fill="#949494" radius="20.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0">
+         <HBox.margin>
+            <Insets left="20.0" right="20.0" />
+         </HBox.margin>
+      </Circle>
+   </children>
+</HBox>
