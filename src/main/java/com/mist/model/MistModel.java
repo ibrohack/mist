@@ -16,6 +16,7 @@ public final class MistModel {
             Player.class,
             Developer.class,
             Admin.class,
+            Media.class,
             PaymentCard.class,
             Preferences.class,
             Phone.class,
