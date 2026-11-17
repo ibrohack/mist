@@ -1,9 +1,9 @@
 package com.mist.service;
 
 /**
- * Lets owners rate and review games, and lets admins hide reviews.
+ * Lets players rate and review the games they own, once per game.
  *
- * <p>Saving a review and recomputing the game's rating run in one transaction.</p>
+ * <p>Saving a review and updating the game's rating statistics run in one transaction.</p>
  */
 public class ReviewService {
 }
