@@ -17,11 +17,15 @@ public final class MistModel {
             Developer.class,
             Admin.class,
             Media.class,
+            Game.class,
             PaymentCard.class,
             Preferences.class,
             Phone.class,
             Address.class,
-            LibraryEntry.class);
+            LibraryEntry.class,
+            GameStats.class,
+            Achievement.class,
+            SystemRequirements.class);
 
     private MistModel() {
     }
