@@ -18,6 +18,7 @@ public final class MistModel {
             Admin.class,
             Media.class,
             Game.class,
+            Order.class,
             PaymentCard.class,
             Preferences.class,
             Phone.class,
@@ -25,7 +26,8 @@ public final class MistModel {
             LibraryEntry.class,
             GameStats.class,
             Achievement.class,
-            SystemRequirements.class);
+            SystemRequirements.class,
+            OrderItem.class);
 
     private MistModel() {
     }
