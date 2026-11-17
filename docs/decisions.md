@@ -1,7 +1,7 @@
 # MIST decision log
 
-Decisions taken while building the project scaffold (week 2, 19 Oct 2026) and the model layer (17 Nov 2026), and how
-they change the preliminary plan of 12 Oct 2026.
+Decisions taken while building the project scaffold (week 2, 19 Oct 2026), the model layer and the data access layer
+(17 Nov 2026), and how they change the preliminary plan of 12 Oct 2026.
 
 ## Scaffold decisions
 
@@ -51,6 +51,25 @@ navigation diagram. [data-model.md](data-model.md) describes every collection an
 9. **No automated tests for the model layer**; the project adds UI tests later. A one-off check against a MongoDB 7
    replica set proved the mapping (see Findings).
 
+## Data access layer decisions (17 Nov 2026)
+
+1. **One DAO interface per collection** (`UserDao`, `GameDao`, `OrderDao`, `ReviewDao`, `MediaDao`), implemented in
+   `dao.hibernate`. The interfaces speak only `model`, `exception` and `ObjectId`.
+2. **Transactions without Hibernate in the services.** `TransactionRunner` (in `dao`) runs a unit of work in one
+   transaction; `HibernateTransactions` binds the session to the thread, so DAO calls inside the work join it and
+   nested calls join the outer one. Outside a transaction, each DAO call runs in a short transaction of its own.
+3. **Writes flush inside the DAO call**, so a broken unique index fails that call, and is logged against it, instead of
+   failing the commit at the end.
+4. **Error translation.** Hibernate, JPA, JDBC and driver failures become `DataAccessException` (`dao.failure`); a
+   duplicate key (MongoDB codes 11000, 11001, 12582) becomes `DuplicateEntityException` (`dao.duplicate`). Model
+   exceptions pass through unchanged, after the rollback, for the services to wrap.
+5. **Operation log.** Every DAO call writes `OPERATION | collection | details | OK/FAILED` to `mist-db.log`, and a
+   failed transaction adds a `ROLLBACK` line. The user set at login is kept app-wide, so background threads log it too.
+   Details never contain passwords or hashes.
+6. **`SchemaSetup.apply` runs on every start.** It creates missing collections, updates the validators with `collMod`
+   and creates the indexes; all of it is idempotent. The validators are strict and reject invalid writes.
+7. **Paging uses `setFirstResult`/`setMaxResults`**, which the extension translates to `$skip`/`$limit`.
+
 ## Changes to the preliminary plan
 
 | Topic | Preliminary plan | Now |
@@ -67,7 +86,7 @@ navigation diagram. [data-model.md](data-model.md) describes every collection an
 | DAO implementations | `com.mist.dao.mongo` | `com.mist.dao.hibernate` |
 | Transactions | `ClientSession.withTransaction` | Hibernate transactions, which the extension maps to MongoDB transactions |
 | Dates / embedded data | not fixed | `java.time.Instant` only; embedded documents are `@Embeddable @Struct` classes |
-| Catalog search | text index | HQL `like` (becomes `$regex`); a text index only if a native MQL query needs it |
+| Catalog search | text index | the driver finds the ids with `$regex` on a quoted pattern, then Hibernate loads the games; no text index |
 | Config | `mist.properties` read by `AppConfig` | same, plus system-property and environment-variable overrides |
 | Brand images | splash, empty and offline SVGs converted to PNG | splash rebuilt in FXML (empty and offline later, the same way); only the launcher icon becomes PNG |
 | Styling | `mist-theme.css` | TailwindFX utilities + `mist-theme.css` brand layer |

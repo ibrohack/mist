@@ -248,9 +248,11 @@ MongoDB runs as replica set `rs0`, so one Hibernate transaction can change sever
 | Publish a game | the `games` document; the developer's `gameIds` |
 | Deactivate a developer | the `users` document; the developer's games are delisted |
 
-## Schema validation and indexes (to build in `SchemaSetup`)
+## Schema validation and indexes
 
-The extension cannot create validators or every index type, so `SchemaSetup` creates them through the MongoDB driver.
+The extension cannot create validators or every index type, so `SchemaSetup.apply` creates them through the MongoDB
+driver. It runs on every start: it creates the missing collections, brings the validators up to date with `collMod`,
+and creates the indexes, all idempotently.
 
 - **Validators:** one `$jsonSchema` per collection, built from the limits the model exposes as constants (for example
   `Review.MAX_COMMENT_LENGTH`).
@@ -279,14 +281,16 @@ A check against a real MongoDB 7 replica set confirmed these queries work throug
 - `from User where email = :e` (it returns the right subclass), `session.find(User.class, id)`, `from Developer`;
 - `from Game where id in :ids`, `where developerId = :d`, `where price = 0`, `order by stats.unitsSold desc`;
 - `from Order where playerId = :p order by createdAt desc`;
-- `from Review where gameId = :g order by createdAt desc`.
+- `from Review where gameId = :g order by createdAt desc`;
+- `setFirstResult` and `setMaxResults`, which become `$skip` and `$limit`, for pages and "top N" lists.
 
 Catalog search needs care:
 
 - `like :param` is not supported (the pattern must be a literal), and `lower(name) like '…'` fails inside the extension.
 - `name ilike '<literal>'` works, but building a literal from user input needs escaping.
-- **Recommended:** find matching ids with the driver, `Filters.regex("name", Pattern.quote(query), "i")`, then load the
-  games with `from Game where id in :ids`.
+- **Chosen:** `HibernateGameDao.searchPublished` finds matching ids with the driver,
+  `Filters.regex("name", Pattern.quote(query), "i")` on published games, then loads the games with
+  `from Game where id in :ids`.
 
 The extension also does not support subqueries or `SELECT DISTINCT`. To show a game's reviews with their authors' nicknames,
 load the reviews, then the authors with one `from User where id in :ids` query.

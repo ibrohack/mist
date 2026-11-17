@@ -1,7 +1,8 @@
 package com.mist.exception;
 
 /**
- * A write broke a unique index, such as a username or email that is already taken.
+ * A write broke a unique index: an email, nickname or studio name that is already taken, or a second review of the
+ * same game by the same player.
  */
 public class DuplicateEntityException extends DataAccessException {
 
