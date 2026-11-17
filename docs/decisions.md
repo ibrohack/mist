@@ -1,7 +1,7 @@
 # MIST decision log
 
-Decisions taken while building the project scaffold (week 2, 19 Oct 2026), and how they change the preliminary plan
-of 12 Oct 2026.
+Decisions taken while building the project scaffold (week 2, 19 Oct 2026) and the model layer (17 Nov 2026), and how
+they change the preliminary plan of 12 Oct 2026.
 
 ## Scaffold decisions
 
@@ -30,13 +30,40 @@ of 12 Oct 2026.
 10. **Docker for `verify`.** `./mvnw test` needs nothing extra. `./mvnw verify` needs Docker Desktop running; the
     MongoDB integration test fails rather than silently skipping.
 
+## Model layer decisions (17 Nov 2026)
+
+The model follows the team's diagrams (`Usuario` → `Cliente`/`Desarrollador`, `Juego`, `Order`, `Valoraciones`) and the
+navigation diagram. [data-model.md](data-model.md) describes every collection and field.
+
+1. **One `users` collection** for players, developers and admins, through `SINGLE_TABLE` inheritance with discriminator
+   `role`: one login query, one unique index on `email`, and the Admin account the rubric's log viewer needs.
+2. **"Cliente" is called Player** in code (`Player`, `Role.PLAYER`, `playerId`).
+3. **Images live in MongoDB**, in the `media` collection (binary, up to 2 MiB each), so every machine that uses the same
+   database sees the same covers and avatars, and developers can upload them.
+4. **Saved card, simulated charge.** Only the holder, brand, last four digits and expiry are stored.
+5. **Achievements are display only**, embedded in the game.
+6. **Normalized personal data:** first and last name, a structured address, a phone split into country code and
+   number, and a unique studio name for developers.
+7. **Argon2id password hashes**; the model refuses a value that is not one.
+8. **Model invariants carry bundle keys.** Factories and mutators throw `IllegalArgumentException` or
+   `IllegalStateException` whose message is a `ModelKeys` key; services wrap it in `ValidationException`. Embedded values
+   are immutable records, and entities replace them (copy-on-write) so Hibernate always writes the change.
+9. **No automated tests for the model layer**; the project adds UI tests later. A one-off check against a MongoDB 7
+   replica set proved the mapping (see Findings).
+
 ## Changes to the preliminary plan
 
 | Topic | Preliminary plan | Now |
 | --- | --- | --- |
 | Java | 21 + JavaFX 21 | 25 + JavaFX 25.0.4 |
 | Mapping | `mongodb-driver-sync` + `PojoCodecProvider` | Hibernate ORM 7.4.7 + `mongodb-hibernate` 1.0.0, on one shared `MongoClient`. The driver is used directly only for validators, special indexes and the connection check |
-| Studios | `studios` collection, `Studio` | `developers` collection, `Developer` entity, `DeveloperDao`; references become `developerId` |
+| Accounts | `users` (CLIENT/DEVELOPER/ADMIN) + `studios` collection | one `users` collection with `SINGLE_TABLE` inheritance: `Player` (was "client"), `Developer` (with a unique `studioName`), `Admin`; no studios collection, references become `developerId` and `playerId` |
+| Fifth collection | `studios` | `media`: images stored as binary documents, referenced by games and users |
+| Payment | wallet balance, `InsufficientFundsException` | saved card (masked: holder, brand, last 4, expiry), charge simulated; the exception is removed |
+| Passwords | BCrypt | Argon2id (PHC string), computed by `AuthService` |
+| Personal data | `profile {displayName, …}` | normalized: `firstName`/`lastName`, `address` struct, `phone {countryCode, number}` |
+| Achievements | unlocked per user in the library | shown on the game only; the library records acquisitions |
+| Returns | not planned | per-game refund: an order item gets `refundedAt`, the order becomes partially or fully refunded |
 | DAO implementations | `com.mist.dao.mongo` | `com.mist.dao.hibernate` |
 | Transactions | `ClientSession.withTransaction` | Hibernate transactions, which the extension maps to MongoDB transactions |
 | Dates / embedded data | not fixed | `java.time.Instant` only; embedded documents are `@Embeddable @Struct` classes |
@@ -82,6 +109,24 @@ a missing field. The week 2 `$jsonSchema` validators must therefore allow null o
 The same test confirms the other types the validators will check: `_id` is an `objectId`, `BigDecimal` a `decimal`,
 `Instant` a `date`, enums are strings, `List<ObjectId>` is an array of `objectId`, an `int` in an embedded document is
 an `int`, and `@Struct` embeddables are subdocuments.
+
+### The model on MongoDB (17 Nov 2026)
+
+A one-off check (not kept in the repository) booted Hibernate with every model class on a `mongo:7.0` replica set,
+stored one document of each kind, and ran the queries the DAOs will need. It confirmed:
+
+- `SINGLE_TABLE` users work, and polymorphic queries return the right subclass.
+- Java records work as `@Embeddable @Struct` values, alone and in lists, and enums inside them are stored as strings.
+- Copy-on-write lists (replacing the list on every change) are written on update.
+- `byte[]` is stored as `binData`.
+- A purchase across `orders`, `users` and `games` commits as a whole, and nothing is left behind when it fails halfway.
+- **Hibernate must be told to store enums as strings.** Without `@Enumerated(EnumType.STRING)` it stores their ordinal
+  number; every enum field and record component in the model carries the annotation.
+- **Under `SINGLE_TABLE`, other roles' fields are omitted, not written as `null`**: a developer document has no
+  `nickname` key. A field of the document's own role without a value is still written as `null`.
+- **`LIKE` needs a literal pattern.** `like :param` is not supported, and `lower(name) like '…'` fails inside the
+  extension. `ilike '<literal>'` and the driver's `$regex` both work. Catalog search should get ids with the driver's
+  `Filters.regex` on a quoted pattern, then load the games with `from Game where id in :ids`.
 
 ### Local MongoDB service and the Docker port
 

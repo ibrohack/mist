@@ -86,7 +86,7 @@ src/main/resources/
 ├─ com/mist/ui/          views (FXML), mist-theme.css, Space Grotesk fonts, launcher icons
 ├─ i18n/                 messages_es.properties, messages_en.properties
 └─ mist.properties, logback.xml
-docs/                    decision log and the brand kit sources
+docs/                    data model, decision log and the brand kit sources
 ```
 
 Layer rules, enforced by `src/test/java/com/mist/architecture/LayerRulesTest.java`:
