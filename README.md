@@ -73,11 +73,12 @@ Without Docker, `verify` fails instead of skipping the integration tests.
 ```
 src/main/java/com/mist/
 ├─ Launcher, MistApp     entry point and JavaFX application
+├─ MistContext           opens the data layer and builds every service for the UI
 ├─ ui/                   navigation (SceneRouter, View), I18n, Styles (TailwindFX facade), UserSession
 │  └─ controller/        FXML controllers
-├─ service/              use cases, validation, domain exceptions
-├─ dao/                  one interface per collection
-│  └─ hibernate/         implementations on Hibernate ORM with the MongoDB extension
+├─ service/              use cases (Auth, User, Store, Library, Review, Publishing, Media), input forms
+├─ dao/                  one interface per collection, plus TransactionRunner
+│  └─ hibernate/         implementations on Hibernate ORM with the MongoDB extension, HibernateDataAccess
 ├─ model/                entities and enums
 ├─ config/               AppConfig, MongoConnection, HibernateBootstrap, SchemaSetup
 ├─ exception/            checked exceptions rooted at MistException
@@ -98,6 +99,15 @@ Layer rules, enforced by `src/test/java/com/mist/architecture/LayerRulesTest.jav
 - Only `com.mist` and `ui` may use JavaFX.
 - Only `com.mist.ui.Styles` may use TailwindFX.
 - Every class in `exception` extends `MistException`.
+
+Using the layers from the UI:
+
+- Open `MistContext.open(AppConfig.load())` once, when the splash checks the database; a `DataAccessException` means
+  MongoDB cannot be reached. Close it when the app stops.
+- Services are stateless: each method takes the id of the user who acts, and the UI keeps the logged-in `User` that
+  `AuthService.login` returns in `UserSession`.
+- Every service method throws `MistException` subclasses whose message is a bundle key; controllers show it with
+  `I18n` in a themed alert.
 
 ## Styling
 

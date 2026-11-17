@@ -1,6 +1,6 @@
 # MIST decision log
 
-Decisions taken while building the project scaffold (week 2, 19 Oct 2026), the model layer and the data access layer
+Decisions taken while building the project scaffold (week 2, 19 Oct 2026), the model, data access and service layers
 (17 Nov 2026), and how they change the preliminary plan of 12 Oct 2026.
 
 ## Scaffold decisions
@@ -70,12 +70,38 @@ navigation diagram. [data-model.md](data-model.md) describes every collection an
    and creates the indexes; all of it is idempotent. The validators are strict and reject invalid writes.
 7. **Paging uses `setFirstResult`/`setMaxResults`**, which the extension translates to `$skip`/`$limit`.
 
+## Service layer decisions (17 Nov 2026)
+
+1. **Stateless services that take the acting user's id.** Each method loads that user and checks that the account
+   exists, is active and has the right role. The UI keeps the logged-in `User` that `AuthService.login` returns.
+2. **Raw input in form records** (`PlayerSignUp`, `ProfileForm`, `GameForm`, `CardForm`, `ImageUpload`, ...). The
+   services build the model values from them, so every rule violation reaches the UI as a `ValidationException` with
+   the model's bundle key, and the UI never catches unchecked exceptions.
+3. **Argon2id through Bouncy Castle** (`bcprov-jdk18on`, pure Java). `PasswordHasher` writes the standard PHC string
+   with the OWASP minimum cost (`m=19456,t=2,p=1`), a 16-byte salt and a 32-byte hash; checks read the cost from the
+   stored string. A one-off check confirmed that `argon2-cffi` verifies MIST's hashes and MIST verifies its hashes.
+4. **Login does not reveal which accounts exist.** A wrong email and a wrong password get the same message, and an
+   unknown email still runs one hash check, so both take the same time. Passwords arrive as `char[]` and are wiped.
+5. **Password policy:** 8 to 128 characters, with at least one letter and one digit.
+6. **Uniqueness is checked twice.** Services check the email, nickname, studio name and review first, to show a precise
+   message; the unique indexes still stop a write that races past the check (`dao.duplicate`).
+7. **Returns are allowed for 14 days** after the purchase (`LibraryService.REFUND_WINDOW`). The model leaves the length
+   to the service, and nothing earlier fixed it.
+8. **A game joins the developer's catalog (`gameIds`) when it is published**, in the publish transaction, as the
+   transaction table in [data-model.md](data-model.md) says. Drafts appear on the dashboard through the
+   `developerId` index.
+9. **`MediaService`** serves covers, screenshots and avatars to the views, which may not use the DAOs. Replacing an
+   image stores the new one and deletes the old one in the same transaction.
+10. **`MistContext` wires the app.** It lives in `com.mist`, which may depend on every layer, and gets the DAOs from
+    `HibernateDataAccess`, so it never touches Hibernate types (the layer test forbids them outside the data layer).
+    `MistApp` does not open it yet; the splash's database check will.
+
 ## Changes to the preliminary plan
 
 | Topic | Preliminary plan | Now |
 | --- | --- | --- |
 | Java | 21 + JavaFX 21 | 25 + JavaFX 25.0.4 |
-| Mapping | `mongodb-driver-sync` + `PojoCodecProvider` | Hibernate ORM 7.4.7 + `mongodb-hibernate` 1.0.0, on one shared `MongoClient`. The driver is used directly only for validators, special indexes and the connection check |
+| Mapping | `mongodb-driver-sync` + `PojoCodecProvider` | Hibernate ORM 7.4.7 + `mongodb-hibernate` 1.0.0, on one shared `MongoClient`. The driver is used directly only for validators, indexes, the catalog search and the connection check |
 | Accounts | `users` (CLIENT/DEVELOPER/ADMIN) + `studios` collection | one `users` collection with `SINGLE_TABLE` inheritance: `Player` (was "client"), `Developer` (with a unique `studioName`), `Admin`; no studios collection, references become `developerId` and `playerId` |
 | Fifth collection | `studios` | `media`: images stored as binary documents, referenced by games and users |
 | Payment | wallet balance, `InsufficientFundsException` | saved card (masked: holder, brand, last 4, expiry), charge simulated; the exception is removed |
