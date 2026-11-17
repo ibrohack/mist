@@ -1,6 +1,8 @@
 package com.mist.model;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import org.hibernate.annotations.Struct;
 
 import java.time.YearMonth;
@@ -21,7 +23,8 @@ import java.util.regex.Pattern;
  */
 @Embeddable
 @Struct(name = "PaymentCard")
-public record PaymentCard(String holderName, CardBrand brand, String last4, int expiryMonth, int expiryYear) {
+public record PaymentCard(String holderName, @Enumerated(EnumType.STRING) CardBrand brand, String last4,
+                          int expiryMonth, int expiryYear) {
 
     /** Longest holder name accepted. */
     public static final int MAX_HOLDER_LENGTH = 80;

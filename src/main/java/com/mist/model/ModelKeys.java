@@ -21,6 +21,8 @@ public final class ModelKeys {
     public static final String USER_EMAIL = "model.user.email";
     /** A password hash is not an Argon2id hash. */
     public static final String USER_PASSWORD_HASH = "model.user.passwordHash";
+    /** A player or developer has no address. */
+    public static final String USER_ADDRESS = "model.user.address";
 
     /** A phone country code is not a {@code +} followed by 1 to 3 digits. */
     public static final String PHONE_COUNTRY_CODE = "model.phone.countryCode";
@@ -53,6 +55,8 @@ public final class ModelKeys {
     public static final String PLAYER_NICKNAME = "model.player.nickname";
     /** A player has no payment card. */
     public static final String PLAYER_CARD = "model.player.card";
+    /** A player already owns the game. */
+    public static final String PLAYER_ALREADY_OWNED = "model.player.alreadyOwned";
 
     /** A studio name is blank or too long. */
     public static final String DEVELOPER_STUDIO_NAME = "model.developer.studioName";

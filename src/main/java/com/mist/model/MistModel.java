@@ -12,10 +12,15 @@ public final class MistModel {
 
     /** Every class annotated with {@code @Entity} or {@code @Embeddable} in this package. */
     public static final List<Class<?>> ANNOTATED_CLASSES = List.of(
+            User.class,
+            Player.class,
+            Developer.class,
+            Admin.class,
             PaymentCard.class,
             Preferences.class,
             Phone.class,
-            Address.class);
+            Address.class,
+            LibraryEntry.class);
 
     private MistModel() {
     }

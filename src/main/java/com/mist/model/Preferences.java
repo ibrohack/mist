@@ -1,6 +1,8 @@
 package com.mist.model;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import org.hibernate.annotations.Struct;
 
 import java.util.Objects;
@@ -13,7 +15,8 @@ import java.util.Objects;
  */
 @Embeddable
 @Struct(name = "Preferences")
-public record Preferences(Language language, Theme theme) {
+public record Preferences(@Enumerated(EnumType.STRING) Language language,
+                          @Enumerated(EnumType.STRING) Theme theme) {
 
     /** Preferences of a new user: Spanish and the dark theme. */
     public static final Preferences DEFAULTS = new Preferences(Language.ES, Theme.DARK);
