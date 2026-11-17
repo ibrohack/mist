@@ -19,6 +19,7 @@ public final class MistModel {
             Media.class,
             Game.class,
             Order.class,
+            Review.class,
             PaymentCard.class,
             Preferences.class,
             Phone.class,
