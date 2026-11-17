@@ -24,6 +24,7 @@
     <hibernate.version>7.4.7.Final</hibernate.version>
     <mongodb-hibernate.version>1.0.0</mongodb-hibernate.version>
     <logback.version>1.6.5</logback.version>
+    <bouncycastle.version>1.86</bouncycastle.version>
 
     <junit.version>5.14.4</junit.version>
     <testfx.version>4.0.18</testfx.version>
@@ -113,6 +114,11 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>${logback.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>${bouncycastle.version}</version>
     </dependency>
 
     <dependency>
