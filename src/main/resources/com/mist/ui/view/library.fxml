@@ -54,7 +54,7 @@
 
       <!-- The covers, re-wrapped as the width changes. -->
       <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="400" styleClass="grid-scroll">
-        <TilePane fx:id="gameGrid" hgap="18" vgap="18" prefTileWidth="170" prefTileHeight="276"
+        <TilePane fx:id="gameGrid" hgap="18" vgap="18" prefTileWidth="170" prefTileHeight="300"
                   tileAlignment="TOP_LEFT" styleClass="game-grid"/>
       </ScrollPane>
     </items>

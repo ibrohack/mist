@@ -207,6 +207,19 @@
   -fx-border-color: -mist-acid;
 }
 
+/* A marked field stays red while the user corrects it. */
+.text-input:error:focused,
+.combo-box-base:error:focused {
+  -fx-border-color: -mist-danger;
+}
+
+/* The date picker draws one frame: its own, not its text field's. */
+.date-picker > .text-field,
+.date-picker > .text-field:focused {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+}
+
 .tooltip {
   -fx-background-color: -mist-surface;
   -fx-background-radius: 3;

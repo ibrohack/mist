@@ -229,6 +229,9 @@ public class GameEditorController implements NavigationAware {
         removeAchievementButton.disableProperty().bind(
                 achievementsTable.getSelectionModel().selectedItemProperty().isNull());
         tagField.setOnAction(event -> onAddTag());
+        // The message line takes room only when it says something.
+        formMessage.managedProperty().bind(formMessage.textProperty().isNotEmpty());
+        formMessage.visibleProperty().bind(formMessage.managedProperty());
         form = new FormValidator(formMessage)
                 .required(nameField).maxLength(nameField, Game.MAX_NAME_LENGTH, ModelKeys.GAME_NAME)
                 .required(priceField)

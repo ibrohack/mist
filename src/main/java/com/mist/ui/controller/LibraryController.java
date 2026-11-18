@@ -288,6 +288,8 @@ public class LibraryController implements NavigationAware {
         Label caption = new Label(item.returnable() ? I18n.format("library.returnableUntil",
                 Formats.date(item.acquiredAt().plus(LibraryService.REFUND_WINDOW))) : "");
         caption.getStyleClass().add("mist-caption");
+        caption.setWrapText(true);
+        caption.setMaxWidth(COVER_WIDTH);
         VBox card = new VBox(frame, name, caption);
         card.setAlignment(Pos.TOP_LEFT);
         card.getStyleClass().add("game-card");
