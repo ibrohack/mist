@@ -27,14 +27,14 @@
 
   <top>
     <HBox fx:id="topBar" alignment="CENTER_LEFT" styleClass="mist-topbar,px-6,gap-[24px]">
-      <HBox fx:id="brand" alignment="CENTER_LEFT" styleClass="gap-[10px]">
+      <HBox fx:id="brand" alignment="CENTER_LEFT" styleClass="gap-[10px],mist-brand" onMouseClicked="#onBrand">
         <ImageView fx:id="logo" fitWidth="32" fitHeight="32" preserveRatio="true">
           <Image url="@../images/mist-icon-64.png"/>
         </ImageView>
         <Label fx:id="wordmark" text="%app.title" styleClass="mist-text-fog,mist-topbar-wordmark"/>
       </HBox>
-      <!-- Navigation links, filled by role. -->
-      <HBox fx:id="navBar" alignment="CENTER_LEFT" styleClass="gap-[4px]"/>
+      <!-- Navigation links of the user's role. -->
+      <fx:include fx:id="header" source="header.fxml"/>
       <Region HBox.hgrow="ALWAYS"/>
       <MenuButton fx:id="userMenu" styleClass="mist-user-menu" mnemonicParsing="false">
         <graphic>

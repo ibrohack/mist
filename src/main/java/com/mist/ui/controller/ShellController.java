@@ -58,7 +58,10 @@ public class ShellController implements ShellHost, NavigationAware {
     private HBox topBar;
     /** The navigation links, by role. */
     @FXML
-    private HBox navBar;
+    private HBox header;
+    /** The controller of the navigation links. */
+    @FXML
+    private HeaderController headerController;
     /** The user menu: avatar, name and the session's options. */
     @FXML
     private MenuButton userMenu;
@@ -128,6 +131,14 @@ public class ShellController implements ShellHost, NavigationAware {
     @Override
     public void showContent(View view, Node screen) {
         content.getChildren().setAll(screen);
+        // HEADER-3: highlight the link of the screen on display.
+        headerController.highlight(view);
+    }
+
+    /** Clicking the brand goes back to the home screen of the user's role. */
+    @FXML
+    private void onBrand() {
+        context.navigator().home();
     }
 
     /**

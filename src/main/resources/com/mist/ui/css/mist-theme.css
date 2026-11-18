@@ -660,3 +660,29 @@
 .tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
   -fx-border-color: transparent;
 }
+
+/* Header navigation links (docs/ui-design.md, "Header"). */
+.toggle-button.mist-nav-link {
+  -fx-background-color: transparent;
+  -fx-background-radius: 0;
+  -fx-text-fill: -mist-ash;
+  -fx-font-size: 15px;
+  -fx-font-weight: 500;
+  -fx-padding: 20 12 17 12;
+  -fx-border-color: transparent;
+  -fx-border-width: 0 0 3 0;
+  -fx-cursor: hand;
+}
+
+.toggle-button.mist-nav-link:hover {
+  -fx-text-fill: -mist-fog;
+}
+
+.toggle-button.mist-nav-link:selected {
+  -fx-text-fill: -mist-fog;
+  -fx-border-color: transparent transparent -mist-acid transparent;
+}
+
+.mist-brand {
+  -fx-cursor: hand;
+}
