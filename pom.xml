@@ -25,6 +25,7 @@
     <mongodb-hibernate.version>1.0.0</mongodb-hibernate.version>
     <logback.version>1.6.5</logback.version>
     <bouncycastle.version>1.86</bouncycastle.version>
+    <jasperreports.version>7.1.1</jasperreports.version>
 
     <junit.version>5.14.4</junit.version>
     <testfx.version>4.0.18</testfx.version>
@@ -124,6 +125,28 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
       <version>${bouncycastle.version}</version>
+    </dependency>
+    <!-- PDF reports (receipt, sales): JasperReports with its PDF exporter, the DejaVu fonts so accents and the euro
+         sign print the same everywhere, and the JDT compiler, so templates compile without a JDK in the app image. -->
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports</artifactId>
+      <version>${jasperreports.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-pdf</artifactId>
+      <version>${jasperreports.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-fonts</artifactId>
+      <version>${jasperreports.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-jdt</artifactId>
+      <version>${jasperreports.version}</version>
     </dependency>
 
     <dependency>
