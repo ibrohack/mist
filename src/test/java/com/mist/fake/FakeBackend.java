@@ -66,7 +66,7 @@ public final class FakeBackend implements Backend {
             throw new UncheckedIOException(e);
         }
         this.services = new AppServices(
-                new AuthService(users, clock),
+                new AuthService(users, transactions, clock),
                 new UserService(users, games, media, transactions, clock),
                 new StoreService(games, users, orders, transactions, clock),
                 new LibraryService(users, games, orders, transactions, clock),

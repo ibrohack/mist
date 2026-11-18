@@ -1,5 +1,6 @@
 package com.mist.service;
 
+import com.mist.dao.TransactionRunner;
 import com.mist.dao.UserDao;
 import com.mist.exception.DuplicateEntityException;
 import com.mist.exception.MistException;
@@ -27,6 +28,9 @@ import java.util.UUID;
  *
  * <p>Every method that receives a password wipes its characters before returning, so the caller should pass a copy it
  * no longer needs, such as the array from a {@code PasswordField}.</p>
+ *
+ * <p>Before anyone is logged in, the operation log names the email being tried: each login writes a {@code LOGIN} line
+ * that worked or failed, with the reason, and the lines of a registration carry the new account's email.</p>
  */
 public class AuthService {
 
@@ -37,6 +41,10 @@ public class AuthService {
 
     /** The users collection. */
     private final UserDao users;
+    /** Runs the password change in one transaction. */
+    private final TransactionRunner transactions;
+    /** Writes the {@code LOGIN} lines of the operation log. */
+    private final DbOperationLogger log = new DbOperationLogger();
     /** The clock changes are dated with. */
     private final Clock clock;
     /** Hashes and checks passwords with Argon2id. */
@@ -47,11 +55,13 @@ public class AuthService {
     /**
      * Creates the service.
      *
-     * @param users the user DAO
-     * @param clock the clock that dates new accounts
+     * @param users        the user DAO
+     * @param transactions runs multi-step changes in one transaction
+     * @param clock        the clock that dates new accounts
      */
-    public AuthService(UserDao users, Clock clock) {
+    public AuthService(UserDao users, TransactionRunner transactions, Clock clock) {
         this.users = Objects.requireNonNull(users, "users");
+        this.transactions = Objects.requireNonNull(transactions, "transactions");
         this.clock = Objects.requireNonNull(clock, "clock");
     }
 
@@ -67,27 +77,48 @@ public class AuthService {
      * @throws MistException         if the database fails
      */
     public User login(String email, char[] password) throws MistException {
-        try {
-            Optional<User> found = Optional.empty();
+        try (DbOperationLogger.Scope _ = DbOperationLogger.actingAs(email)) {
             try {
-                found = users.findByEmail(User.normalizeEmail(email));
-            } catch (IllegalArgumentException _) {
-                // A malformed email cannot match an account; fall through to the dummy check.
+                User user = authenticate(email, password);
+                log.ok("LOGIN", "users", "role=" + user.role());
+                DbOperationLogger.setUser(user.getEmail());
+                return user;
+            } catch (MistException e) {
+                // The reason is a bundle key, such as a wrong password; the password itself is never logged.
+                log.failed("LOGIN", "users", e.getMessage());
+                throw e;
             }
-            String storedHash = found.map(User::getPasswordHash).orElse(dummyHash);
-            boolean matches = password != null && hasher.verify(password, storedHash);
-            if (found.isEmpty() || !matches) {
-                throw new UnauthorizedException(ServiceKeys.AUTH_BAD_CREDENTIALS);
-            }
-            User user = found.get();
-            if (!user.isActive()) {
-                throw new UnauthorizedException(ServiceKeys.ACCOUNT_DEACTIVATED);
-            }
-            DbOperationLogger.setUser(user.getEmail());
-            return user;
         } finally {
             wipe(password);
         }
+    }
+
+    /**
+     * Finds the account of an email and checks its password and status.
+     *
+     * @param email    the email address as typed
+     * @param password the password as typed
+     * @return the active account
+     * @throws UnauthorizedException if the email or password is wrong, or the account was deactivated
+     * @throws MistException         if the database fails
+     */
+    private User authenticate(String email, char[] password) throws MistException {
+        Optional<User> found = Optional.empty();
+        try {
+            found = users.findByEmail(User.normalizeEmail(email));
+        } catch (IllegalArgumentException _) {
+            // A malformed email cannot match an account; fall through to the dummy check.
+        }
+        String storedHash = found.map(User::getPasswordHash).orElse(dummyHash);
+        boolean matches = password != null && hasher.verify(password, storedHash);
+        if (found.isEmpty() || !matches) {
+            throw new UnauthorizedException(ServiceKeys.AUTH_BAD_CREDENTIALS);
+        }
+        User user = found.get();
+        if (!user.isActive()) {
+            throw new UnauthorizedException(ServiceKeys.ACCOUNT_DEACTIVATED);
+        }
+        return user;
     }
 
     /** Logs the current user out: the operation log goes back to anonymous. */
@@ -113,16 +144,18 @@ public class AuthService {
             Phone phone = Rules.check(() -> PhoneForm.toPhone(form.phone()));
             PaymentCard card = Rules.check(() -> form.card() == null ? null : form.card().toCard(YearMonth.now(clock)));
             String nickname = form.nickname() == null ? null : form.nickname().strip();
-            if (users.existsByEmail(email)) {
-                throw new DuplicateEntityException(ServiceKeys.USER_EMAIL_TAKEN);
+            try (DbOperationLogger.Scope _ = DbOperationLogger.actingAs(email)) {
+                if (users.existsByEmail(email)) {
+                    throw new DuplicateEntityException(ServiceKeys.USER_EMAIL_TAKEN);
+                }
+                if (nickname != null && !nickname.isEmpty() && users.existsByNickname(nickname)) {
+                    throw new DuplicateEntityException(ServiceKeys.USER_NICKNAME_TAKEN);
+                }
+                String hash = hasher.hash(form.password());
+                Player player = Rules.check(() -> Player.register(form.firstName(), form.lastName(), email, hash, phone,
+                        address, nickname, card, clock.instant()));
+                return users.save(player);
             }
-            if (nickname != null && !nickname.isEmpty() && users.existsByNickname(nickname)) {
-                throw new DuplicateEntityException(ServiceKeys.USER_NICKNAME_TAKEN);
-            }
-            String hash = hasher.hash(form.password());
-            Player player = Rules.check(() -> Player.register(form.firstName(), form.lastName(), email, hash, phone,
-                    address, nickname, card, clock.instant()));
-            return users.save(player);
         } finally {
             wipe(form.password());
         }
@@ -146,16 +179,18 @@ public class AuthService {
             Address address = Rules.check(() -> form.address() == null ? null : form.address().toAddress());
             Phone phone = Rules.check(() -> PhoneForm.toPhone(form.phone()));
             String studioName = form.studioName() == null ? null : form.studioName().strip();
-            if (users.existsByEmail(email)) {
-                throw new DuplicateEntityException(ServiceKeys.USER_EMAIL_TAKEN);
+            try (DbOperationLogger.Scope _ = DbOperationLogger.actingAs(email)) {
+                if (users.existsByEmail(email)) {
+                    throw new DuplicateEntityException(ServiceKeys.USER_EMAIL_TAKEN);
+                }
+                if (studioName != null && !studioName.isEmpty() && users.existsByStudioName(studioName)) {
+                    throw new DuplicateEntityException(ServiceKeys.USER_STUDIO_NAME_TAKEN);
+                }
+                String hash = hasher.hash(form.password());
+                Developer developer = Rules.check(() -> Developer.register(form.firstName(), form.lastName(), email, hash,
+                        phone, address, studioName, form.bankAccount(), clock.instant()));
+                return users.save(developer);
             }
-            if (studioName != null && !studioName.isEmpty() && users.existsByStudioName(studioName)) {
-                throw new DuplicateEntityException(ServiceKeys.USER_STUDIO_NAME_TAKEN);
-            }
-            String hash = hasher.hash(form.password());
-            Developer developer = Rules.check(() -> Developer.register(form.firstName(), form.lastName(), email, hash,
-                    phone, address, studioName, form.bankAccount(), clock.instant()));
-            return users.save(developer);
         } finally {
             wipe(form.password());
         }
@@ -176,13 +211,22 @@ public class AuthService {
             throws MistException {
         try {
             User user = Accounts.active(users, userId);
-            if (currentPassword == null || !hasher.verify(currentPassword, user.getPasswordHash())) {
+            String checkedHash = user.getPasswordHash();
+            if (currentPassword == null || !hasher.verify(currentPassword, checkedHash)) {
                 throw new UnauthorizedException(ServiceKeys.AUTH_WRONG_PASSWORD);
             }
             checkStrength(newPassword);
+            // Argon2id is slow on purpose, so the hash is made before the transaction opens.
             String hash = hasher.hash(newPassword);
-            Rules.apply(() -> user.changePasswordHash(hash));
-            users.save(user);
+            transactions.run(() -> {
+                User fresh = Accounts.active(users, userId);
+                if (!checkedHash.equals(fresh.getPasswordHash())) {
+                    // The password changed elsewhere after it was checked: the current one is no longer right.
+                    throw new UnauthorizedException(ServiceKeys.AUTH_WRONG_PASSWORD);
+                }
+                Rules.apply(() -> fresh.changePasswordHash(hash));
+                users.save(fresh);
+            });
         } finally {
             wipe(currentPassword);
             wipe(newPassword);
