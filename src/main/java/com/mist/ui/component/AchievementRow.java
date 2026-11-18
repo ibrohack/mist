@@ -8,10 +8,10 @@ import javafx.beans.property.StringProperty;
  */
 public final class AchievementRow {
 
-    /** The achievement's name. */
-    private final StringProperty name;
-    /** How the achievement is unlocked. */
-    private final StringProperty description;
+    /** The achievement's name; named apart from {@link #nameProperty()} so Javadoc does not document it twice. */
+    private final StringProperty nameText;
+    /** How the achievement is unlocked; named apart from {@link #descriptionProperty()}, as above. */
+    private final StringProperty descriptionText;
 
     /**
      * Creates a row.
@@ -20,8 +20,8 @@ public final class AchievementRow {
      * @param description the description
      */
     public AchievementRow(String name, String description) {
-        this.name = new SimpleStringProperty(this, "name", name);
-        this.description = new SimpleStringProperty(this, "description", description);
+        this.nameText = new SimpleStringProperty(this, "name", name);
+        this.descriptionText = new SimpleStringProperty(this, "description", description);
     }
 
     /**
@@ -30,7 +30,7 @@ public final class AchievementRow {
      * @return the name
      */
     public String getName() {
-        return name.get();
+        return nameText.get();
     }
 
     /**
@@ -39,7 +39,7 @@ public final class AchievementRow {
      * @param value the new name
      */
     public void setName(String value) {
-        name.set(value);
+        nameText.set(value);
     }
 
     /**
@@ -48,7 +48,7 @@ public final class AchievementRow {
      * @return the name property
      */
     public StringProperty nameProperty() {
-        return name;
+        return nameText;
     }
 
     /**
@@ -57,7 +57,7 @@ public final class AchievementRow {
      * @return the description
      */
     public String getDescription() {
-        return description.get();
+        return descriptionText.get();
     }
 
     /**
@@ -66,7 +66,7 @@ public final class AchievementRow {
      * @param value the new description
      */
     public void setDescription(String value) {
-        description.set(value);
+        descriptionText.set(value);
     }
 
     /**
@@ -75,6 +75,6 @@ public final class AchievementRow {
      * @return the description property
      */
     public StringProperty descriptionProperty() {
-        return description;
+        return descriptionText;
     }
 }
