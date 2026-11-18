@@ -40,7 +40,7 @@ import java.util.Objects;
 /**
  * Controller of the library: the games the player owns, as a filtered list of names and a grid of covers.
  *
- * <p>Implements the behaviors LIB-1 to LIB-4 of {@code docs/ui-design.md}.</p>
+ * <p>Implements the behaviors LIB-1 to LIB-6 of {@code docs/ui-design.md}.</p>
  */
 public class LibraryController implements NavigationAware {
 
@@ -88,6 +88,12 @@ public class LibraryController implements NavigationAware {
     /** Opens the review dialog for the selected game. */
     @FXML
     private MenuItem reviewItem;
+    /** Returns the selected game, while it can be returned. */
+    @FXML
+    private MenuItem returnItem;
+    /** Opens the orders. */
+    @FXML
+    private Button ordersButton;
     /** The covers of the kept games. */
     @FXML
     private TilePane gameGrid;
@@ -139,6 +145,13 @@ public class LibraryController implements NavigationAware {
         tagFilter.valueProperty().addListener((observable, before, after) -> applyFilters());
         sortBox.valueProperty().addListener((observable, before, after) -> applyFilters());
         sorted.addListener((ListChangeListener<OwnedGame>) change -> renderGrid());
+        // LIB-5: only a game still in its refund window can be returned.
+        gameMenu.setOnShowing(event -> {
+            OwnedGame item = selected();
+            openItem.setDisable(item == null);
+            reviewItem.setDisable(item == null);
+            returnItem.setDisable(item == null || !item.returnable());
+        });
         gameList.getSelectionModel().selectedItemProperty().addListener((observable, before, after) ->
                 highlight(after));
         // LIB-3: a double click or Enter opens the selected game.
@@ -205,6 +218,32 @@ public class LibraryController implements NavigationAware {
             ReviewDialog.show(context, item.game(),
                     () -> Dialogs.info(context.navigator().window(), I18n.text("review.published")));
         }
+    }
+
+    /** LIB-5: returns the selected game after confirming the refund. */
+    @FXML
+    private void onReturn() {
+        OwnedGame item = selected();
+        if (item == null || !item.returnable()) {
+            return;
+        }
+        Dialogs.confirm(context.navigator().window(), I18n.format("library.return.confirm", item.game().getName()),
+                "library.return", () -> context.tasks().run(gameList, () -> {
+                    var amount = context.services().library().returnGame(context.session().userId(),
+                            item.game().getId());
+                    context.session().update(context.services().users().get(context.session().userId()));
+                    return amount;
+                }, amount -> {
+                    // R1: the refund is done and the game leaves the library.
+                    Dialogs.info(context.navigator().window(), I18n.format("library.returned", Formats.money(amount)));
+                    load();
+                }));
+    }
+
+    /** LIB-6: opens the orders. */
+    @FXML
+    private void onOrders() {
+        context.navigator().show(View.ORDERS);
     }
 
     /** The empty state's button opens the store. */

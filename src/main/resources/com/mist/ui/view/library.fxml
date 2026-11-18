@@ -43,10 +43,13 @@
               <items>
                 <MenuItem fx:id="openItem" text="%store.open" onAction="#onOpen"/>
                 <MenuItem fx:id="reviewItem" text="%game.writeReview" onAction="#onReview"/>
+                <MenuItem fx:id="returnItem" text="%library.return" onAction="#onReturn"/>
               </items>
             </ContextMenu>
           </contextMenu>
         </ListView>
+        <Button fx:id="ordersButton" text="%library.orders" styleClass="mist-button-secondary" maxWidth="Infinity"
+                onAction="#onOrders"/>
       </VBox>
 
       <!-- The covers, re-wrapped as the width changes. -->

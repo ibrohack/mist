@@ -44,7 +44,10 @@ public enum View {
     WISHLIST("view/wishlist.fxml", Placement.SHELL),
 
     /** The games the player owns. */
-    LIBRARY("view/library.fxml", Placement.SHELL);
+    LIBRARY("view/library.fxml", Placement.SHELL),
+
+    /** The player's orders, with returns and receipts. */
+    ORDERS("view/orders.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {

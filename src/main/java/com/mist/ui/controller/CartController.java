@@ -12,7 +12,6 @@ import com.mist.ui.NavigationAware;
 import com.mist.ui.UiContext;
 import com.mist.ui.View;
 import com.mist.ui.component.CartCell;
-import com.mist.ui.report.Reports;
 import com.mist.ui.support.Dialogs;
 import com.mist.ui.support.Formats;
 import javafx.beans.binding.Bindings;
@@ -30,8 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 /**
  * Controller of the cart: the games about to be bought, the summary, the terms and the checkout.
@@ -233,15 +230,7 @@ public class CartController implements NavigationAware {
      * @param buyer the player who placed it
      */
     private void saveReceipt(Order order, User buyer) {
-        String day = LocalDate.ofInstant(order.getCreatedAt(), ZoneId.systemDefault()).toString();
-        // R3: a cancelled chooser does nothing.
-        context.files().savePdf(context.navigator().window(), I18n.format("report.receipt.file", day))
-                .ifPresent(target -> context.tasks().run(null, () -> {
-                    Reports.receipt(order, buyer, target);
-                    return target;
-                    // R1: the PDF is written; R2: a ReportException is reported as a file error.
-                }, saved -> Dialogs.info(context.navigator().window(), I18n.format("report.saved", saved)),
-                        error -> context.errors().report(context.navigator().window(), error)));
+        Receipts.save(context, order, buyer);
     }
 
     /** Updates the total, the list of names and the card. */
