@@ -32,24 +32,40 @@ public class Order {
     /** Most games one order can hold. */
     public static final int MAX_ITEMS = 50;
 
+    /** The document id. */
     @Id
     @ObjectIdGenerator
     private ObjectId id;
 
+    /** The buyer. */
     private ObjectId playerId;
+    /** The games bought, with their price at the time. */
     private List<OrderItem> items;
+    /** What was charged. */
     private BigDecimal total;
 
+    /** Paid, partially or fully refunded. */
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    /** The card charged, masked. */
     private PaymentCard paidWith;
+    /** When it was placed. */
     private Instant createdAt;
 
     /** Used by Hibernate. */
     protected Order() {
     }
 
+    /**
+     * Creates a paid order.
+     *
+     * @param playerId  the buyer
+     * @param items     the games bought
+     * @param total     what was charged
+     * @param paidWith  the card charged
+     * @param createdAt when it was placed
+     */
     private Order(ObjectId playerId, List<OrderItem> items, BigDecimal total, PaymentCard paidWith,
                   Instant createdAt) {
         this.playerId = playerId;

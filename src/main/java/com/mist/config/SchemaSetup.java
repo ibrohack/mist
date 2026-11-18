@@ -56,15 +56,24 @@ public final class SchemaSetup {
     /** Server error code when a collection already exists, for example because another app instance created it. */
     private static final int NAMESPACE_EXISTS = 48;
 
+    /** The BSON type {@code string}. */
     private static final String STRING = "string";
+    /** The BSON type {@code objectId}. */
     private static final String OBJECT_ID = "objectId";
+    /** The BSON type {@code date}. */
     private static final String DATE = "date";
+    /** The BSON type {@code decimal}. */
     private static final String DECIMAL = "decimal";
+    /** The BSON type {@code int}. */
     private static final String INT = "int";
+    /** The BSON type {@code object}. */
     private static final String OBJECT = "object";
+    /** The BSON type {@code array}. */
     private static final String ARRAY = "array";
+    /** The BSON type {@code null}. */
     private static final String NULL = "null";
 
+    /** Not instantiable: a holder of the schema setup. */
     private SchemaSetup() {
     }
 
@@ -105,6 +114,14 @@ public final class SchemaSetup {
         database.getCollection("media").createIndex(Indexes.ascending("ownerId"));
     }
 
+    /**
+     * Creates a collection with its validator, or updates the validator.
+     *
+     * @param database   the database
+     * @param existing   the collections that exist
+     * @param name       the collection
+     * @param jsonSchema its {@code $jsonSchema}
+     */
     private static void validate(MongoDatabase database, Set<String> existing, String name, Document jsonSchema) {
         Document validator = new Document("$jsonSchema", jsonSchema);
         if (!existing.contains(name)) {
@@ -128,6 +145,11 @@ public final class SchemaSetup {
 
     // ----------------------------------------------------------------------------------------------------- users
 
+    /**
+     * Builds the schema of the users collection: the common fields and one branch per role.
+     *
+     * @return the schema
+     */
     private static Document users() {
         Document properties = new Document()
                 .append("_id", type(OBJECT_ID))
@@ -179,6 +201,12 @@ public final class SchemaSetup {
                 .append("oneOf", List.of(player, developer, admin));
     }
 
+    /**
+     * Builds the schema of an address.
+     *
+     * @param nullable whether {@code null} is allowed
+     * @return the schema
+     */
     private static Document address(boolean nullable) {
         return object(nullable, new Document()
                 .append("street", text(1, Address.MAX_STREET_LENGTH))
@@ -190,6 +218,11 @@ public final class SchemaSetup {
                 "street", "postalCode", "city", "country");
     }
 
+    /**
+     * Builds the schema of a saved card.
+     *
+     * @return the schema
+     */
     private static Document card() {
         return object(false, new Document()
                 .append("holderName", text(1, PaymentCard.MAX_HOLDER_LENGTH))
@@ -204,6 +237,11 @@ public final class SchemaSetup {
 
     // ----------------------------------------------------------------------------------------------------- games
 
+    /**
+     * Builds the schema of the games collection.
+     *
+     * @return the schema
+     */
     private static Document games() {
         List<Object> pegi = new ArrayList<>(enumNames(Pegi.class));
         pegi.add(null);
@@ -246,6 +284,11 @@ public final class SchemaSetup {
 
     // ---------------------------------------------------------------------------------------------------- orders
 
+    /**
+     * Builds the schema of the orders collection.
+     *
+     * @return the schema
+     */
     private static Document orders() {
         Document item = object(false, new Document()
                 .append("gameId", type(OBJECT_ID))
@@ -268,6 +311,11 @@ public final class SchemaSetup {
 
     // --------------------------------------------------------------------------------------------------- reviews
 
+    /**
+     * Builds the schema of the reviews collection.
+     *
+     * @return the schema
+     */
     private static Document reviews() {
         Document properties = new Document()
                 .append("_id", type(OBJECT_ID))
@@ -283,6 +331,11 @@ public final class SchemaSetup {
 
     // ----------------------------------------------------------------------------------------------------- media
 
+    /**
+     * Builds the schema of the media collection.
+     *
+     * @return the schema
+     */
     private static Document media() {
         Document properties = new Document()
                 .append("_id", type(OBJECT_ID))
@@ -298,41 +351,101 @@ public final class SchemaSetup {
 
     // --------------------------------------------------------------------------------------------------- helpers
 
+    /**
+     * Builds a schema that allows some BSON types.
+     *
+     * @param bsonTypes the types
+     * @return the schema
+     */
     private static Document type(String... bsonTypes) {
         return new Document("bsonType", bsonTypes.length == 1 ? bsonTypes[0] : List.of(bsonTypes));
     }
 
+    /**
+     * Builds the schema of a required text.
+     *
+     * @param minLength the shortest length
+     * @param maxLength the longest length
+     * @return the schema
+     */
     private static Document text(int minLength, int maxLength) {
         return type(STRING).append("minLength", minLength).append("maxLength", maxLength);
     }
 
+    /**
+     * Builds the schema of a text that may be {@code null}.
+     *
+     * @param maxLength the longest length
+     * @return the schema
+     */
     private static Document optionalText(int maxLength) {
         return type(STRING, NULL).append("maxLength", maxLength);
     }
 
+    /**
+     * Builds the schema of an amount of money.
+     *
+     * @param maximum the highest amount, or {@code null}
+     * @return the schema
+     */
     private static Document money(BigDecimal maximum) {
         Document money = type(DECIMAL).append("minimum", decimal(BigDecimal.ZERO));
         return maximum == null ? money : money.append("maximum", decimal(maximum));
     }
 
+    /**
+     * Converts a number for a schema bound.
+     *
+     * @param value the number
+     * @return the BSON decimal
+     */
     private static Decimal128 decimal(BigDecimal value) {
         return new Decimal128(value);
     }
 
+    /**
+     * Builds the schema of an embedded document.
+     *
+     * @param nullable   whether {@code null} is allowed
+     * @param properties the schemas of its fields
+     * @param required   the fields it must have
+     * @return the schema
+     */
     private static Document object(boolean nullable, Document properties, String... required) {
         Document object = nullable ? type(OBJECT, NULL) : type(OBJECT);
         return object.append("required", List.of(required)).append("properties", properties);
     }
 
+    /**
+     * Builds the schema of an array.
+     *
+     * @param items    the schema of its elements
+     * @param maxItems the most elements, or {@code null}
+     * @return the schema
+     */
     private static Document array(Document items, Integer maxItems) {
         Document array = type(ARRAY).append("items", items);
         return maxItems == null ? array : array.append("maxItems", maxItems);
     }
 
+    /**
+     * Builds the schema of a field that holds an enum constant.
+     *
+     * @param type the enum
+     * @param <E>  the enum type
+     * @return the schema
+     */
     private static <E extends Enum<E>> Document oneOfEnum(Class<E> type) {
         return new Document("enum", enumNames(type));
     }
 
+    /**
+     * Lists the names of an enum's constants.
+     *
+     * @param type the enum
+     * @param <E>  the enum type
+     * @return the names
+     */
     private static <E extends Enum<E>> List<String> enumNames(Class<E> type) {
         return Arrays.stream(type.getEnumConstants()).map(Enum::name).toList();
     }

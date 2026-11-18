@@ -37,10 +37,15 @@ public class StoreService {
     /** Longest list the store returns at once. */
     public static final int MAX_LIST_SIZE = 100;
 
+    /** The games collection. */
     private final GameDao games;
+    /** The users collection. */
     private final UserDao users;
+    /** The orders collection. */
     private final OrderDao orders;
+    /** Runs the changes that touch several documents. */
     private final TransactionRunner transactions;
+    /** The clock changes are dated with. */
     private final Clock clock;
 
     /**
@@ -259,6 +264,13 @@ public class StoreService {
         });
     }
 
+    /**
+     * Loads a game and checks that it is on sale.
+     *
+     * @param gameId the game
+     * @return the game
+     * @throws MistException if it does not exist or is not published
+     */
     private Game purchasable(ObjectId gameId) throws MistException {
         Game game = game(gameId);
         if (!game.isPurchasable()) {
@@ -267,6 +279,13 @@ public class StoreService {
         return game;
     }
 
+    /**
+     * Checks the size of a requested list.
+     *
+     * @param limit the requested size
+     * @return the same size
+     * @throws ValidationException if it is not between 1 and {@link #MAX_LIST_SIZE}
+     */
     private static int checkedLimit(int limit) throws ValidationException {
         if (limit < 1 || limit > MAX_LIST_SIZE) {
             throw new ValidationException(ServiceKeys.INVALID_INPUT);

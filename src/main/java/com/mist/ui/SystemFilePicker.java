@@ -13,6 +13,11 @@ import java.util.ResourceBundle;
  */
 public final class SystemFilePicker implements FilePicker {
 
+    /** Creates the picker; each dialog is built when asked for. */
+    public SystemFilePicker() {
+        // Nothing to set up.
+    }
+
     @Override
     public Optional<Path> openImage(Window owner) {
         ResourceBundle bundle = I18n.bundle();

@@ -51,38 +51,63 @@ public class Game {
     /** Most achievements a game can have. */
     public static final int MAX_ACHIEVEMENTS = 50;
 
+    /** The shape of a two-letter language code. */
     private static final Pattern LANGUAGE = Pattern.compile("[a-z]{2}");
 
+    /** The document id. */
     @Id
     @ObjectIdGenerator
     private ObjectId id;
 
+    /** The name in the store. */
     private String name;
+    /** The store description. */
     private String description;
+    /** The price in euros. */
     private BigDecimal price;
+    /** The cover image in the media collection. */
     private ObjectId coverId;
+    /** The screenshots in the media collection. */
     private List<ObjectId> screenshotIds;
+    /** The release day, at midnight UTC. */
     private Instant releaseDate;
+    /** The developer who publishes it. */
     private ObjectId developerId;
+    /** The minimum system requirements. */
     private SystemRequirements requirements;
 
+    /** The PEGI age rating. */
     @Enumerated(EnumType.STRING)
     private Pegi pegi;
 
+    /** The genre tags, lower case. */
     private List<String> tags;
+    /** The supported languages, as two-letter codes. */
     private List<String> languages;
+    /** The achievements shown on the game page. */
     private List<Achievement> achievements;
+    /** Units sold, revenue and ratings. */
     private GameStats stats;
 
+    /** Draft, published or delisted. */
     @Enumerated(EnumType.STRING)
     private GameStatus status;
 
+    /** When the draft was created. */
     private Instant createdAt;
 
     /** Used by Hibernate. */
     protected Game() {
     }
 
+    /**
+     * Creates a draft.
+     *
+     * @param developerId the developer
+     * @param name        the name
+     * @param price       the price
+     * @param createdAt   when the draft was created
+     */
     private Game(ObjectId developerId, String name, BigDecimal price, Instant createdAt) {
         this.developerId = developerId;
         this.name = name;
@@ -111,10 +136,22 @@ public class Game {
                 Objects.requireNonNull(now, "now"));
     }
 
+    /**
+     * Checks a game name.
+     *
+     * @param name the name
+     * @return the name without surrounding spaces
+     */
     private static String checkedName(String name) {
         return Checks.text(name, 1, MAX_NAME_LENGTH, ModelKeys.GAME_NAME);
     }
 
+    /**
+     * Checks a price.
+     *
+     * @param price the price
+     * @return the price with two decimals
+     */
     private static BigDecimal checkedPrice(BigDecimal price) {
         BigDecimal cents = Checks.money(price, ModelKeys.GAME_PRICE);
         Checks.require(cents.compareTo(MAX_PRICE) <= 0, ModelKeys.GAME_PRICE);
@@ -465,6 +502,13 @@ public class Game {
         stats = stats.withRating(rating);
     }
 
+    /**
+     * Returns a read-only view of a list.
+     *
+     * @param list the list, possibly {@code null}
+     * @param <T>  the element type
+     * @return an unmodifiable list, empty for {@code null}
+     */
     private static <T> List<T> view(List<T> list) {
         return list == null ? List.of() : Collections.unmodifiableList(list);
     }

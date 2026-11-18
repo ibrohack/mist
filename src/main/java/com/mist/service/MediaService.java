@@ -16,6 +16,7 @@ import java.util.Objects;
  */
 public class MediaService {
 
+    /** The media collection, where images are stored. */
     private final MediaDao media;
 
     /**

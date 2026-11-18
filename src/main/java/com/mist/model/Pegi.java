@@ -20,8 +20,14 @@ public enum Pegi {
     /** Adults only. */
     PEGI_18(18);
 
+    /** The youngest age the rating allows. */
     private final int minimumAge;
 
+    /**
+     * Creates a rating.
+     *
+     * @param minimumAge the youngest age it allows
+     */
     Pegi(int minimumAge) {
         this.minimumAge = minimumAge;
     }

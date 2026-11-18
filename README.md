@@ -46,6 +46,7 @@ property overrides both.
 | --------------------- | ------------------------------------------- | --------------------- | ----------------------- |
 | MongoDB connection    | `mongodb://localhost:27017/?replicaSet=rs0` | `MIST_MONGO_URI`      | `-Dmist.mongo.uri`      |
 | Database name         | `mist`                                      | `MIST_MONGO_DATABASE` | `-Dmist.mongo.database` |
+| Demo data             | `true`                                      | `MIST_SEED_DEMO`      | `-Dmist.seed.demo`      |
 
 Logs go to `~/.mist/logs`: `mist-app.log` for the application and `mist-db.log` for the database operation log.
 
@@ -55,6 +56,22 @@ Logs go to `~/.mist/logs`: `mist-app.log` for the application and `mist-db.log` 
 ./mvnw javafx:run
 ```
 
+The splash connects to MongoDB; if it cannot, MIST shows the offline screen with a Retry button.
+
+### Demo data
+
+On the first start against an empty database, MIST seeds demo content (turn it off with `mist.seed.demo=false`).
+Every demo account uses the password `mist2026`:
+
+| Account             | Role      | What it has                                                         |
+| ------------------- | --------- | ------------------------------------------------------------------- |
+| `admin@mist.local`  | Admin     | The operation log viewer                                            |
+| `nebula@mist.local` | Developer | Nebula Forge: six published games and one draft (The Quiet Signal)  |
+| `lumen@mist.local`  | Developer | Lumen Works: five published games                                   |
+| `lucia@mist.local`  | Player    | Four games (two still returnable), a cart, a wishlist, two reviews  |
+| `marc@mist.local`   | Player    | Two games and two reviews                                           |
+| `nora@mist.local`   | Player    | Two games bought 20 days ago and two reviews                        |
+
 From an IDE, run `com.mist.Launcher`, not `MistApp`: JavaFX refuses to start an `Application` subclass as the main
 class of a classpath app. Maven generates the TailwindFX stylesheet during `process-resources`, so let the IDE build
 with Maven, or run `./mvnw process-resources` once after changing the style classes in a view.
@@ -63,10 +80,13 @@ with Maven, or run `./mvnw process-resources` once after changing the style clas
 
 | Command          | Runs                                                            | Needs                 |
 | ---------------- | --------------------------------------------------------------- | --------------------- |
-| `./mvnw test`    | Unit, architecture and UI tests (TestFX opens a real window)     | Nothing extra         |
+| `./mvnw test`    | Architecture, i18n and UI tests: TestFX drives every screen on the real services over in-memory DAOs (windows open briefly; the mouse is not moved) | Nothing extra |
 | `./mvnw verify`  | The above, plus `*IT` integration tests on MongoDB 7 in Testcontainers | Docker Desktop running |
 
 Without Docker, `verify` fails instead of skipping the integration tests.
+
+`./mvnw javadoc:javadoc` builds the API documentation in `target/reports/apidocs`, private members included; it fails
+on any missing comment.
 
 ## Packaging
 
@@ -85,9 +105,10 @@ so WiX is not required. The app still needs MongoDB as described above.
 src/main/java/com/mist/
 ├─ Launcher, MistApp     entry point and JavaFX application
 ├─ MistContext           opens the data layer and builds every service for the UI
-├─ ui/                   navigation (SceneRouter, View), I18n, Styles (TailwindFX facade), UserSession
-│  └─ controller/        FXML controllers
-├─ service/              use cases (Auth, User, Store, Library, Review, Publishing, Media), input forms
+├─ ui/                   navigation (Navigator, SceneRouter, View), UiContext, I18n, Styles, UserSession
+│  ├─ controller/        FXML controllers, one per view
+│  └─ support/           background tasks, error reporting, dialogs, form validation, formats, images
+├─ service/              use cases (Auth, User, Store, Library, Review, Publishing, Media, Log), forms, DemoData
 ├─ dao/                  one interface per collection, plus TransactionRunner
 │  └─ hibernate/         implementations on Hibernate ORM with the MongoDB extension, HibernateDataAccess
 ├─ model/                entities and enums
@@ -98,7 +119,8 @@ src/main/resources/
 ├─ com/mist/ui/          views (FXML), mist-theme.css, Space Grotesk fonts, launcher icons
 ├─ i18n/                 messages_es.properties, messages_en.properties
 └─ mist.properties, logback.xml
-docs/                    data model, decision log and the brand kit sources
+src/main/packaging/      the Windows icon and the zip descriptor of the app image
+docs/                    UI design, data model, decision log and the brand kit sources
 ```
 
 Layer rules, enforced by `src/test/java/com/mist/architecture/LayerRulesTest.java`:

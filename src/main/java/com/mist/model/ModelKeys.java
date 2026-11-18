@@ -109,6 +109,7 @@ public final class ModelKeys {
     /** A review comment is too long. */
     public static final String REVIEW_COMMENT = "model.review.comment";
 
+    /** Not instantiable: a holder of bundle keys. */
     private ModelKeys() {
     }
 }

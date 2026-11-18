@@ -44,6 +44,12 @@ public enum View {
     /** Where the screen is shown. */
     private final Placement placement;
 
+    /**
+     * Declares a screen.
+     *
+     * @param fxml      the FXML path, relative to {@code com/mist/ui/}
+     * @param placement where the screen is shown
+     */
     View(String fxml, Placement placement) {
         this.fxml = fxml;
         this.placement = placement;

@@ -16,15 +16,24 @@ import javafx.scene.layout.VBox;
  * cannot be reached.</p>
  */
 public class LibraryController {
+    /** The grid of owned games. */
     @FXML
     private TilePane gameGrid;
 
+    /** The list of owned games. */
     @FXML
     private ListView<?> gameList;
 
+    /** Searches the library. */
     @FXML
     private TextField searchField;
 
+    /** Creates the controller; FXML injects the fields. */
+    public LibraryController() {
+        // Nothing to set up.
+    }
+
+    /** Prepares the library view. */
     public void initialize() {
         // Initialization code for the library view
     }

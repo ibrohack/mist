@@ -22,6 +22,7 @@ public final class Dialogs {
     /** Id of the label that holds a dialog's message. */
     public static final String MESSAGE_ID = "dialogMessage";
 
+    /** Not instantiable: a holder of dialog helpers. */
     private Dialogs() {
     }
 

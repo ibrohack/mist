@@ -18,8 +18,11 @@ import java.util.stream.Collectors;
  */
 abstract class HibernateDao {
 
+    /** Gives the DAO its session. */
     private final HibernateTransactions transactions;
+    /** Writes the operation log. */
     private final DbOperationLogger log;
+    /** The collection this DAO works on, for the log. */
     private final String collection;
 
     /**

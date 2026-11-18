@@ -31,10 +31,15 @@ import java.util.Objects;
  */
 public class PublishingService {
 
+    /** The games collection. */
     private final GameDao games;
+    /** The users collection. */
     private final UserDao users;
+    /** The media collection, where images are stored. */
     private final MediaDao media;
+    /** Runs the changes that touch several documents. */
     private final TransactionRunner transactions;
+    /** The clock changes are dated with. */
     private final Clock clock;
 
     /**
@@ -247,6 +252,14 @@ public class PublishingService {
         return new SalesReport(developer.getTotalRevenue(), unitsSold, catalog);
     }
 
+    /**
+     * Loads a game and checks that it belongs to the developer.
+     *
+     * @param developer the acting developer
+     * @param gameId    the game
+     * @return the game
+     * @throws MistException if it does not exist or is another developer's
+     */
     private Game owned(Developer developer, ObjectId gameId) throws MistException {
         Game game = gameId == null ? null : games.findById(gameId).orElse(null);
         if (game == null) {

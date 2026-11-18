@@ -27,6 +27,7 @@ import java.util.Set;
  */
 final class PersistenceErrors {
 
+    /** Not instantiable: a holder of error translation helpers. */
     private PersistenceErrors() {
     }
 
@@ -78,6 +79,12 @@ final class PersistenceErrors {
                 + (firstLine.length() > 160 ? firstLine.substring(0, 160) + "..." : firstLine);
     }
 
+    /**
+     * Tells whether a failure is a broken unique index.
+     *
+     * @param failure the failure
+     * @return {@code true} for a duplicate key
+     */
     private static boolean isDuplicateKey(Throwable failure) {
         for (Throwable cause : chain(failure)) {
             if (cause instanceof ConstraintViolationException
@@ -90,11 +97,22 @@ final class PersistenceErrors {
         return false;
     }
 
+    /**
+     * Tells whether a MongoDB error code means a duplicate key.
+     *
+     * @param code the error code
+     * @return {@code true} for 11000, 11001 and 12582
+     */
     private static boolean isDuplicateKey(int code) {
         return code != 0 && ErrorCategory.fromErrorCode(code) == ErrorCategory.DUPLICATE_KEY;
     }
 
-    /** The failure and its causes, outermost first, stopping at a cycle. */
+    /**
+     * Lists a failure and its causes, outermost first, stopping at a cycle.
+     *
+     * @param failure the failure
+     * @return the failure followed by its causes
+     */
     private static Iterable<Throwable> chain(Throwable failure) {
         Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         List<Throwable> causes = new ArrayList<>();

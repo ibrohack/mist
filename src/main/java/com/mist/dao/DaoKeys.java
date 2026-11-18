@@ -11,6 +11,7 @@ public final class DaoKeys {
     /** A write broke a unique index. */
     public static final String DUPLICATE = "dao.duplicate";
 
+    /** Not instantiable: a holder of bundle keys. */
     private DaoKeys() {
     }
 }

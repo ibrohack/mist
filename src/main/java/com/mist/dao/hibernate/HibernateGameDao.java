@@ -29,9 +29,12 @@ import java.util.stream.Collectors;
  */
 public class HibernateGameDao extends HibernateDao implements GameDao {
 
+    /** The collection the catalog search queries directly. */
     private static final String COLLECTION = "games";
+    /** The status field. */
     private static final String STATUS = "status";
 
+    /** The client the catalog search uses. */
     private final MongoConnection connection;
 
     /**
@@ -117,17 +120,38 @@ public class HibernateGameDao extends HibernateDao implements GameDao {
         return execute(isNew ? "INSERT" : "UPDATE", details, session -> persistOrMerge(session, game, isNew));
     }
 
+    /**
+     * Loads games by id.
+     *
+     * @param session the session
+     * @param ids     the ids
+     * @return the games, in any order
+     */
     private static List<Game> loadAll(Session session, List<ObjectId> ids) {
         return session.createSelectionQuery("from Game where id in :ids", Game.class)
                 .setParameterList("ids", ids)
                 .getResultList();
     }
 
+    /**
+     * Puts loaded games in the order of their ids.
+     *
+     * @param ids   the ids, in the wanted order
+     * @param games the games
+     * @return the games in the order of {@code ids}
+     */
     private static List<Game> inOrder(List<ObjectId> ids, List<Game> games) {
         Map<ObjectId, Game> byId = games.stream().collect(Collectors.toMap(Game::getId, Function.identity()));
         return ids.stream().map(byId::get).filter(Objects::nonNull).toList();
     }
 
+    /**
+     * Checks a list size.
+     *
+     * @param limit the size
+     * @return the same size
+     * @throws IllegalArgumentException if it is not positive
+     */
     private static int positive(int limit) {
         if (limit < 1) {
             throw new IllegalArgumentException("limit must be positive: " + limit);

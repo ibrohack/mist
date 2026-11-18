@@ -18,8 +18,11 @@ import java.util.Objects;
  */
 public final class HibernateTransactions implements TransactionRunner {
 
+    /** Opens the sessions. */
     private final SessionFactory sessionFactory;
+    /** Writes the rollbacks to the operation log. */
     private final DbOperationLogger log;
+    /** The session of the transaction running on this thread. */
     private final ThreadLocal<Session> current = new ThreadLocal<>();
 
     /**
@@ -84,6 +87,12 @@ public final class HibernateTransactions implements TransactionRunner {
         return log;
     }
 
+    /**
+     * Rolls a transaction back and logs why.
+     *
+     * @param transaction the transaction
+     * @param failure     what made it fail
+     */
     private void rollback(Transaction transaction, Throwable failure) {
         try {
             if (transaction.getStatus().canRollback()) {

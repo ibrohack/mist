@@ -27,17 +27,35 @@ public class Developer extends User {
     /** Longest studio name accepted. */
     public static final int MAX_STUDIO_NAME_LENGTH = 80;
 
+    /** The shape of an IBAN, without spaces. */
     private static final Pattern IBAN = Pattern.compile("[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}");
 
+    /** The studio name, unique among developers. */
     private String studioName;
+    /** The IBAN sales are paid into. */
     private String bankAccount;
+    /** The developer's published games. */
     private List<ObjectId> gameIds;
+    /** What the developer's games have earned, after refunds. */
     private BigDecimal totalRevenue;
 
     /** Used by Hibernate. */
     protected Developer() {
     }
 
+    /**
+     * Creates a developer.
+     *
+     * @param firstName    the first name
+     * @param lastName     the last name
+     * @param email        the email
+     * @param passwordHash the Argon2id hash
+     * @param phone        the phone, or {@code null}
+     * @param address      the address
+     * @param studioName   the studio name
+     * @param bankAccount  the IBAN
+     * @param createdAt    when the account was created
+     */
     private Developer(String firstName, String lastName, String email, String passwordHash, Phone phone,
                       Address address, String studioName, String bankAccount, Instant createdAt) {
         super(firstName, lastName, email, passwordHash, phone, Checks.present(address, ModelKeys.USER_ADDRESS),
@@ -83,6 +101,12 @@ public class Developer extends User {
         return normalized;
     }
 
+    /**
+     * Computes the IBAN checksum.
+     *
+     * @param iban the IBAN without spaces
+     * @return the remainder of the rearranged IBAN modulo 97, 1 when valid
+     */
     private static int mod97(String iban) {
         String rearranged = iban.substring(4) + iban.substring(0, 4);
         int remainder = 0;
@@ -94,6 +118,12 @@ public class Developer extends User {
         return remainder;
     }
 
+    /**
+     * Checks a studio name.
+     *
+     * @param studioName the name
+     * @return the name without surrounding spaces
+     */
     private static String checkedStudioName(String studioName) {
         return Checks.text(studioName, 1, MAX_STUDIO_NAME_LENGTH, ModelKeys.DEVELOPER_STUDIO_NAME);
     }
@@ -204,6 +234,11 @@ public class Developer extends User {
         totalRevenue = revenue().subtract(refund);
     }
 
+    /**
+     * Returns the revenue, zero if not set yet.
+     *
+     * @return the total revenue
+     */
     private BigDecimal revenue() {
         return totalRevenue == null ? BigDecimal.ZERO.setScale(2) : totalRevenue;
     }

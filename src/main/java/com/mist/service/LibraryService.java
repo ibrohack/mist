@@ -37,10 +37,15 @@ public class LibraryService {
     /** How long after the purchase a game can be returned. */
     public static final Duration REFUND_WINDOW = Duration.ofDays(14);
 
+    /** The users collection. */
     private final UserDao users;
+    /** The games collection. */
     private final GameDao games;
+    /** The orders collection. */
     private final OrderDao orders;
+    /** Runs the changes that touch several documents. */
     private final TransactionRunner transactions;
+    /** The clock changes are dated with. */
     private final Clock clock;
 
     /**
@@ -156,10 +161,25 @@ public class LibraryService {
         });
     }
 
+    /**
+     * Finds a game in a player's library.
+     *
+     * @param player the player
+     * @param gameId the game
+     * @return the library entry, or empty if the player does not own it
+     */
     private static Optional<LibraryEntry> entry(Player player, ObjectId gameId) {
         return player.getLibrary().stream().filter(entry -> entry.gameId().equals(gameId)).findFirst();
     }
 
+    /**
+     * Tells whether a game of an order can still be returned.
+     *
+     * @param order  the order, or {@code null}
+     * @param gameId the game
+     * @param now    the current instant
+     * @return {@code true} within the refund window and while not refunded
+     */
     private static boolean isReturnable(Order order, ObjectId gameId, Instant now) {
         return order != null && order.isRefundable(gameId, now, REFUND_WINDOW);
     }

@@ -10,6 +10,7 @@ import javafx.application.Application;
  */
 public final class Launcher {
 
+    /** Not instantiable: a holder of the launcher. */
     private Launcher() {
     }
 

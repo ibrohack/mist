@@ -30,6 +30,7 @@ public final class MistModel {
             SystemRequirements.class,
             OrderItem.class);
 
+    /** Not instantiable: a holder of the model catalog. */
     private MistModel() {
     }
 }

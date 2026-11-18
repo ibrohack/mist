@@ -42,7 +42,8 @@ Default control behavior (typing in a field, scrolling a list, opening a combo b
 | `Formats` | `com.mist.ui.support` | Locale-aware money (EUR), dates and enum labels. |
 | `Images` | `com.mist.ui.support` | Loads covers, screenshots and avatars through `MediaService#image(ObjectId)` in the background, with a cache. |
 | `FilePicker` | `com.mist.ui` | Wraps `FileChooser` (open an image, save a PDF), so tests can stub the native dialogs. |
-| `HelpWindow` | `com.mist.ui.controller` | The help window ([C-6](#c-6-help)). |
+| `HelpController` | `com.mist.ui.controller` | The help window's content ([C-6](#c-6-help)); `Navigator#showHelp()` opens the window. |
+| `DemoData`, `LogService` | `com.mist.service` | The demo content seeded into an empty database, and the admins' reader of the operation log. |
 | Controllers | `com.mist.ui.controller` | One per FXML view. They call services only through `UiTasks` and never touch DAOs (enforced by `LayerRulesTest`). |
 
 FXML files live in `src/main/resources/com/mist/ui/view/`, one per screen, and keep `fx:controller` so Scene Builder
@@ -113,8 +114,8 @@ Space Grotesk (Regular, Medium, Bold), loaded by `Styles` from `com/mist/ui/font
 
 Every service call goes through `UiTasks#run(Node busy, Work<T> work, Consumer<T> onSuccess)` (or the overload with
 an `onFailure` handler). The work runs on a worker thread; `busy` is disabled until it ends; `onSuccess` runs on the
-JavaFX thread. A failure goes to `ErrorReporter#report(Node owner, Throwable error, Runnable retry)` unless the caller
-handles it.
+JavaFX thread. A failure goes to `ErrorReporter#report(Window owner, Throwable error, Runnable retry)` unless the
+caller handles it.
 
 ### C-2 Error handling
 
@@ -128,6 +129,7 @@ handles it.
 | `UnauthorizedException(service.account.deactivated)` | The session ends; Login opens with the message. |
 | `UnauthorizedException(other keys)` | Warning dialog with the message; the session stays. |
 | `DataAccessException(dao.failure, service.log.unreadable)` | Error dialog with the message and a **Retry** button that runs the same work again. |
+| `IOException` (a file the user picked) | Error dialog with `error.fileUnreadable`. |
 | Any other `Throwable` | Logged with its stack trace to `mist-app.log`; error dialog with `error.unexpected`. Unhandled exceptions on the JavaFX thread reach the same handler through `Thread.setDefaultUncaughtExceptionHandler`. |
 
 Every reaction is also written to `mist-app.log` by the logger `com.mist.ui` (screen, action, key); the database log
@@ -164,7 +166,8 @@ Dark (default) or light, chosen in the user menu. `Styles#applyTheme(Scene, Them
 
 ### C-6 Help
 
-**F1**, the user menu's Help item, or a screen's **?** button open `HelpWindow` (a non-modal window). It lists one topic
+**F1**, the user menu's Help item, or a screen's **?** button call `Navigator#showHelp()`, which opens the help
+window (non-modal, `help.fxml` with `HelpController`). It lists one topic
 per screen (`help.<topic>.title`, `help.<topic>.body`) and opens on the topic of the current screen.
 
 ### C-7 Keyboard
@@ -221,7 +224,7 @@ flowchart LR
 | Shell | `SHELL` | `shell.fxml` | `ShellController` | logged in, guest | UC-03 Log out, UC-13 Change language and theme, UC-20 Get help |
 | Profile | `PROFILE` | `profile.fxml` | `ProfileController` | player, developer, admin | UC-12 Edit profile, UC-14 Deactivate account |
 | Operation log | `ADMIN_LOG` | `admin-log.fxml` | `AdminLogController` | admin | UC-19 View and filter the database log |
-| Help | (window) | `help.fxml` | `HelpWindow` | all | UC-20 Get help |
+| Help | (window) | `help.fxml` | `HelpController` | all | UC-20 Get help |
 | Store | `STORE` | `store.fxml` | `StoreController` | guest, player, developer | UC-04 Browse and search the catalog |
 | Game page | `GAME` | `game.fxml` | `GameController` | guest, player, developer | UC-05 View a game, UC-06 Add to cart, UC-08 Add to wishlist |
 | Cart | `CART` | `cart.fxml` | `CartController` | player | UC-06 Manage the cart, UC-07 Check out, UC-21 Download receipt |
@@ -336,11 +339,11 @@ The user menu `userMenu` (`MenuButton`) shows the avatar (circle) and the user's
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
-| SHELL-1 | `ShellController#onNavigatedTo` | none | `Images#avatar(ObjectId)` | The menu shows the user's name and avatar, and only the items of their role. |
+| SHELL-1 | `ShellController#onNavigatedTo` | none | `Images#load(ObjectId, double, double, Consumer<Image>)` | The menu shows the user's name and avatar, and only the items of their role. |
 | SHELL-2 | `profileItem.onAction → ShellController#onProfile` | none | none | `Navigator#show(PROFILE)` |
 | SHELL-3 | `spanishItem`/`englishItem.onAction → ShellController#onLanguage` | none | `I18n#use(Locale)`; logged in: `UserService#changePreferences(ObjectId, Language, Theme)` | **R1** The screen reloads in the new language; the preference is saved and `UserSession#update(User)`. **R2** `DataAccessException`: the language still changes for this session; C-2 dialog. |
 | SHELL-4 | `darkItem`/`lightItem.onAction → ShellController#onTheme` | none | `Styles#applyTheme(Scene, Theme)`; logged in: `UserService#changePreferences(...)` | **R1** The theme changes at once and is saved. **R2** as SHELL-3.R2. |
-| SHELL-5 | `helpItem.onAction` or F1 `→ ShellController#onHelp` | none | `HelpWindow#show(View)` | The help window opens on the current screen's topic. |
+| SHELL-5 | `helpItem.onAction` or F1 `→ ShellController#onHelp` | none | `Navigator#showHelp()` | The help window opens on the current screen's topic. |
 | SHELL-6 | `logItem.onAction → ShellController#onOperationLog` | admin | none | `Navigator#show(ADMIN_LOG)` |
 | SHELL-7 | `logoutItem.onAction → ShellController#onLogout` | none | `AuthService#logout()` | `UserSession#end()`; `Navigator#show(LOGIN)`. A guest goes to Login the same way. |
 
@@ -426,6 +429,6 @@ operation** (`filterOperationItem`).
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
-| HELP-1 | F1, `helpItem`, or a screen's `helpButton` `→ HelpWindow#show(View)` | none | none | Opens (or brings to front) the window on the topic of the given screen. |
-| HELP-2 | `topicList.selectionModel.selectedItem` changes `→ HelpWindow#showTopic` | none | none | Shows `help.<topic>.title` and the paragraphs of `help.<topic>.body`. |
+| HELP-1 | F1, `helpItem`, or a screen's `helpButton` `→ Navigator#showHelp()` → `HelpController#select(View)` | none | none | Opens (or brings to front) the window on the topic of the given screen. |
+| HELP-2 | `topicList.selectionModel.selectedItem` changes `→ HelpController#showTopic` | none | none | Shows `help.<topic>.title` and the paragraphs of `help.<topic>.body`. |
 | HELP-3 | `closeButton.onAction` or Esc | none | none | Closes the window. |

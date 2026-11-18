@@ -17,6 +17,7 @@ import java.util.Objects;
  */
 public final class SceneRouter {
 
+    /** Not instantiable: a holder of the view loader. */
     private SceneRouter() {
     }
 

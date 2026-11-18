@@ -33,10 +33,15 @@ import java.util.Objects;
  */
 public class UserService {
 
+    /** The users collection. */
     private final UserDao users;
+    /** The games collection. */
     private final GameDao games;
+    /** The media collection, where images are stored. */
     private final MediaDao media;
+    /** Runs the changes that touch several documents. */
     private final TransactionRunner transactions;
+    /** The clock changes are dated with. */
     private final Clock clock;
 
     /**

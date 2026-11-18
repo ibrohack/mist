@@ -31,6 +31,11 @@ public class MistApp extends Application {
     /** The context of the main window, closed when the app stops. */
     private UiContext context;
 
+    /** Creates the application; JavaFX calls {@link #start(Stage)} next. */
+    public MistApp() {
+        // JavaFX creates the application through this constructor.
+    }
+
     @Override
     public void start(Stage stage) {
         I18n.use(I18n.DEFAULT_LOCALE);
@@ -72,6 +77,11 @@ public class MistApp extends Application {
 
         /** Number of the next thread. */
         private final AtomicInteger next = new AtomicInteger(1);
+
+        /** Creates the factory; threads are numbered from 1. */
+        WorkerThreads() {
+            // Nothing else to set up.
+        }
 
         @Override
         public Thread newThread(Runnable task) {

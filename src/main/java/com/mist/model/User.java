@@ -38,26 +38,40 @@ public abstract class User {
     /** Longest email address accepted. */
     public static final int MAX_EMAIL_LENGTH = 254;
 
+    /** The shape of an email address. */
     private static final Pattern EMAIL = Pattern.compile("[^@\\s]++@[^@\\s.]++(?:\\.[^@\\s.]++)++");
+    /** The start of every stored password hash. */
     private static final String ARGON2ID_PREFIX = "$argon2id$";
 
+    /** The document id. */
     @Id
     @ObjectIdGenerator
     private ObjectId id;
 
+    /** The first name. */
     private String firstName;
+    /** The last name. */
     private String lastName;
+    /** The email, lower case and unique. */
     private String email;
+    /** The Argon2id hash of the password. */
     private String passwordHash;
+    /** The phone, or {@code null}. */
     private Phone phone;
+    /** The postal address. */
     private Address address;
+    /** The avatar in the media collection, or {@code null}. */
     private ObjectId avatarId;
+    /** When the account was created. */
     private Instant createdAt;
 
+    /** Active or deactivated. */
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
 
+    /** When the account was deactivated, or {@code null}. */
     private Instant deactivatedAt;
+    /** Language and theme. */
     private Preferences preferences;
 
     /** Used by Hibernate. */
@@ -103,6 +117,13 @@ public abstract class User {
         return normalized;
     }
 
+    /**
+     * Checks a stored password hash.
+     *
+     * @param passwordHash the hash
+     * @return the hash
+     * @throws IllegalArgumentException if it is not an Argon2id PHC string
+     */
     private static String checkedPasswordHash(String passwordHash) {
         Checks.require(passwordHash != null && passwordHash.startsWith(ARGON2ID_PREFIX), ModelKeys.USER_PASSWORD_HASH);
         return passwordHash;

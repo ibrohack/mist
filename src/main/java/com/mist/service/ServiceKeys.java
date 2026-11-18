@@ -63,6 +63,7 @@ public final class ServiceKeys {
     /** The database operation log could not be read. */
     public static final String LOG_UNREADABLE = "service.log.unreadable";
 
+    /** Not instantiable: a holder of bundle keys. */
     private ServiceKeys() {
     }
 }

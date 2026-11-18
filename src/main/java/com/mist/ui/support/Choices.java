@@ -21,6 +21,7 @@ public final class Choices {
     /** How many years ahead a card expiry can be chosen. */
     private static final int EXPIRY_YEARS = 16;
 
+    /** Not instantiable: a holder of combo box fillers. */
     private Choices() {
     }
 

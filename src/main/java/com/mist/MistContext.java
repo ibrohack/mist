@@ -30,20 +30,36 @@ import java.util.Objects;
  */
 public final class MistContext implements AutoCloseable {
 
+    /** The startup log. */
     private static final Logger LOG = LoggerFactory.getLogger(MistContext.class);
     /** The folder {@code logback.xml} writes the logs to; the operation log viewer reads it. */
     private static final Path LOG_DIRECTORY = Path.of(System.getProperty("user.home"), ".mist", "logs");
 
+    /** The data access layer. */
     private final HibernateDataAccess data;
+    /** Login and registration. */
     private final AuthService auth;
+    /** Profiles and accounts. */
     private final UserService users;
+    /** Catalog, cart and checkout. */
     private final StoreService store;
+    /** Library and returns. */
     private final LibraryService library;
+    /** Ratings and reviews. */
     private final ReviewService reviews;
+    /** Developers' games and sales. */
     private final PublishingService publishing;
+    /** Images. */
     private final MediaService media;
+    /** The operation log reader. */
     private final LogService logs;
 
+    /**
+     * Builds the services on the data access layer.
+     *
+     * @param data  the open data access layer
+     * @param clock the clock the services date their changes with
+     */
     private MistContext(HibernateDataAccess data, Clock clock) {
         this.data = data;
         this.auth = new AuthService(data.users(), clock);

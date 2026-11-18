@@ -35,8 +35,11 @@ public class AuthService {
     /** Longest password accepted. */
     public static final int MAX_PASSWORD_LENGTH = 128;
 
+    /** The users collection. */
     private final UserDao users;
+    /** The clock changes are dated with. */
     private final Clock clock;
+    /** Hashes and checks passwords with Argon2id. */
     private final PasswordHasher hasher = new PasswordHasher();
     /** Checked when the email is unknown, so a wrong email takes as long as a wrong password. */
     private final String dummyHash = hasher.hash(UUID.randomUUID().toString().toCharArray());
@@ -207,6 +210,11 @@ public class AuthService {
         }
     }
 
+    /**
+     * Overwrites a password in memory once it is no longer needed.
+     *
+     * @param password the password, or {@code null}
+     */
     private static void wipe(char[] password) {
         if (password != null) {
             Arrays.fill(password, '\0');

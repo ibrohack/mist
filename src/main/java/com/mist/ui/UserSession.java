@@ -23,7 +23,12 @@ public final class UserSession {
     /** Whether a guest is browsing without an account. */
     private boolean guest;
     /** Counts the changes of the session, so views can refresh on any of them. */
-    private final ReadOnlyLongWrapper version = new ReadOnlyLongWrapper(this, "version");
+    private final ReadOnlyLongWrapper changes = new ReadOnlyLongWrapper(this, "version");
+
+    /** Creates an empty session: nobody is using MIST yet. */
+    public UserSession() {
+        // Starts empty.
+    }
 
     /**
      * Starts the session of a user who just logged in.
@@ -131,11 +136,11 @@ public final class UserSession {
      * @return the session version
      */
     public ReadOnlyLongProperty versionProperty() {
-        return version.getReadOnlyProperty();
+        return changes.getReadOnlyProperty();
     }
 
     /** Signals a change to the views that listen. */
     private void changed() {
-        version.set(version.get() + 1);
+        changes.set(changes.get() + 1);
     }
 }

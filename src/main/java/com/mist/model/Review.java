@@ -27,20 +27,35 @@ public class Review {
     /** Longest comment accepted. */
     public static final int MAX_COMMENT_LENGTH = 2000;
 
+    /** The document id. */
     @Id
     @ObjectIdGenerator
     private ObjectId id;
 
+    /** The reviewer. */
     private ObjectId playerId;
+    /** The game reviewed. */
     private ObjectId gameId;
+    /** The rating, 1 to 5. */
     private int rating;
+    /** The text, or {@code null}. */
     private String comment;
+    /** When it was written. */
     private Instant createdAt;
 
     /** Used by Hibernate. */
     protected Review() {
     }
 
+    /**
+     * Creates a review.
+     *
+     * @param playerId  the reviewer
+     * @param gameId    the game
+     * @param rating    the rating
+     * @param comment   the text, or {@code null}
+     * @param createdAt when it was written
+     */
     private Review(ObjectId playerId, ObjectId gameId, int rating, String comment, Instant createdAt) {
         this.playerId = playerId;
         this.gameId = gameId;

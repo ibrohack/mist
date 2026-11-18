@@ -18,7 +18,9 @@ public final class MongoConnection implements AutoCloseable {
     /** Short enough for the splash to report an unreachable server quickly. */
     private static final long SERVER_SELECTION_TIMEOUT_SECONDS = 5;
 
+    /** The shared client. */
     private final MongoClient client;
+    /** The database MIST uses. */
     private final String databaseName;
 
     /**

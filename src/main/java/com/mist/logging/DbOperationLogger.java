@@ -21,11 +21,20 @@ public final class DbOperationLogger {
     /** Logging-context key that {@code logback.xml} reads the user from. */
     public static final String USER_KEY = "user";
 
+    /** The logger that writes {@code mist-db.log}. */
     private static final Logger LOG = LoggerFactory.getLogger(LOGGER_NAME);
+    /** The outcome of an operation that worked. */
     private static final String OK = "OK";
+    /** The outcome of an operation that failed. */
     private static final String FAILED = "FAILED";
 
+    /** The logged-in user written on each line, or {@code null} for anonymous. */
     private static volatile String currentUser;
+
+    /** Creates a logger; every instance writes to the same log, with the same current user. */
+    public DbOperationLogger() {
+        // Stateless: the user is kept app-wide.
+    }
 
     /**
      * Sets the user written on every following line, after a successful login.
@@ -63,6 +72,14 @@ public final class DbOperationLogger {
         write(operation, collection, details, FAILED);
     }
 
+    /**
+     * Writes one line with the current user.
+     *
+     * @param operation  what was done
+     * @param collection the collection it touched
+     * @param details    the ids or filters involved
+     * @param outcome    {@code OK} or {@code FAILED}
+     */
     private static void write(String operation, String collection, String details, String outcome) {
         if (!LOG.isInfoEnabled()) {
             return;
@@ -83,7 +100,12 @@ public final class DbOperationLogger {
         }
     }
 
-    /** Keeps one operation on one line and the column separator unambiguous. */
+    /**
+     * Keeps one operation on one line and the column separator unambiguous.
+     *
+     * @param details the details, possibly {@code null}
+     * @return the details on one line, with {@code |} replaced, or {@code -} when there are none
+     */
     private static String clean(String details) {
         if (details == null || details.isBlank()) {
             return "-";

@@ -11,8 +11,10 @@ import com.mist.exception.ValidationException;
  */
 final class Rules {
 
+    /** The prefix of the model's bundle keys. */
     private static final String MODEL_KEY_PREFIX = "model.";
 
+    /** Not instantiable: a holder of rule helpers. */
     private Rules() {
     }
 

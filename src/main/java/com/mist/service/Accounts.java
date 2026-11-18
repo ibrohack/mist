@@ -15,6 +15,7 @@ import org.bson.types.ObjectId;
  */
 final class Accounts {
 
+    /** Not instantiable: a holder of account lookups. */
     private Accounts() {
     }
 

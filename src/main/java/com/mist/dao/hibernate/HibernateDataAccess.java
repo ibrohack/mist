@@ -24,15 +24,30 @@ import org.hibernate.SessionFactory;
  */
 public final class HibernateDataAccess implements AutoCloseable {
 
+    /** The shared MongoDB client. */
     private final MongoConnection connection;
+    /** Hibernate's session factory on that client. */
     private final SessionFactory sessionFactory;
+    /** Runs the transactions. */
     private final HibernateTransactions transactions;
+    /** The users DAO. */
     private final UserDao users;
+    /** The games DAO. */
     private final GameDao games;
+    /** The orders DAO. */
     private final OrderDao orders;
+    /** The reviews DAO. */
     private final ReviewDao reviews;
+    /** The media DAO. */
     private final MediaDao media;
 
+    /**
+     * Builds the DAOs on an open connection.
+     *
+     * @param connection     the shared MongoDB client
+     * @param sessionFactory the session factory on it
+     * @param log            the operation log
+     */
     private HibernateDataAccess(MongoConnection connection, SessionFactory sessionFactory, DbOperationLogger log) {
         this.connection = connection;
         this.sessionFactory = sessionFactory;

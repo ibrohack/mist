@@ -64,6 +64,12 @@ public record Address(String street, String details, String postalCode, String c
         return new Address(street, details, upper(postalCode), city, province, upper(country));
     }
 
+    /**
+     * Upper-cases a code, keeping {@code null}.
+     *
+     * @param value the code, possibly {@code null}
+     * @return the code in upper case
+     */
     private static String upper(String value) {
         return value == null ? null : value.strip().toUpperCase(Locale.ROOT);
     }

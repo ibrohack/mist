@@ -29,6 +29,7 @@ public final class I18n {
     /** The language the UI is shown in. */
     private static volatile Locale locale = DEFAULT_LOCALE;
 
+    /** Not instantiable: a holder of the language helper. */
     private I18n() {
     }
 

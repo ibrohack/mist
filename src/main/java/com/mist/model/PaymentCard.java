@@ -89,6 +89,12 @@ public record PaymentCard(String holderName, @Enumerated(EnumType.STRING) CardBr
         return "•••• " + last4;
     }
 
+    /**
+     * Checks a card number's checksum.
+     *
+     * @param digits the card number
+     * @return {@code true} if the Luhn checksum is valid
+     */
     private static boolean passesLuhn(String digits) {
         int sum = 0;
         boolean doubled = false;
@@ -106,6 +112,12 @@ public record PaymentCard(String holderName, @Enumerated(EnumType.STRING) CardBr
         return sum % 10 == 0;
     }
 
+    /**
+     * Finds a card's brand from its number.
+     *
+     * @param digits the card number
+     * @return the brand, or {@link CardBrand#OTHER}
+     */
     private static CardBrand brandOf(String digits) {
         if (digits.startsWith("34") || digits.startsWith("37")) {
             return CardBrand.AMEX;

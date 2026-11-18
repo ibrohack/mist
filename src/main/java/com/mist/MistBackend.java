@@ -16,6 +16,11 @@ final class MistBackend implements Backend {
     /** The open context, or {@code null} while disconnected. */
     private MistContext context;
 
+    /** Creates the backend, disconnected until {@link #connect()}. */
+    MistBackend() {
+        // Connects on demand.
+    }
+
     @Override
     public synchronized AppServices connect() throws DataAccessException {
         if (context == null) {

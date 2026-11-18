@@ -1,7 +1,7 @@
 # MIST decision log
 
 Decisions taken while building the project scaffold (week 2, 19 Oct 2026), the model, data access and service layers
-(17 Nov 2026), and how they change the preliminary plan of 12 Oct 2026.
+(17 Nov 2026), the user interface (18 Nov 2026), and how they change the preliminary plan of 12 Oct 2026.
 
 ## Scaffold decisions
 
@@ -96,6 +96,38 @@ navigation diagram. [data-model.md](data-model.md) describes every collection an
     `HibernateDataAccess`, so it never touches Hibernate types (the layer test forbids them outside the data layer).
     `MistApp` does not open it yet; the splash's database check will.
 
+## UI layer decisions (18 Nov 2026)
+
+The interface follows the team's navigation diagram and the brand kit; [ui-design.md](ui-design.md) describes the aspect
+and behavior of every screen.
+
+1. **The UI never sees `MistContext`.** `MistApp` hands the UI a `Backend` (`MistBackend` in the app); the views get
+   `AppServices` from it. `LayerRulesTest` keeps `ui` away from `dao`.
+2. **Controllers get a `UiContext` in their constructor**, through the `FXMLLoader` controller factory in
+   `SceneRouter`; FXML files keep `fx:controller`, so Scene Builder opens them.
+3. **Every service call runs on a worker thread** (`UiTasks`, a JavaFX `Task`), with the control that started it
+   disabled. Errors reach one `ErrorReporter`: rule violations are warnings or marks on the form, database failures
+   offer a retry, a deactivated account ends the session, anything else is logged and shown as a generic error.
+4. **Forms are checked twice**: `FormValidator` before the call, with the model's own limits and formats, and the
+   service after it; a service error key is bound to its field, so it is marked in the same place.
+5. **Dialogs never block** the JavaFX thread and carry MIST's own button texts, so they follow the UI language.
+6. **Language and theme switch at once** and are saved in the user's preferences; a language change rebuilds the
+   screen in place. The light theme only redefines the brand tokens.
+7. **Login hides which accounts exist**, as the service does: wrong email and wrong password get the same message.
+8. **The profile edits one row at a time, in place**, as the navigation diagram draws it, instead of a separate form.
+9. **Demo data seeds an empty database** (`DemoData`, `mist.seed.demo=true` by default): an admin, two developers,
+   twelve games with generated art, three players with orders, a cart, a wishlist and reviews. It is the only way an
+   admin account is created.
+10. **The operation log is read from the files**, `~/.mist/logs/mist-db.log` and its rolled days, by `LogService`, for
+    admins only (ADT IL5.1).
+11. **Help comes from the bundles**: one topic per screen (`help.<topic>.*`), so it is translated like the rest and a
+    screen gets help by adding keys. F1 opens it everywhere.
+12. **UI tests run the real services on in-memory DAOs** (`com.mist.fake`) with failure switches, so `./mvnw test`
+    covers use cases, rule errors, database failures and file errors without Docker. Interactions fire the controls'
+    events instead of moving the mouse.
+13. **Packaging is a jpackage app image**, not an installer, so no WiX is needed; see the README.
+14. **Javadoc covers private members too** and fails on any missing comment (`./mvnw javadoc:javadoc`).
+
 ## Changes to the preliminary plan
 
 | Topic | Preliminary plan | Now |
@@ -114,9 +146,10 @@ navigation diagram. [data-model.md](data-model.md) describes every collection an
 | Dates / embedded data | not fixed | `java.time.Instant` only; embedded documents are `@Embeddable @Struct` classes |
 | Catalog search | text index | the driver finds the ids with `$regex` on a quoted pattern, then Hibernate loads the games; no text index |
 | Config | `mist.properties` read by `AppConfig` | same, plus system-property and environment-variable overrides |
-| Brand images | splash, empty and offline SVGs converted to PNG | splash rebuilt in FXML (empty and offline later, the same way); only the launcher icon becomes PNG |
+| Brand images | splash, empty and offline SVGs converted to PNG | splash and offline rebuilt in FXML (the empty library later, the same way); only the launcher icon becomes PNG |
 | Styling | `mist-theme.css` | TailwindFX utilities + `mist-theme.css` brand layer |
-| Packaging | `javafx-maven-plugin` jlink + jpackage | jpackage on a classpath app, because jlink cannot take Hibernate's automatic modules |
+| Packaging | `javafx-maven-plugin` jlink + jpackage | jpackage app image of a classpath app (`-Ppackage`), because jlink cannot take Hibernate's automatic modules; no installer, so no WiX |
+| Tests | JUnit for services and DAOs, TestFX for flows | TestFX tests of every screen on the real services over in-memory DAOs; no service or DAO unit tests |
 | Exceptions | hierarchy (type unspecified) | same names, checked |
 
 ## Findings

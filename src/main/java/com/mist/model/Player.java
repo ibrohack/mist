@@ -22,18 +22,37 @@ import java.util.regex.Pattern;
 @DiscriminatorValue("PLAYER")
 public class Player extends User {
 
+    /** The shape of a nickname. */
     private static final Pattern NICKNAME = Pattern.compile("[A-Za-z0-9_.-]{3,24}");
 
+    /** The nickname, unique among players. */
     private String nickname;
+    /** The saved card, masked. */
     private PaymentCard card;
+    /** The games owned. */
     private List<LibraryEntry> library;
+    /** The games in the cart. */
     private List<ObjectId> cartGameIds;
+    /** The games on the wishlist. */
     private List<ObjectId> wishlistGameIds;
 
     /** Used by Hibernate. */
     protected Player() {
     }
 
+    /**
+     * Creates a player.
+     *
+     * @param firstName    the first name
+     * @param lastName     the last name
+     * @param email        the email
+     * @param passwordHash the Argon2id hash
+     * @param phone        the phone, or {@code null}
+     * @param address      the address
+     * @param nickname     the nickname
+     * @param card         the saved card
+     * @param createdAt    when the account was created
+     */
     private Player(String firstName, String lastName, String email, String passwordHash, Phone phone,
                    Address address, String nickname, PaymentCard card, Instant createdAt) {
         super(firstName, lastName, email, passwordHash, phone, Checks.present(address, ModelKeys.USER_ADDRESS),
@@ -65,6 +84,12 @@ public class Player extends User {
         return new Player(firstName, lastName, email, passwordHash, phone, address, nickname, card, now);
     }
 
+    /**
+     * Checks a nickname.
+     *
+     * @param nickname the nickname
+     * @return the nickname without surrounding spaces
+     */
     private static String checkedNickname(String nickname) {
         String stripped = nickname == null ? null : nickname.strip();
         return Checks.matching(stripped, NICKNAME, ModelKeys.PLAYER_NICKNAME);
@@ -247,16 +272,39 @@ public class Player extends User {
         return true;
     }
 
+    /**
+     * Returns a read-only view of a list.
+     *
+     * @param list the list, possibly {@code null}
+     * @param <T>  the element type
+     * @return an unmodifiable list, empty for {@code null}
+     */
     private static <T> List<T> view(List<T> list) {
         return list == null ? List.of() : Collections.unmodifiableList(list);
     }
 
+    /**
+     * Returns a copy of a list with one more element.
+     *
+     * @param list    the list
+     * @param element the element to add
+     * @param <T>     the element type
+     * @return the new list
+     */
     private static <T> List<T> appended(List<T> list, T element) {
         List<T> copy = new ArrayList<>(view(list));
         copy.add(element);
         return List.copyOf(copy);
     }
 
+    /**
+     * Returns a copy of a list without an element.
+     *
+     * @param list    the list
+     * @param element the element to remove
+     * @param <T>     the element type
+     * @return the new list
+     */
     private static <T> List<T> without(List<T> list, T element) {
         List<T> copy = new ArrayList<>(view(list));
         copy.remove(element);

@@ -298,6 +298,11 @@ public class AdminLogController implements NavigationAware {
     /** Shows the details on one line, cut with an ellipsis, and the whole text in a tooltip. */
     private static final class DetailsCell extends TableCell<LogEntry, String> {
 
+        /** Creates an empty cell; the table fills it. */
+        DetailsCell() {
+            // The table calls updateItem.
+        }
+
         @Override
         protected void updateItem(String details, boolean empty) {
             super.updateItem(details, empty);
@@ -308,6 +313,11 @@ public class AdminLogController implements NavigationAware {
 
     /** Shows the outcome as "OK" in acid or "FAILED" in the danger color. */
     private static final class OutcomeCell extends TableCell<LogEntry, Boolean> {
+
+        /** Creates an empty cell; the table fills it. */
+        OutcomeCell() {
+            // The table calls updateItem.
+        }
 
         @Override
         protected void updateItem(Boolean ok, boolean empty) {

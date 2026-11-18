@@ -33,12 +33,18 @@ public class ReviewService {
     /** Most reviews returned in one page. */
     public static final int MAX_PAGE_SIZE = 50;
 
+    /** The highest page number accepted, a guard against absurd offsets. */
     private static final int MAX_PAGE = 100_000;
 
+    /** The reviews collection. */
     private final ReviewDao reviews;
+    /** The users collection. */
     private final UserDao users;
+    /** The games collection. */
     private final GameDao games;
+    /** Runs the changes that touch several documents. */
     private final TransactionRunner transactions;
+    /** The clock changes are dated with. */
     private final Clock clock;
 
     /**

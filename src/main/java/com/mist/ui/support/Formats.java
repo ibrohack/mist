@@ -24,6 +24,7 @@ public final class Formats {
     /** The currency every price in MIST is in. */
     private static final Currency EURO = Currency.getInstance("EUR");
 
+    /** Not instantiable: a holder of formatters. */
     private Formats() {
     }
 

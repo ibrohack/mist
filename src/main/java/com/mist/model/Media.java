@@ -32,20 +32,35 @@ public class Media {
     /** Image formats accepted, which are those JavaFX can show. */
     public static final Set<String> CONTENT_TYPES = Set.of("image/png", "image/jpeg", "image/gif");
 
+    /** The document id. */
     @Id
     @ObjectIdGenerator
     private ObjectId id;
 
+    /** The image type: PNG, JPEG or GIF. */
     private String contentType;
+    /** The image bytes. */
     private byte[] data;
+    /** The name of the uploaded file. */
     private String fileName;
+    /** The user who uploaded it. */
     private ObjectId ownerId;
+    /** When it was uploaded. */
     private Instant createdAt;
 
     /** Used by Hibernate. */
     protected Media() {
     }
 
+    /**
+     * Creates an image document.
+     *
+     * @param contentType the image type
+     * @param data        the bytes
+     * @param fileName    the uploaded file name
+     * @param ownerId     the uploader
+     * @param createdAt   when it was uploaded
+     */
     private Media(String contentType, byte[] data, String fileName, ObjectId ownerId, Instant createdAt) {
         this.contentType = contentType;
         this.data = data;

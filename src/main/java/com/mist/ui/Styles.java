@@ -22,20 +22,27 @@ import java.util.stream.IntStream;
  */
 public final class Styles {
 
+    /** The styling log. */
     private static final Logger LOG = LoggerFactory.getLogger(Styles.class);
 
+    /** The brand theme, dark by default. */
     private static final String THEME = "css/mist-theme.css";
     /** Redefines the brand tokens for the light theme; appended after {@link #THEME}. */
     private static final String LIGHT_THEME = "css/mist-theme-light.css";
+    /** The stylesheet Maven generates for the static TailwindFX utilities. */
     private static final String TAILWIND_GENERATED = "/css/tailwindfx-generated.css";
+    /** The Space Grotesk fonts. */
     private static final List<String> FONTS = List.of(
             "fonts/SpaceGrotesk-Regular.ttf",
             "fonts/SpaceGrotesk-Medium.ttf",
             "fonts/SpaceGrotesk-Bold.ttf");
+    /** The sizes of the launcher icons. */
     private static final int[] ICON_SIZES = {16, 32, 48, 64, 256};
 
+    /** Whether the fonts are loaded already. */
     private static boolean fontsLoaded;
 
+    /** Not instantiable: a holder of the styling facade. */
     private Styles() {
     }
 
@@ -90,6 +97,7 @@ public final class Styles {
                 .toList();
     }
 
+    /** Loads the brand fonts once. */
     private static void loadFonts() {
         if (fontsLoaded) {
             return;
@@ -102,6 +110,12 @@ public final class Styles {
         fontsLoaded = true;
     }
 
+    /**
+     * Finds a UI resource.
+     *
+     * @param path the path relative to {@code com/mist/ui/}
+     * @return its URL
+     */
     private static URL resource(String path) {
         return Objects.requireNonNull(Styles.class.getResource(path), () -> "Missing UI resource com/mist/ui/" + path);
     }

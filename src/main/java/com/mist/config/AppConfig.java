@@ -20,17 +20,31 @@ import java.util.Properties;
  */
 public final class AppConfig {
 
+    /** The classpath resource holding the defaults. */
     private static final String RESOURCE = "/mist.properties";
+    /** Key of the MongoDB connection string. */
     private static final String MONGO_URI = "mist.mongo.uri";
+    /** Key of the database name. */
     private static final String MONGO_DATABASE = "mist.mongo.database";
     /** Optional; {@code true} unless set to {@code false}. */
     private static final String SEED_DEMO = "mist.seed.demo";
+    /** The keys an environment variable or a system property can override. */
     private static final List<String> KEYS = List.of(MONGO_URI, MONGO_DATABASE, SEED_DEMO);
 
+    /** The MongoDB connection string. */
     private final String mongoUri;
+    /** The name of the database MIST uses. */
     private final String mongoDatabase;
+    /** Whether an empty database gets the demo data. */
     private final boolean seedDemoData;
 
+    /**
+     * Creates the settings.
+     *
+     * @param mongoUri      the MongoDB connection string
+     * @param mongoDatabase the database name
+     * @param seedDemoData  whether to seed demo data into an empty database
+     */
     private AppConfig(String mongoUri, String mongoDatabase, boolean seedDemoData) {
         this.mongoUri = mongoUri;
         this.mongoDatabase = mongoDatabase;
@@ -108,6 +122,12 @@ public final class AppConfig {
         return seedDemoData;
     }
 
+    /**
+     * Reads {@code mist.properties} from the classpath.
+     *
+     * @return the default settings
+     * @throws IllegalStateException if the file is missing
+     */
     private static Properties readDefaults() {
         Properties properties = new Properties();
         try (InputStream in = AppConfig.class.getResourceAsStream(RESOURCE)) {
@@ -121,12 +141,27 @@ public final class AppConfig {
         return properties;
     }
 
+    /**
+     * Replaces a setting with a non-blank override.
+     *
+     * @param properties the settings
+     * @param key        the setting
+     * @param value      the override, possibly blank
+     */
     private static void override(Properties properties, String key, String value) {
         if (value != null && !value.isBlank()) {
             properties.setProperty(key, value);
         }
     }
 
+    /**
+     * Reads a required setting.
+     *
+     * @param properties the settings
+     * @param key        the setting
+     * @return its value without surrounding spaces
+     * @throws IllegalStateException if it is missing or blank
+     */
     private static String require(Properties properties, String key) {
         String value = properties.getProperty(key);
         if (value == null || value.isBlank()) {

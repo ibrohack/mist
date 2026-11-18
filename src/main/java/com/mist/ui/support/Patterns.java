@@ -22,6 +22,7 @@ public final class Patterns {
     /** An IBAN shape, once spaces are removed; the service checks its checksum. */
     public static final Pattern IBAN = Pattern.compile("[A-Za-z]{2}[0-9]{2}[A-Za-z0-9]{11,30}");
 
+    /** Not instantiable: a holder of text formats. */
     private Patterns() {
     }
 }

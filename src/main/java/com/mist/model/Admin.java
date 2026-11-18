@@ -19,6 +19,15 @@ public class Admin extends User {
     protected Admin() {
     }
 
+    /**
+     * Creates an admin.
+     *
+     * @param firstName    the first name
+     * @param lastName     the last name
+     * @param email        the email
+     * @param passwordHash the Argon2id hash
+     * @param createdAt    when the account was created
+     */
     private Admin(String firstName, String lastName, String email, String passwordHash, Instant createdAt) {
         super(firstName, lastName, email, passwordHash, null, null, createdAt);
     }

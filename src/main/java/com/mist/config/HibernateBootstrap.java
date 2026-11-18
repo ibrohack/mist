@@ -18,10 +18,12 @@ import java.util.Collection;
  */
 public final class HibernateBootstrap {
 
+    /** The name of the MongoDB extension's dialect. */
     private static final String MONGO_DIALECT = "MongoDB";
     /** Required by the extension; {@code MQL} is its only supported value. */
     private static final String NULL_SEMANTICS = "com.mongodb.hibernate.semantics.nulls";
 
+    /** Not instantiable: a holder of the bootstrap helper. */
     private HibernateBootstrap() {
     }
 

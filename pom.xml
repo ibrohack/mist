@@ -255,10 +255,21 @@
         </configuration>
       </plugin>
 
+      <!-- ./mvnw javadoc:javadoc documents every member, private ones included, and fails on any missing comment,
+           so the API documentation stays complete (DIN IL3.1). -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${maven-javadoc-plugin.version}</version>
+        <configuration>
+          <show>private</show>
+          <doclint>all</doclint>
+          <failOnWarnings>true</failOnWarnings>
+          <additionalOptions>
+            <additionalOption>-Xmaxwarns</additionalOption>
+            <additionalOption>10000</additionalOption>
+          </additionalOptions>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -33,6 +33,11 @@ public final class ErrorReporter {
     /** Ends the session with a message, when the account was deactivated meanwhile. */
     private Consumer<String> accountClosed = key -> { };
 
+    /** Creates the reporter of the main window; the session end is wired later by the navigator. */
+    public ErrorReporter() {
+        // Nothing to set up.
+    }
+
     /**
      * Sets what ends the session when a service reports that the account was deactivated.
      *

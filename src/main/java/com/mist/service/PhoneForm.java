@@ -33,6 +33,12 @@ public record PhoneForm(String countryCode, String number) {
         return form == null ? null : form.toPhone();
     }
 
+    /**
+     * Tells whether a text is empty.
+     *
+     * @param value the text, possibly {@code null}
+     * @return {@code true} for {@code null} or blank
+     */
     private static boolean isBlank(String value) {
         return value == null || value.isBlank();
     }

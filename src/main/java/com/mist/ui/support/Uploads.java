@@ -24,6 +24,7 @@ public final class Uploads {
     private static final Map<String, String> TYPES = Map.of(
             "png", "image/png", "jpg", "image/jpeg", "jpeg", "image/jpeg", "gif", "image/gif");
 
+    /** Not instantiable: a holder of upload helpers. */
     private Uploads() {
     }
 
