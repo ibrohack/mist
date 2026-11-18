@@ -15,13 +15,18 @@ import javafx.scene.control.TextField;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import com.mist.dao.DaoKeys;
+import com.mist.exception.InvalidDocumentException;
+import com.mist.model.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * The developer dashboard (STUDIO-1 to STUDIO-3, STUDIO-5, STUDIO-6), its editable price column and its header link.
+ * The developer dashboard (STUDIO-1 to STUDIO-3, STUDIO-5, STUDIO-6), its editable price column, the new game
+ * dialog (NEW-1, NEW-2), its header link, and what the user sees when the database fails or refuses a value.
  */
 class StudioTest extends MistUiTest {
 
@@ -139,6 +144,63 @@ class StudioTest extends MistUiTest {
         loginAs(DemoData.PLAYER_EMAIL);
 
         assertFalse(visible("studioLink"));
+    }
+
+    @Test
+    void aDatabaseFailureWhileSavingAPricePutsTheOldOneBack() throws Exception {
+        loginAs(DemoData.DEVELOPER_EMAIL);
+        db.failNextCall();
+
+        editPrice("Grand Theft Auto IV", "17,50");
+
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        assertEquals(new BigDecimal("19.99"), db.gameByName("Grand Theft Auto IV").getPrice());
+        assertEquals(new BigDecimal("19.99"), row("Grand Theft Auto IV").getPrice());
+    }
+
+    @Test
+    void aPriceTheDatabaseRefusesIsAWarningWithoutRetry() throws Exception {
+        loginAs(DemoData.DEVELOPER_EMAIL);
+        db.failNextCall(new InvalidDocumentException(DaoKeys.INVALID_DOCUMENT));
+
+        editPrice("Grand Theft Auto IV", "17,50");
+
+        assertEquals(msg(DaoKeys.INVALID_DOCUMENT), dialogMessage());
+        assertFalse(visible("dialogRetry"));
+        assertEquals(new BigDecimal("19.99"), db.gameByName("Grand Theft Auto IV").getPrice());
+    }
+
+    @Test
+    void aDatabaseFailureWhileLoadingTheDashboardOffersARetry() throws Exception {
+        User developer = backend.services().auth().login(DemoData.DEVELOPER_EMAIL, DemoData.PASSWORD.toCharArray());
+        db.failNextCall();
+
+        robot.interact(() -> {
+            context.session().start(developer);
+            navigator.home();
+        });
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        assertTrue(table().getItems().isEmpty());
+        click("dialogRetry");
+
+        assertEquals(3, table().getItems().size());
+    }
+
+    @Test
+    void aDatabaseFailureWhileCreatingAGameOffersARetry() throws Exception {
+        loginAs(DemoData.DEVELOPER_EMAIL);
+        click("newGameButton");
+        type("nameField", "Hollow Echo");
+        type("priceField", "12,99");
+        db.failNextCall();
+
+        click("dialogConfirm");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        assertNull(db.gameByName("Hollow Echo"));
+        click("dialogRetry");
+
+        assertEquals(View.GAME_EDITOR, navigator.current());
+        assertEquals(GameStatus.DRAFT, db.gameByName("Hollow Echo").getStatus());
     }
 
     /**

@@ -15,6 +15,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
+import com.mist.dao.DaoKeys;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -133,6 +134,21 @@ class GameTest extends MistUiTest {
 
         assertEquals(msg(ServiceKeys.GAME_NOT_FOUND), dialogMessage());
         assertEquals(View.STORE, navigator.current());
+    }
+
+    @Test
+    void aDatabaseFailureWhileAddingToTheCartOffersARetry() throws Exception {
+        loginAs(DemoData.PLAYER_EMAIL);
+        openGame("Tony Hawk's Pro Skater 2");
+        db.failNextCall();
+
+        click("addToCartButton");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        click("dialogRetry");
+
+        assertTrue(visible("goToCartButton"));
+        Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
+        assertTrue(lucia.getCartGameIds().contains(db.gameByName("Tony Hawk's Pro Skater 2").getId()));
     }
 
     /**
