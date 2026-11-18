@@ -1,5 +1,6 @@
 package com.mist.ui;
 
+import com.mist.model.Role;
 import com.mist.model.Theme;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -131,11 +132,11 @@ public final class Navigator {
         show(View.LOGIN, noticeKey == null ? null : new LoginNotice(null, noticeKey, false));
     }
 
-    /** Opens the shell of a session that just started, on its first screen. */
+    /** Opens the shell of a session that just started, on the first screen of the user's role. */
     public void home() {
         history.clear();
         current = null;
-        show(View.PROFILE);
+        show(context.session().hasRole(Role.ADMIN) ? View.ADMIN_LOG : View.PROFILE);
     }
 
     /**

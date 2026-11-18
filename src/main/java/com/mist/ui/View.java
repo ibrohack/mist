@@ -26,7 +26,10 @@ public enum View {
     REGISTER("view/register.fxml", Placement.WINDOW),
 
     /** The user's profile: personal data, password, avatar, card or studio, and deactivation. */
-    PROFILE("view/profile.fxml", Placement.SHELL);
+    PROFILE("view/profile.fxml", Placement.SHELL),
+
+    /** The admins' viewer of the database operation log. */
+    ADMIN_LOG("view/admin-log.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {

@@ -2,6 +2,7 @@ package com.mist.ui.controller;
 
 import com.mist.model.Language;
 import com.mist.model.Player;
+import com.mist.model.Role;
 import com.mist.model.Theme;
 import com.mist.model.User;
 import com.mist.ui.I18n;
@@ -85,6 +86,9 @@ public class ShellController implements ShellHost, NavigationAware {
     /** Switches to the light theme. */
     @FXML
     private RadioMenuItem lightItem;
+    /** Opens the operation log, for admins. */
+    @FXML
+    private MenuItem logItem;
     /** Ends the session. */
     @FXML
     private MenuItem logoutItem;
@@ -155,6 +159,14 @@ public class ShellController implements ShellHost, NavigationAware {
         context.navigator().show(View.PROFILE);
     }
 
+    /** SHELL-6: opens the operation log, for admins. */
+    @FXML
+    private void onOperationLog() {
+        if (context.session().hasRole(Role.ADMIN)) {
+            context.navigator().show(View.ADMIN_LOG);
+        }
+    }
+
     /** SHELL-7: ends the session and returns to the login screen. */
     @FXML
     private void onLogout() {
@@ -189,6 +201,7 @@ public class ShellController implements ShellHost, NavigationAware {
     private void showUser() {
         User user = context.session().user().orElse(null);
         profileItem.setVisible(user != null);
+        logItem.setVisible(context.session().hasRole(Role.ADMIN));
         if (user == null) {
             userMenu.setText(I18n.text("shell.guest"));
             avatarInitials.setText("?");
