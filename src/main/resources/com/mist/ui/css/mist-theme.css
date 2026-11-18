@@ -226,3 +226,76 @@
 .dialog-pane.mist-dialog .button {
   -fx-padding: 8 16;
 }
+
+/* Shell: header bar, user menu and avatar (docs/ui-design.md, "Shell"). */
+.mist-topbar {
+  -fx-background-color: -mist-surface;
+  -fx-border-color: transparent transparent -mist-border transparent;
+  -fx-min-height: 64px;
+  -fx-pref-height: 64px;
+}
+
+.mist-topbar-wordmark {
+  -fx-font-size: 22px;
+  -fx-font-weight: 700;
+}
+
+.menu-button,
+.mist-user-menu {
+  -fx-background-color: transparent;
+  -fx-text-fill: -mist-fog;
+  -fx-padding: 4 8;
+}
+
+.menu-button > .label {
+  -fx-text-fill: -mist-fog;
+}
+
+.menu-button:hover,
+.menu-button:showing {
+  -fx-background-color: -mist-void;
+  -fx-background-radius: 3;
+}
+
+.menu-button > .arrow-button > .arrow {
+  -fx-background-color: -mist-ash;
+}
+
+.context-menu {
+  -fx-background-color: -mist-surface;
+  -fx-border-color: -mist-border;
+  -fx-background-radius: 3;
+  -fx-border-radius: 3;
+}
+
+.menu-item > .label {
+  -fx-text-fill: -mist-fog;
+}
+
+.menu-item:focused {
+  -fx-background-color: -mist-void;
+}
+
+.menu-item:focused > .label {
+  -fx-text-fill: -mist-acid;
+}
+
+.menu > .right-container > .arrow,
+.radio-menu-item:checked > .left-container > .radio {
+  -fx-background-color: -mist-acid;
+}
+
+.separator-menu-item > .line {
+  -fx-border-color: -mist-border transparent transparent transparent;
+}
+
+.mist-avatar {
+  -fx-fill: -mist-track;
+  -fx-stroke: -mist-border;
+}
+
+.mist-avatar-initials {
+  -fx-text-fill: -mist-fog;
+  -fx-font-size: 12px;
+  -fx-font-weight: 700;
+}

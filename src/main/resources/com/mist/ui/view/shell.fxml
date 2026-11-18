@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
+
+<!-- Shell: the header of a session (brand, navigation, user menu) around the in-shell screens.
+     See docs/ui-design.md, "Shell". -->
+<BorderPane fx:id="root" prefWidth="1280" prefHeight="800" styleClass="mist-bg-void"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mist.ui.controller.ShellController">
+  <fx:define>
+    <ToggleGroup fx:id="languageGroup"/>
+    <ToggleGroup fx:id="themeGroup"/>
+  </fx:define>
+
+  <top>
+    <HBox fx:id="topBar" alignment="CENTER_LEFT" styleClass="mist-topbar,px-6,gap-[24px]">
+      <HBox fx:id="brand" alignment="CENTER_LEFT" styleClass="gap-[10px]">
+        <ImageView fx:id="logo" fitWidth="32" fitHeight="32" preserveRatio="true">
+          <Image url="@../images/mist-icon-64.png"/>
+        </ImageView>
+        <Label fx:id="wordmark" text="%app.title" styleClass="mist-text-fog,mist-topbar-wordmark"/>
+      </HBox>
+      <!-- Navigation links, filled by role. -->
+      <HBox fx:id="navBar" alignment="CENTER_LEFT" styleClass="gap-[4px]"/>
+      <Region HBox.hgrow="ALWAYS"/>
+      <MenuButton fx:id="userMenu" styleClass="mist-user-menu" mnemonicParsing="false">
+        <graphic>
+          <StackPane fx:id="avatarBox">
+            <Circle fx:id="avatarCircle" radius="16" styleClass="mist-avatar"/>
+            <Label fx:id="avatarInitials" styleClass="mist-avatar-initials"/>
+          </StackPane>
+        </graphic>
+        <items>
+          <Menu fx:id="languageMenu" text="%menu.language">
+            <items>
+              <RadioMenuItem fx:id="spanishItem" text="%menu.language.es" toggleGroup="$languageGroup"
+                             onAction="#onLanguage"/>
+              <RadioMenuItem fx:id="englishItem" text="%menu.language.en" toggleGroup="$languageGroup"
+                             onAction="#onLanguage"/>
+            </items>
+          </Menu>
+          <Menu fx:id="themeMenu" text="%menu.theme">
+            <items>
+              <RadioMenuItem fx:id="darkItem" text="%menu.theme.dark" toggleGroup="$themeGroup"
+                             onAction="#onTheme"/>
+              <RadioMenuItem fx:id="lightItem" text="%menu.theme.light" toggleGroup="$themeGroup"
+                             onAction="#onTheme"/>
+            </items>
+          </Menu>
+        </items>
+      </MenuButton>
+    </HBox>
+  </top>
+
+  <center>
+    <StackPane fx:id="content" styleClass="mist-bg-void"/>
+  </center>
+</BorderPane>

@@ -1,5 +1,6 @@
 package com.mist.ui;
 
+import com.mist.model.Theme;
 import io.github.yasmramos.tailwindfx.TwFXML;
 import io.github.yasmramos.tailwindfx.TwInstall;
 import javafx.scene.Parent;
@@ -24,6 +25,8 @@ public final class Styles {
     private static final Logger LOG = LoggerFactory.getLogger(Styles.class);
 
     private static final String THEME = "css/mist-theme.css";
+    /** Redefines the brand tokens for the light theme; appended after {@link #THEME}. */
+    private static final String LIGHT_THEME = "css/mist-theme-light.css";
     private static final String TAILWIND_GENERATED = "/css/tailwindfx-generated.css";
     private static final List<String> FONTS = List.of(
             "fonts/SpaceGrotesk-Regular.ttf",
@@ -49,6 +52,22 @@ public final class Styles {
         loadFonts();
         TwInstall.installGenerated(scene, TAILWIND_GENERATED);
         scene.getStylesheets().add(resource(THEME).toExternalForm());
+    }
+
+    /**
+     * Switches a scene between the dark and the light theme (behavior C-5 of {@code docs/ui-design.md}).
+     *
+     * <p>The light stylesheet only redefines the brand tokens, so it goes last and every view follows.</p>
+     *
+     * @param scene the scene, already styled by {@link #install(Scene)}
+     * @param theme the theme to show
+     */
+    public static void applyTheme(Scene scene, Theme theme) {
+        String light = resource(LIGHT_THEME).toExternalForm();
+        scene.getStylesheets().remove(light);
+        if (theme == Theme.LIGHT) {
+            scene.getStylesheets().add(light);
+        }
     }
 
     /**

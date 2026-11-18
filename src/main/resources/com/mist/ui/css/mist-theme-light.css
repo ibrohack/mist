@@ -1,0 +1,25 @@
+/* MIST light theme: redefines the brand tokens; appended after mist-theme.css by Styles.applyTheme. */
+.root {
+  -mist-void: #e4e8e0;
+  -mist-surface: #f2f5ee;
+  -mist-fog: #0a0c0b;
+  -mist-ash: #686e69;
+  -mist-border: #c9cec5;
+  -mist-track: #d5dad1;
+  -mist-danger: #c62828;
+
+  -fx-base: #f2f5ee;
+  -fx-background: #e4e8e0;
+  -fx-control-inner-background: #f2f5ee;
+}
+
+/* Acid text is unreadable on a light background; acid fills keep their dark text. */
+.mist-text-acid,
+.mist-message-ok,
+.menu-item:focused > .label {
+  -fx-text-fill: #3f6600;
+}
+
+.mist-ring {
+  -fx-opacity: 0.35;
+}

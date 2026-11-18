@@ -5,6 +5,7 @@ import com.mist.fake.FakeDatabase;
 import com.mist.fake.MutableClock;
 import com.mist.fake.StubFilePicker;
 import com.mist.logging.DbOperationLogger;
+import com.mist.model.User;
 import com.mist.service.DemoData;
 import com.mist.ui.support.Dialogs;
 import javafx.scene.Node;
@@ -91,6 +92,9 @@ public abstract class MistUiTest {
         files = new StubFilePicker();
         prepare();
         context = new UiContext(backend, files, Runnable::run);
+        if (!db.isOffline()) {
+            context.connect();
+        }
         navigator = new Navigator(stage, context);
         stage.setWidth(1280);
         stage.setHeight(800);
@@ -125,6 +129,22 @@ public abstract class MistUiTest {
         });
         I18n.use(I18n.DEFAULT_LOCALE);
         DbOperationLogger.clearUser();
+    }
+
+    /**
+     * Starts a session for a demo account without going through the login screen, and opens its home screen.
+     *
+     * @param email the account's email; every demo account uses {@link DemoData#PASSWORD}
+     * @return the logged-in user
+     * @throws Exception if the login fails
+     */
+    protected User loginAs(String email) throws Exception {
+        User user = backend.services().auth().login(email, DemoData.PASSWORD.toCharArray());
+        robot.interact(() -> {
+            context.session().start(user);
+            navigator.home();
+        });
+        return user;
     }
 
     /**

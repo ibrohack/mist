@@ -11,7 +11,10 @@ import java.util.Locale;
 public enum View {
 
     /** First screen: the brand art, the tagline and a loading bar while MIST connects. */
-    SPLASH("view/splash.fxml", Placement.WINDOW);
+    SPLASH("view/splash.fxml", Placement.WINDOW),
+
+    /** The frame of a session: the header with the user menu, around the in-shell screens. */
+    SHELL("view/shell.fxml", Placement.WINDOW);
 
     /** Where a screen is shown. */
     public enum Placement {
