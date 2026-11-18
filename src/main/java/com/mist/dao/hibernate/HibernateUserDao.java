@@ -2,8 +2,6 @@ package com.mist.dao.hibernate;
 
 import com.mist.dao.UserDao;
 import com.mist.exception.DataAccessException;
-import com.mist.model.Developer;
-import com.mist.model.Player;
 import com.mist.model.User;
 import org.bson.types.ObjectId;
 
@@ -54,25 +52,36 @@ public class HibernateUserDao extends HibernateDao implements UserDao {
 
     @Override
     public boolean existsByEmail(String email) throws DataAccessException {
-        return findByEmail(email).isPresent();
+        Objects.requireNonNull(email, "email");
+        return exists("email=" + email, "select id from User where email = :value", email);
     }
 
     @Override
     public boolean existsByNickname(String nickname) throws DataAccessException {
         Objects.requireNonNull(nickname, "nickname");
-        return execute("FIND", "nickname=" + nickname, session -> !session
-                .createSelectionQuery("from Player where nickname = :nickname", Player.class)
-                .setParameter("nickname", nickname)
-                .setMaxResults(1)
-                .getResultList().isEmpty());
+        return exists("nickname=" + nickname, "select id from Player where nickname = :value", nickname);
     }
 
     @Override
     public boolean existsByStudioName(String studioName) throws DataAccessException {
         Objects.requireNonNull(studioName, "studioName");
-        return execute("FIND", "studioName=" + studioName, session -> !session
-                .createSelectionQuery("from Developer where studioName = :studioName", Developer.class)
-                .setParameter("studioName", studioName)
+        return exists("studioName=" + studioName, "select id from Developer where studioName = :value", studioName);
+    }
+
+    /**
+     * Tells whether a query finds a user, reading only the {@code _id} of at most one document instead of the whole
+     * account.
+     *
+     * @param details what the operation log shows
+     * @param query   an HQL query selecting {@code id}, with one parameter named {@code value}
+     * @param value   the value looked for
+     * @return {@code true} if a user matches
+     * @throws DataAccessException if the database fails
+     */
+    private boolean exists(String details, String query, String value) throws DataAccessException {
+        return execute("EXISTS", details, session -> !session
+                .createSelectionQuery(query, ObjectId.class)
+                .setParameter("value", value)
                 .setMaxResults(1)
                 .getResultList().isEmpty());
     }
