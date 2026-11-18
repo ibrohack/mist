@@ -71,6 +71,16 @@ public final class FakeGameDao implements GameDao {
     }
 
     @Override
+    public List<Game> findFreePublished(int limit) throws DataAccessException {
+        db.check();
+        return published()
+                .filter(Game::isFree)
+                .sorted(Comparator.comparing(Game::getReleaseDate, Comparator.nullsFirst(Instant::compareTo)).reversed())
+                .limit(limit)
+                .toList();
+    }
+
+    @Override
     public List<Game> searchPublished(String text, int limit) throws DataAccessException {
         String query = text == null ? "" : text.strip().toLowerCase(Locale.ROOT);
         if (query.isEmpty()) {

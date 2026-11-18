@@ -77,6 +77,17 @@ public class StoreService {
     }
 
     /**
+     * Lists the free games on sale, for the "Free" tab.
+     *
+     * @param limit how many games to show, 1 to {@value #MAX_LIST_SIZE}
+     * @return free published games, latest release first
+     * @throws MistException if the limit is out of range or the database fails
+     */
+    public List<Game> freeGames(int limit) throws MistException {
+        return games.findFreePublished(checkedLimit(limit));
+    }
+
+    /**
      * Lists the best sellers, for "Top sellers".
      *
      * @param limit how many games to show, 1 to {@value #MAX_LIST_SIZE}

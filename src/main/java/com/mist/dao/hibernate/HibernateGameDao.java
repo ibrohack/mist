@@ -11,6 +11,7 @@ import com.mongodb.client.model.Sorts;
 import org.bson.types.ObjectId;
 import org.hibernate.Session;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -86,6 +87,18 @@ public class HibernateGameDao extends HibernateDao implements GameDao {
         return execute("FIND", "status=PUBLISHED, top sellers, limit=" + limit, session -> session
                 .createSelectionQuery("from Game where status = :status order by stats.unitsSold desc", Game.class)
                 .setParameter(STATUS, GameStatus.PUBLISHED)
+                .setMaxResults(positive(limit))
+                .getResultList());
+    }
+
+    @Override
+    public List<Game> findFreePublished(int limit) throws DataAccessException {
+        // MongoDB compares decimals by value, so the stored 0.00 matches zero.
+        return execute("FIND", "status=PUBLISHED, price=0, limit=" + limit, session -> session
+                .createSelectionQuery("from Game where status = :status and price = :free order by releaseDate desc",
+                        Game.class)
+                .setParameter(STATUS, GameStatus.PUBLISHED)
+                .setParameter("free", BigDecimal.ZERO)
                 .setMaxResults(positive(limit))
                 .getResultList());
     }

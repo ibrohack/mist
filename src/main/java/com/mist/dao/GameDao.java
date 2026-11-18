@@ -61,6 +61,15 @@ public interface GameDao {
     List<Game> findTopSellers(int limit) throws DataAccessException;
 
     /**
+     * Lists the published games that cost nothing, for the store's "Free" tab.
+     *
+     * @param limit how many games to return at most
+     * @return free published games, latest release date first
+     * @throws DataAccessException if the database fails
+     */
+    List<Game> findFreePublished(int limit) throws DataAccessException;
+
+    /**
      * Searches the published games by name, ignoring case. The text is matched literally, not as a pattern.
      *
      * @param text  the text the name must contain
