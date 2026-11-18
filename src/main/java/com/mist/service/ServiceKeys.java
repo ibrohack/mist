@@ -27,6 +27,9 @@ public final class ServiceKeys {
     public static final String USER_NOT_PLAYER = "service.user.notPlayer";
     /** Only a developer may do this. */
     public static final String USER_NOT_DEVELOPER = "service.user.notDeveloper";
+
+    /** The account is not an admin. */
+    public static final String USER_NOT_ADMIN = "service.user.notAdmin";
     /** Another account already uses the email address. */
     public static final String USER_EMAIL_TAKEN = "service.user.emailTaken";
     /** Another player already uses the nickname. */
@@ -56,6 +59,9 @@ public final class ServiceKeys {
 
     /** The player already reviewed the game. */
     public static final String REVIEW_ALREADY_EXISTS = "service.review.alreadyExists";
+
+    /** The database operation log could not be read. */
+    public static final String LOG_UNREADABLE = "service.log.unreadable";
 
     private ServiceKeys() {
     }

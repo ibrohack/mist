@@ -2,6 +2,7 @@ package com.mist.ui;
 
 import com.mist.service.AuthService;
 import com.mist.service.LibraryService;
+import com.mist.service.LogService;
 import com.mist.service.MediaService;
 import com.mist.service.PublishingService;
 import com.mist.service.ReviewService;
@@ -20,9 +21,11 @@ import java.util.Objects;
  * @param reviews    ratings and reviews
  * @param publishing developers' games and sales
  * @param media      covers, screenshots and avatars
+ * @param logs       the database operation log, for admins
  */
 public record AppServices(AuthService auth, UserService users, StoreService store, LibraryService library,
-                          ReviewService reviews, PublishingService publishing, MediaService media) {
+                          ReviewService reviews, PublishingService publishing, MediaService media,
+                          LogService logs) {
 
     /**
      * Checks that every service is present.
@@ -37,5 +40,6 @@ public record AppServices(AuthService auth, UserService users, StoreService stor
         Objects.requireNonNull(reviews, "reviews");
         Objects.requireNonNull(publishing, "publishing");
         Objects.requireNonNull(media, "media");
+        Objects.requireNonNull(logs, "logs");
     }
 }

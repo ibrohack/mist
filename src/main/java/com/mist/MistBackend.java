@@ -22,7 +22,7 @@ final class MistBackend implements Backend {
             context = MistContext.open(AppConfig.load());
         }
         return new AppServices(context.auth(), context.users(), context.store(), context.library(),
-                context.reviews(), context.publishing(), context.media());
+                context.reviews(), context.publishing(), context.media(), context.logs());
     }
 
     @Override

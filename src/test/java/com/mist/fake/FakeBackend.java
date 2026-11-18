@@ -4,6 +4,7 @@ import com.mist.dao.DaoKeys;
 import com.mist.exception.DataAccessException;
 import com.mist.service.AuthService;
 import com.mist.service.LibraryService;
+import com.mist.service.LogService;
 import com.mist.service.MediaService;
 import com.mist.service.PublishingService;
 import com.mist.service.ReviewService;
@@ -12,6 +13,10 @@ import com.mist.service.UserService;
 import com.mist.ui.AppServices;
 import com.mist.ui.Backend;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Clock;
 
 /**
@@ -36,6 +41,8 @@ public final class FakeBackend implements Backend {
     private final FakeMediaDao media;
     /** The transaction runner. */
     private final FakeTransactions transactions;
+    /** The folder the operation log is read from, a fresh temporary folder. */
+    private final Path logDirectory;
     /** The services, built on the DAOs. */
     private final AppServices services;
 
@@ -53,6 +60,11 @@ public final class FakeBackend implements Backend {
         this.reviews = new FakeReviewDao(db);
         this.media = new FakeMediaDao(db);
         this.transactions = new FakeTransactions(db);
+        try {
+            this.logDirectory = Files.createTempDirectory("mist-logs");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         this.services = new AppServices(
                 new AuthService(users, clock),
                 new UserService(users, games, media, transactions, clock),
@@ -60,7 +72,8 @@ public final class FakeBackend implements Backend {
                 new LibraryService(users, games, orders, transactions, clock),
                 new ReviewService(reviews, users, games, transactions, clock),
                 new PublishingService(games, users, media, transactions, clock),
-                new MediaService(media));
+                new MediaService(media),
+                new LogService(users, logDirectory));
     }
 
     @Override
@@ -83,6 +96,15 @@ public final class FakeBackend implements Backend {
      */
     public AppServices services() {
         return services;
+    }
+
+    /**
+     * Returns the folder the operation log viewer reads, where tests write sample log files.
+     *
+     * @return the log folder
+     */
+    public Path logDirectory() {
+        return logDirectory;
     }
 
     /**

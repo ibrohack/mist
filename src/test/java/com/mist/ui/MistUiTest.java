@@ -24,9 +24,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.testfx.api.FxRobot;
 import org.testfx.api.FxToolkit;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Base of the UI tests: MIST's real views, controllers and services on an in-memory data layer.
@@ -117,9 +122,13 @@ public abstract class MistUiTest {
         navigator.show(View.SPLASH);
     }
 
-    /** Closes the dialogs and windows a test left open and restores the language. */
+    /**
+     * Closes the dialogs and windows a test left open, restores the language and deletes the test's log folder.
+     *
+     * @throws IOException if the log folder cannot be deleted
+     */
     @AfterEach
-    void closeWindows() {
+    void closeWindows() throws IOException {
         robot.interact(() -> {
             for (Window window : List.copyOf(Window.getWindows())) {
                 if (window != stage) {
@@ -129,6 +138,11 @@ public abstract class MistUiTest {
         });
         I18n.use(I18n.DEFAULT_LOCALE);
         DbOperationLogger.clearUser();
+        try (Stream<Path> files = Files.walk(backend.logDirectory())) {
+            for (Path file : files.sorted(Comparator.reverseOrder()).toList()) {
+                Files.deleteIfExists(file);
+            }
+        }
     }
 
     /**

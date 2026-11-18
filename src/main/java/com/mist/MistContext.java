@@ -7,6 +7,7 @@ import com.mist.exception.MistException;
 import com.mist.service.AuthService;
 import com.mist.service.DemoData;
 import com.mist.service.LibraryService;
+import com.mist.service.LogService;
 import com.mist.service.MediaService;
 import com.mist.service.PublishingService;
 import com.mist.service.ReviewService;
@@ -16,6 +17,7 @@ import com.mist.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.time.Clock;
 import java.util.Objects;
 
@@ -29,6 +31,8 @@ import java.util.Objects;
 public final class MistContext implements AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MistContext.class);
+    /** The folder {@code logback.xml} writes the logs to; the operation log viewer reads it. */
+    private static final Path LOG_DIRECTORY = Path.of(System.getProperty("user.home"), ".mist", "logs");
 
     private final HibernateDataAccess data;
     private final AuthService auth;
@@ -38,6 +42,7 @@ public final class MistContext implements AutoCloseable {
     private final ReviewService reviews;
     private final PublishingService publishing;
     private final MediaService media;
+    private final LogService logs;
 
     private MistContext(HibernateDataAccess data, Clock clock) {
         this.data = data;
@@ -48,6 +53,7 @@ public final class MistContext implements AutoCloseable {
         this.reviews = new ReviewService(data.reviews(), data.users(), data.games(), data.transactions(), clock);
         this.publishing = new PublishingService(data.games(), data.users(), data.media(), data.transactions(), clock);
         this.media = new MediaService(data.media());
+        this.logs = new LogService(data.users(), LOG_DIRECTORY);
     }
 
     /**
@@ -167,6 +173,15 @@ public final class MistContext implements AutoCloseable {
      */
     public MediaService media() {
         return media;
+    }
+
+    /**
+     * Returns the admins' reader of the database operation log.
+     *
+     * @return the log service
+     */
+    public LogService logs() {
+        return logs;
     }
 
     /** Closes the data access layer and its connection. */
