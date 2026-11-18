@@ -63,7 +63,7 @@ public class GameCell extends ListCell<Game> {
         text.setAlignment(Pos.CENTER_LEFT);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        row = new HBox(14, frame, text, spacer, rating, price);
+        row = new HBox(16, frame, text, spacer, rating, price);
         row.setAlignment(Pos.CENTER_LEFT);
         price.setMinWidth(Region.USE_PREF_SIZE);
     }

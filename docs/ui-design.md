@@ -86,9 +86,18 @@ Space Grotesk (Regular, Medium, Bold), loaded by `Styles` from `com/mist/ui/font
 ### Shape, spacing and layout
 
 - Corners are 3 px everywhere (`mist-rounded`); avatars are circles.
-- Spacing follows a 4 px grid through TailwindFX utilities (`p-6` = 24 px, `gap-[16px]`).
+- Spacing follows a 4 px grid through TailwindFX utilities (`p-6` = 24 px, `gap-[16px]`). Screens use `p-8` and
+  `gap-[20px]` between blocks; a title and its caption are 6 px apart. Table cells are padded 10 x 12 px, list
+  rows 12 x 16 px.
 - The window is at least 1024 x 640; screens grow with it. Forms are at most 560 px wide and centered.
-- Selected list rows and the active navigation link get a 3 px acid left border (`mist-accent-left`).
+- Lists, tables and the help window fill the space they get; a screen whose blocks do not fit the window scrolls
+  as a whole. Filter bars wrap onto a second line instead of squeezing their fields. Buttons, prices and
+  navigation links keep their full text; long titles are the ones cut with an ellipsis.
+- Scroll bars are 12 px wide: an ash thumb on a track, lighter on hover and acid while dragged. They show only
+  when the content does not fit.
+- Selected list rows and the active navigation link get a 3 px acid left border (`mist-accent-left`); the row
+  with keyboard focus gets a 1 px one.
+- The help window is at least 560 x 400.
 
 ### Controls
 
@@ -392,10 +401,12 @@ Each editor has its own Save button (`<row>Save`) and Cancel button (`<row>Cance
 
 ### Operation log (admin)
 
-**Aspect.** A filter bar over a full-height table.
+**Aspect.** The title with the entry count and Refresh on its right, a filter bar that wraps on narrow windows,
+and a full-height table that scrolls. Details are in a fixed-width font.
 
 ```
-Day [2026-11-18 v]  User [________]  Operation [All v]  [x] Failed only   [Refresh]   312 of 1,204 entries
+Operation log                                                        312 of 1,204 entries   [Refresh]
+Day [2026-11-18 v]  User [________]  Operation [All v]  [x] Failed only
 +---------------------+------------------+-----------+-------------+-------------------------------+---------+
 | Time                | User             | Operation | Collection  | Details                       | Outcome |
 +---------------------+------------------+-----------+-------------+-------------------------------+---------+
@@ -530,7 +541,7 @@ terms check box with its link, and the checkout button.
 |---|---|---|
 | `cartList` | `ListView<Game>` with `CartCell` | Cover, name, price, a Remove button (`removeButton` in each row) |
 | `totalLabel` | `Label` | `cart.total` = "Total: {0}" |
-| `summaryList` | `VBox` of `Label` | One name per game |
+| `summaryList` | `VBox` of `Label` in a `ScrollPane` | One name per game; scrolls in a long cart so the total and Checkout stay visible |
 | `cardLabel` | `Label` | `cart.card` = "Charged to {0}" (brand and last digits) |
 | `termsCheck`, `termsLink` | `CheckBox`, `Hyperlink` | The checkout button is enabled only when checked and the cart has games |
 | `checkoutButton` | `Button` (primary) | |

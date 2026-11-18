@@ -29,6 +29,10 @@ public final class Navigator {
 
     /** The FXML of the help window. */
     private static final String HELP_VIEW = "view/help.fxml";
+    /** The smallest width of the help window, so the topics and the text both stay readable. */
+    private static final double HELP_MIN_WIDTH = 560;
+    /** The smallest height of the help window. */
+    private static final double HELP_MIN_HEIGHT = 400;
     /** Opens the help window. */
     private static final KeyCombination HELP_KEY = new KeyCodeCombination(KeyCode.F1);
 
@@ -168,6 +172,8 @@ public final class Navigator {
             helpStage.setTitle(I18n.text("help.title"));
             helpStage.getIcons().setAll(stage.getIcons());
             helpStage.setScene(scene);
+            helpStage.setMinWidth(HELP_MIN_WIDTH);
+            helpStage.setMinHeight(HELP_MIN_HEIGHT);
         }
         helpPanel.select(current == null ? View.SHELL : current);
         helpStage.show();

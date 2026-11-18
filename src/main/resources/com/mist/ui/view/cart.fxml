@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -40,12 +41,16 @@
   <VBox prefWidth="340" minWidth="300" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[14px]">
     <Label fx:id="totalLabel" styleClass="mist-subtitle"/>
     <Label text="%cart.summary" styleClass="mist-caption"/>
-    <VBox fx:id="summaryList" styleClass="gap-[4px]"/>
+    <!-- A long cart scrolls here, so the total and Checkout stay on screen. -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" styleClass="mist-summary-scroll">
+      <VBox fx:id="summaryList" styleClass="gap-[4px]"/>
+    </ScrollPane>
     <Label fx:id="cardLabel" styleClass="mist-caption" wrapText="true"/>
     <HBox alignment="CENTER_LEFT" styleClass="gap-[4px]">
       <CheckBox fx:id="termsCheck" text="%cart.accept"/>
       <Hyperlink fx:id="termsLink" text="%cart.terms" onAction="#onTerms"/>
     </HBox>
-    <Button fx:id="checkoutButton" text="%cart.checkout" maxWidth="Infinity" onAction="#onCheckout"/>
+    <Button fx:id="checkoutButton" text="%cart.checkout" maxWidth="Infinity" minHeight="-Infinity"
+            onAction="#onCheckout"/>
   </VBox>
 </HBox>

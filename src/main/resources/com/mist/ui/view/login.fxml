@@ -51,7 +51,7 @@
       <ToggleButton fx:id="enToggle" text="EN" toggleGroup="$languageGroup" styleClass="mist-toggle"
                     onAction="#onLanguage"/>
     </HBox>
-    <VBox styleClass="gap-[4px]">
+    <VBox styleClass="gap-[6px]">
       <Label fx:id="loginTitle" text="%login.title" styleClass="mist-title"/>
       <Label text="%login.subtitle" styleClass="mist-caption"/>
     </VBox>

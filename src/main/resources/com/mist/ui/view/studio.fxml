@@ -21,7 +21,7 @@
             fx:controller="com.mist.ui.controller.StudioController">
   <VBox styleClass="p-8,gap-[20px]">
     <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
-      <VBox styleClass="gap-[4px]">
+      <VBox styleClass="gap-[6px]">
         <Label fx:id="studioTitle" styleClass="mist-title"/>
         <Label text="%studio.subtitle" styleClass="mist-caption"/>
       </VBox>
@@ -33,15 +33,15 @@
 
     <!-- Summary cards -->
     <HBox styleClass="gap-[16px]">
-      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[4px]">
+      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[6px]">
         <Label text="%studio.revenue" styleClass="mist-caption"/>
         <Label fx:id="revenueLabel" styleClass="mist-stat"/>
       </VBox>
-      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[4px]">
+      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[6px]">
         <Label text="%studio.units" styleClass="mist-caption"/>
         <Label fx:id="unitsLabel" styleClass="mist-stat"/>
       </VBox>
-      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[4px]">
+      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[6px]">
         <Label text="%studio.published" styleClass="mist-caption"/>
         <Label fx:id="publishedLabel" styleClass="mist-stat"/>
       </VBox>

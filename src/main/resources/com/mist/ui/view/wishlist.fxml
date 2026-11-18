@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- Wishlist: the games the player wants, with Add to cart and Remove. See docs/ui-design.md, "Wishlist". -->
-<VBox styleClass="mist-bg-void,p-8,gap-[16px]"
+<VBox styleClass="mist-bg-void,p-8,gap-[20px]"
       xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.mist.ui.controller.WishlistController">
   <HBox alignment="CENTER_LEFT" styleClass="gap-[16px]">

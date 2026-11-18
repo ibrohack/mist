@@ -13,20 +13,20 @@
   <fx:define>
     <ToggleGroup fx:id="links"/>
   </fx:define>
-  <ToggleButton fx:id="storeLink" text="%nav.store" toggleGroup="$links" styleClass="mist-nav-link"
+  <ToggleButton fx:id="storeLink" text="%nav.store" toggleGroup="$links" styleClass="mist-nav-link" minWidth="-Infinity"
                 onAction="#onLink"/>
-  <ToggleButton fx:id="libraryLink" text="%nav.library" toggleGroup="$links" styleClass="mist-nav-link"
+  <ToggleButton fx:id="libraryLink" text="%nav.library" toggleGroup="$links" styleClass="mist-nav-link" minWidth="-Infinity"
                 onAction="#onLink"/>
-  <ToggleButton fx:id="wishlistLink" text="%nav.wishlist" toggleGroup="$links" styleClass="mist-nav-link"
+  <ToggleButton fx:id="wishlistLink" text="%nav.wishlist" toggleGroup="$links" styleClass="mist-nav-link" minWidth="-Infinity"
                 onAction="#onLink"/>
-  <ToggleButton fx:id="cartLink" text="%nav.cart" toggleGroup="$links" styleClass="mist-nav-link"
+  <ToggleButton fx:id="cartLink" text="%nav.cart" toggleGroup="$links" styleClass="mist-nav-link" minWidth="-Infinity"
                 contentDisplay="RIGHT" graphicTextGap="8" onAction="#onLink">
     <graphic>
       <Label fx:id="cartBadge" styleClass="mist-badge"/>
     </graphic>
   </ToggleButton>
-  <ToggleButton fx:id="studioLink" text="%nav.studio" toggleGroup="$links" styleClass="mist-nav-link"
+  <ToggleButton fx:id="studioLink" text="%nav.studio" toggleGroup="$links" styleClass="mist-nav-link" minWidth="-Infinity"
                 onAction="#onLink"/>
-  <ToggleButton fx:id="logLink" text="%nav.log" toggleGroup="$links" styleClass="mist-nav-link"
+  <ToggleButton fx:id="logLink" text="%nav.log" toggleGroup="$links" styleClass="mist-nav-link" minWidth="-Infinity"
                 onAction="#onLink"/>
 </HBox>
