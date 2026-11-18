@@ -184,6 +184,12 @@ public class GameEditorController implements NavigationAware {
     /** The achievements, editable in place. */
     @FXML
     private TableView<AchievementRow> achievementsTable;
+    /** The achievements table's context menu: add a row, remove the selected one (EDIT-3). */
+    @FXML
+    private ContextMenu achievementMenu;
+    /** Removes the selected achievement; disabled when no row is selected. */
+    @FXML
+    private MenuItem removeAchievementItem;
     /** The achievements' names, editable. */
     @FXML
     private TableColumn<AchievementRow, String> achievementNameColumn;
@@ -203,6 +209,9 @@ public class GameEditorController implements NavigationAware {
     /** Sets up the choices, the editable table, the tags and the checks of every field. */
     @FXML
     private void initialize() {
+        // EDIT-3: the context menu can only remove a row when one is selected.
+        achievementMenu.setOnShowing(event -> removeAchievementItem.setDisable(
+                achievementsTable.getSelectionModel().getSelectedItem() == null));
         pegiBox.getItems().setAll(Pegi.values());
         pegiBox.setConverter(new StringConverter<>() {
             @Override

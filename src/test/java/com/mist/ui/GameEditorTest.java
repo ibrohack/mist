@@ -32,6 +32,8 @@ import java.util.List;
 import com.mist.dao.DaoKeys;
 import com.mist.exception.InvalidDocumentException;
 import java.nio.file.Files;
+import javafx.scene.control.MenuItem;
+import javafx.stage.WindowEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -290,6 +292,35 @@ class GameEditorTest extends MistUiTest {
 
         assertEquals(msg("error.fileUnreadable"), dialogMessage());
         assertEquals(2, db.gameByName(DemoData.DRAFT_GAME).getScreenshotIds().size());
+    }
+
+    @Test
+    void achievementsAreAddedAndRemovedFromTheContextMenu() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        ContextMenu menu = achievements().getContextMenu();
+
+        robot.interact(() -> menu.getOnShowing().handle(new WindowEvent(menu, WindowEvent.WINDOW_SHOWING)));
+        assertTrue(menuItem(menu, "removeAchievementItem").isDisable());
+        robot.interact(menuItem(menu, "addAchievementItem")::fire);
+        assertEquals(4, achievements().getItems().size());
+
+        robot.interact(() -> achievements().getSelectionModel().select(0));
+        robot.interact(() -> menu.getOnShowing().handle(new WindowEvent(menu, WindowEvent.WINDOW_SHOWING)));
+        assertFalse(menuItem(menu, "removeAchievementItem").isDisable());
+        robot.interact(menuItem(menu, "removeAchievementItem")::fire);
+
+        assertEquals(3, achievements().getItems().size());
+    }
+
+    /**
+     * Returns an item of a context menu.
+     *
+     * @param menu the menu
+     * @param id   the item's fx:id
+     * @return the item
+     */
+    private static MenuItem menuItem(ContextMenu menu, String id) {
+        return menu.getItems().stream().filter(item -> id.equals(item.getId())).findFirst().orElseThrow();
     }
 
     /**

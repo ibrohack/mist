@@ -6,6 +6,7 @@ import com.mist.model.Developer;
 import com.mist.model.Game;
 import com.mist.model.GameStatus;
 import com.mist.model.Player;
+import com.mist.model.Review;
 import com.mist.model.Role;
 import com.mist.model.SystemRequirements;
 import com.mist.model.User;
@@ -20,11 +21,15 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Pagination;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -161,6 +166,18 @@ public class GameController implements NavigationAware {
     /** The reviews of the current page. */
     @FXML
     private ListView<GameReview> reviewsList;
+    /** The achievements' context menu (GAME-9). */
+    @FXML
+    private ContextMenu achievementMenu;
+    /** Copies the selected achievement. */
+    @FXML
+    private MenuItem copyAchievementItem;
+    /** The reviews' context menu (GAME-10). */
+    @FXML
+    private ContextMenu reviewMenu;
+    /** Copies the selected review. */
+    @FXML
+    private MenuItem copyReviewItem;
     /** The pages of reviews. */
     @FXML
     private Pagination reviewsPages;
@@ -180,6 +197,11 @@ public class GameController implements NavigationAware {
         achievementsList.setCellFactory(list -> new AchievementCell());
         achievementsList.setPlaceholder(new Label(I18n.text("game.noAchievements")));
         reviewsList.setCellFactory(list -> new ReviewCell());
+        // GAME-9 and GAME-10: the copy items need a selected row.
+        achievementMenu.setOnShowing(event -> copyAchievementItem.setDisable(
+                achievementsList.getSelectionModel().getSelectedItem() == null));
+        reviewMenu.setOnShowing(event -> copyReviewItem.setDisable(
+                reviewsList.getSelectionModel().getSelectedItem() == null));
         reviewsList.setPlaceholder(new Label(I18n.text("game.noReviews")));
         // The pagination only picks the page; the reviews show in the list above it.
         reviewsPages.setPageFactory(index -> new Region());
@@ -432,6 +454,42 @@ public class GameController implements NavigationAware {
         Label chip = new Label(tag);
         chip.getStyleClass().add("mist-chip");
         return chip;
+    }
+
+    /** GAME-9: copies the selected achievement's name and description. */
+    @FXML
+    private void onCopyAchievement() {
+        Achievement achievement = achievementsList.getSelectionModel().getSelectedItem();
+        if (achievement != null) {
+            copy(I18n.format("game.copiedAchievement", achievement.name(), achievement.description()));
+        }
+    }
+
+    /** GAME-10: copies the selected review: its author, its stars and its text. */
+    @FXML
+    private void onCopyReview() {
+        GameReview selected = reviewsList.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            Review review = selected.review();
+            String comment = review.getComment() == null ? "" : review.getComment();
+            copy(I18n.format("game.copiedReview", selected.authorNickname(), review.getRating(), comment).strip());
+        }
+    }
+
+    /**
+     * Puts a text on the system clipboard.
+     *
+     * @param text the text
+     */
+    private static void copy(String text) {
+        ClipboardContent content = new ClipboardContent();
+        content.putString(text);
+        if (Clipboard.getSystemClipboard().setContent(content)) {
+            LOG.info("Copied to the clipboard from a game page");
+        } else {
+            // Another program held the clipboard: nothing to show, but worth knowing when a copy seems lost.
+            LOG.warn("The system clipboard refused the copied text");
+        }
     }
 
     /**
