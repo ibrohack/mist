@@ -2,6 +2,7 @@ package com.mist.ui.support;
 
 import com.mist.exception.DataAccessException;
 import com.mist.exception.DuplicateEntityException;
+import com.mist.exception.InvalidDocumentException;
 import com.mist.exception.MistException;
 import com.mist.exception.NotFoundException;
 import com.mist.exception.UnauthorizedException;
@@ -70,6 +71,8 @@ public final class ErrorReporter {
             case ValidationException e -> warn(owner, e);
             // A duplicate is a rule the user broke, even though it is also a DataAccessException.
             case DuplicateEntityException e -> warn(owner, e);
+            // The validator refused a value: retrying would fail the same way, so no Retry button.
+            case InvalidDocumentException e -> warn(owner, e);
             case NotFoundException e -> warn(owner, e);
             case UnauthorizedException e when ServiceKeys.ACCOUNT_DEACTIVATED.equals(e.getMessage()) -> {
                 LOG.info("The account was deactivated during the session; signing out");
