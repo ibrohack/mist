@@ -24,6 +24,9 @@
 
   <VBox alignment="TOP_CENTER" styleClass="mist-bg-void,py-12">
     <VBox fx:id="formBox" maxWidth="560" styleClass="mist-bg-surface,mist-rounded,p-10,gap-[18px]">
+      <HBox alignment="CENTER_RIGHT">
+        <Button fx:id="helpButton" text="?" styleClass="mist-toggle,mist-help-button" onAction="#onHelp"/>
+      </HBox>
       <VBox styleClass="gap-[4px]">
         <Label text="%register.title" styleClass="mist-title"/>
         <Label text="%register.subtitle" styleClass="mist-caption" wrapText="true"/>

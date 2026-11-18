@@ -62,6 +62,9 @@ public class LoginController implements NavigationAware {
     /** Opens the registration screen. */
     @FXML
     private Hyperlink registerLink;
+    /** Opens the help window. */
+    @FXML
+    private Button helpButton;
 
     /**
      * Creates the controller.
@@ -139,6 +142,12 @@ public class LoginController implements NavigationAware {
         }
         // R4: a database failure offers to try again.
         context.errors().report(context.navigator().window(), error, this::onLogin);
+    }
+
+    /** HELP-1: opens the help on this screen's topic. */
+    @FXML
+    private void onHelp() {
+        context.navigator().showHelp();
     }
 
     /** LOGIN-2: opens the registration screen. */

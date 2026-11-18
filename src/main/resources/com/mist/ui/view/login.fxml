@@ -45,6 +45,7 @@
   <VBox fx:id="formPanel" alignment="CENTER" minWidth="420" prefWidth="460" maxWidth="520"
         styleClass="mist-bg-surface,px-16,gap-[16px]">
     <HBox alignment="CENTER_RIGHT" styleClass="gap-[4px]">
+      <Button fx:id="helpButton" text="?" styleClass="mist-toggle,mist-help-button" onAction="#onHelp"/>
       <ToggleButton fx:id="esToggle" text="ES" toggleGroup="$languageGroup" styleClass="mist-toggle"
                     onAction="#onLanguage"/>
       <ToggleButton fx:id="enToggle" text="EN" toggleGroup="$languageGroup" styleClass="mist-toggle"

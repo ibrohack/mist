@@ -135,6 +135,9 @@ public class RegisterController {
     /** Goes back to the login screen. */
     @FXML
     private Hyperlink backLink;
+    /** Opens the help window. */
+    @FXML
+    private Button helpButton;
 
     /**
      * Creates the controller.
@@ -233,6 +236,12 @@ public class RegisterController {
             return;
         }
         context.errors().report(context.navigator().window(), error, this::onRegister);
+    }
+
+    /** HELP-1: opens the help on this screen's topic. */
+    @FXML
+    private void onHelp() {
+        context.navigator().showHelp();
     }
 
     /** REGISTER-3: goes back to the login screen. */

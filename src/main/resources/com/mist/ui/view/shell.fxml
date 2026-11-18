@@ -63,6 +63,7 @@
                              onAction="#onTheme"/>
             </items>
           </Menu>
+          <MenuItem fx:id="helpItem" text="%menu.help" accelerator="F1" onAction="#onHelp"/>
           <MenuItem fx:id="logItem" text="%menu.operationLog" accelerator="Shortcut+L" onAction="#onOperationLog"/>
           <SeparatorMenuItem/>
           <MenuItem fx:id="logoutItem" text="%menu.logout" accelerator="Shortcut+Shift+Q" onAction="#onLogout"/>

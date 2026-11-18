@@ -561,3 +561,13 @@
   -fx-background-color: -mist-acid;
   -fx-text-fill: #0a0c0b;
 }
+
+/* Help window. */
+.mist-help-topics {
+  -fx-background-color: -mist-surface;
+  -fx-border-color: transparent -mist-border transparent transparent;
+}
+
+.button.mist-help-button {
+  -fx-min-width: 30;
+}

@@ -4,6 +4,9 @@ import com.mist.model.Role;
 import com.mist.model.Theme;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -19,10 +22,15 @@ import java.util.Objects;
  * <p>Every screen change goes through here: the navigator loads the screen's view with {@link SceneRouter}, puts it
  * on the window, and then tells a {@link NavigationAware} controller which parameter it was opened with. Screens that
  * fill the window replace its content; screens of a session are shown inside the shell, which is loaded the first
- * time one of them opens. The navigator remembers the in-shell screens visited, for {@link #back()}, and applies the
- * theme to the window.</p>
+ * time one of them opens. The navigator remembers the in-shell screens visited, for {@link #back()}, applies the
+ * theme to the window, and opens the help window on the current screen's topic (F1 anywhere).</p>
  */
 public final class Navigator {
+
+    /** The FXML of the help window. */
+    private static final String HELP_VIEW = "view/help.fxml";
+    /** Opens the help window. */
+    private static final KeyCombination HELP_KEY = new KeyCodeCombination(KeyCode.F1);
 
     /**
      * A screen visited inside the shell.
@@ -47,6 +55,10 @@ public final class Navigator {
     private Object currentParameter;
     /** The theme of the window. */
     private Theme theme = Theme.DARK;
+    /** The help window, created the first time it opens. */
+    private Stage helpStage;
+    /** The content of the help window. */
+    private HelpPanel helpPanel;
 
     /**
      * Creates the navigator of the main window and attaches it to the context.
@@ -107,6 +119,7 @@ public final class Navigator {
 
     /** Rebuilds the screen on display, and the shell around it, after a language change. */
     public void reload() {
+        closeHelp();
         if (current == null) {
             return;
         }
@@ -129,7 +142,54 @@ public final class Navigator {
             context.services().auth().logout();
         }
         context.session().end();
+        closeHelp();
         show(View.LOGIN, noticeKey == null ? null : new LoginNotice(null, noticeKey, false));
+    }
+
+    /**
+     * HELP-1: opens the help window, or brings it to the front, on the topic of the current screen.
+     *
+     * @throws UncheckedIOException if the help view is broken, which is a programming error
+     */
+    public void showHelp() {
+        if (helpStage == null) {
+            SceneRouter.Loaded loaded;
+            try {
+                loaded = SceneRouter.load(HELP_VIEW, context);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Cannot load " + HELP_VIEW, e);
+            }
+            helpPanel = (HelpPanel) loaded.controller();
+            Scene scene = new Scene(loaded.root());
+            Styles.install(scene);
+            Styles.applyTheme(scene, theme);
+            helpStage = new Stage();
+            helpStage.initOwner(stage);
+            helpStage.setTitle(I18n.text("help.title"));
+            helpStage.getIcons().setAll(stage.getIcons());
+            helpStage.setScene(scene);
+        }
+        helpPanel.select(current == null ? View.SHELL : current);
+        helpStage.show();
+        helpStage.toFront();
+    }
+
+    /**
+     * Tells whether the help window is open.
+     *
+     * @return {@code true} while it shows
+     */
+    public boolean isHelpShowing() {
+        return helpStage != null && helpStage.isShowing();
+    }
+
+    /** Closes the help window, so it is rebuilt in the new language or for the next user. */
+    private void closeHelp() {
+        if (helpStage != null) {
+            helpStage.hide();
+            helpStage = null;
+            helpPanel = null;
+        }
     }
 
     /** Opens the shell of a session that just started, on the first screen of the user's role. */
@@ -148,6 +208,9 @@ public final class Navigator {
         this.theme = Objects.requireNonNull(newTheme, "newTheme");
         if (stage.getScene() != null) {
             Styles.applyTheme(stage.getScene(), newTheme);
+        }
+        if (helpStage != null) {
+            Styles.applyTheme(helpStage.getScene(), newTheme);
         }
     }
 
@@ -245,6 +308,8 @@ public final class Navigator {
         } else {
             scene.setRoot(root);
         }
+        // F1 opens the help on every screen; set again after each change, as menus also register shortcuts.
+        scene.getAccelerators().put(HELP_KEY, this::showHelp);
     }
 
     /**

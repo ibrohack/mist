@@ -86,6 +86,9 @@ public class ShellController implements ShellHost, NavigationAware {
     /** Switches to the light theme. */
     @FXML
     private RadioMenuItem lightItem;
+    /** Opens the help window. */
+    @FXML
+    private MenuItem helpItem;
     /** Opens the operation log, for admins. */
     @FXML
     private MenuItem logItem;
@@ -157,6 +160,12 @@ public class ShellController implements ShellHost, NavigationAware {
     @FXML
     private void onProfile() {
         context.navigator().show(View.PROFILE);
+    }
+
+    /** SHELL-5: opens the help on the current screen's topic. */
+    @FXML
+    private void onHelp() {
+        context.navigator().showHelp();
     }
 
     /** SHELL-6: opens the operation log, for admins. */
