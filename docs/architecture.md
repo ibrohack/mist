@@ -12,6 +12,7 @@ layers fit together, and why it is built this way. The details live in three com
 | [data-model.md](data-model.md) | Every collection and field, embedded or referenced and why, transactions, validators, indexes, the operation log format |
 | [ui-design.md](ui-design.md) | The aspect and behavior of every screen, with the exact controls, events and service methods |
 | [decisions.md](decisions.md) | Every design decision, in the order it was taken, and how the project departs from the preliminary plan |
+| [user-manual.md](user-manual.md), [manual-usuario.md](manual-usuario.md) | How to use every screen, for players, developers and admins |
 
 ## Installation
 
