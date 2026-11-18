@@ -7,6 +7,7 @@
   -mist-ash: #818782;
   -mist-border: #343a35;
   -mist-track: #252a26;
+  -mist-danger: #ff5c5c;
   -fx-font-family: "Space Grotesk";
   -fx-background-color: -mist-void;
   -fx-text-fill: -mist-fog;
@@ -133,4 +134,95 @@
 /* The kit's wordmark size; TailwindFX 0.1.2 has no 104 px size and turns text-[104px] into a text color. */
 .mist-wordmark {
   -fx-font-size: 104px;
+}
+
+/* Type scale (docs/ui-design.md, "Typography"). */
+.mist-title {
+  -fx-font-size: 28px;
+  -fx-font-weight: 700;
+  -fx-text-fill: -mist-fog;
+}
+
+.mist-subtitle {
+  -fx-font-size: 18px;
+  -fx-font-weight: 500;
+  -fx-text-fill: -mist-fog;
+}
+
+.mist-caption {
+  -fx-font-size: 12px;
+  -fx-text-fill: -mist-ash;
+}
+
+/* Button variants: the primary button is the plain .button above. */
+.button.mist-button-secondary {
+  -fx-background-color: transparent;
+  -fx-border-color: -mist-border;
+  -fx-border-radius: 3;
+  -fx-text-fill: -mist-fog;
+  -fx-font-weight: 500;
+}
+
+.button.mist-button-secondary:hover {
+  -fx-border-color: -mist-acid;
+}
+
+.button.mist-button-danger {
+  -fx-background-color: transparent;
+  -fx-border-color: -mist-danger;
+  -fx-border-radius: 3;
+  -fx-text-fill: -mist-danger;
+}
+
+.button.mist-button-danger:hover {
+  -fx-background-color: derive(-mist-danger, -80%);
+}
+
+.button:disabled {
+  -fx-opacity: 0.45;
+}
+
+/* Form messages and invalid fields (behavior C-3). */
+.mist-message-error {
+  -fx-text-fill: -mist-danger;
+}
+
+.mist-message-ok {
+  -fx-text-fill: -mist-acid;
+}
+
+.text-input:error,
+.combo-box-base:error {
+  -fx-border-color: -mist-danger;
+  -fx-border-radius: 3;
+}
+
+.text-input:focused {
+  -fx-border-color: -mist-acid;
+}
+
+.tooltip {
+  -fx-background-color: -mist-surface;
+  -fx-background-radius: 3;
+  -fx-text-fill: -mist-fog;
+  -fx-font-size: 12px;
+}
+
+/* Dialogs (com.mist.ui.support.Dialogs). */
+.dialog-pane.mist-dialog {
+  -fx-background-color: -mist-surface;
+  -fx-padding: 8;
+}
+
+.dialog-pane.mist-dialog > .content,
+.dialog-pane.mist-dialog .label {
+  -fx-text-fill: -mist-fog;
+}
+
+.dialog-pane.mist-dialog > .button-bar > .container {
+  -fx-background-color: -mist-surface;
+}
+
+.dialog-pane.mist-dialog .button {
+  -fx-padding: 8 16;
 }

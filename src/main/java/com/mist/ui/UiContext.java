@@ -1,12 +1,16 @@
 package com.mist.ui;
 
 import com.mist.exception.DataAccessException;
+import com.mist.ui.support.ErrorReporter;
+import com.mist.ui.support.Images;
+import com.mist.ui.support.UiTasks;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Everything a controller needs, handed to its constructor by {@link SceneRouter}: the services, the session, the
- * navigator and the file picker.
+ * navigator, the file picker, and the shared helpers for background work, errors and images.
  *
  * <p>The services exist only after {@link #connect()} succeeds, which the splash does first; until then
  * {@link #services()} fails.</p>
@@ -19,6 +23,12 @@ public final class UiContext {
     private final FilePicker files;
     /** Who is using the app. */
     private final UserSession session = new UserSession();
+    /** The reaction to errors. */
+    private final ErrorReporter errors = new ErrorReporter();
+    /** Runs service calls in the background. */
+    private final UiTasks tasks;
+    /** Loads stored images. */
+    private final Images images;
     /** The navigator of the main window, attached once it exists. */
     private Navigator navigator;
     /** The services, once connected; written by a worker thread, read by the JavaFX thread. */
@@ -27,12 +37,15 @@ public final class UiContext {
     /**
      * Creates the context of the main window.
      *
-     * @param backend where the services come from
-     * @param files   the file dialogs
+     * @param backend  where the services come from
+     * @param files    the file dialogs
+     * @param executor where service calls run: a worker pool in the app, the calling thread in UI tests
      */
-    public UiContext(Backend backend, FilePicker files) {
+    public UiContext(Backend backend, FilePicker files, Executor executor) {
         this.backend = Objects.requireNonNull(backend, "backend");
         this.files = Objects.requireNonNull(files, "files");
+        this.tasks = new UiTasks(executor, errors, () -> navigator == null ? null : navigator.window());
+        this.images = new Images(tasks, () -> services().media());
     }
 
     /**
@@ -112,6 +125,33 @@ public final class UiContext {
      */
     public FilePicker files() {
         return files;
+    }
+
+    /**
+     * Returns the runner of background service calls.
+     *
+     * @return the task runner
+     */
+    public UiTasks tasks() {
+        return tasks;
+    }
+
+    /**
+     * Returns the reaction to errors.
+     *
+     * @return the error reporter
+     */
+    public ErrorReporter errors() {
+        return errors;
+    }
+
+    /**
+     * Returns the loader of stored images.
+     *
+     * @return the image loader
+     */
+    public Images images() {
+        return images;
     }
 
     /** Releases the database connection, when the app stops. */
