@@ -19,6 +19,8 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,6 +34,9 @@ import java.util.function.Consumer;
  * <p>Controller of {@code new-game.fxml}. Create keeps the dialog open until the service accepts the draft.</p>
  */
 public class NewGameDialog {
+
+    /** The UI's own log: user actions and the errors shown to the user. */
+    private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
 
     /** The dialog's view. */
     private static final String VIEW = "view/new-game.fxml";
@@ -127,6 +132,7 @@ public class NewGameDialog {
         }
         String name = nameField.getText();
         BigDecimal price = GameForms.parsePrice(priceField.getText());
+        LOG.info("Creating the draft {}", name);
         context.tasks().run(nameField, () -> context.services().publishing().createDraft(context.session().userId(),
                 name, price), draft -> {
                     // R1: close and open the draft.
@@ -138,5 +144,11 @@ public class NewGameDialog {
                         context.errors().report(dialog.getDialogPane().getScene().getWindow(), error, this::onCreate);
                     }
                 });
+    }
+
+    /** HELP-1: opens the help on the dashboard topic, which explains new games. */
+    @FXML
+    private void onHelp() {
+        context.navigator().showHelp();
     }
 }

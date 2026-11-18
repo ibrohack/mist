@@ -29,10 +29,16 @@ import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
+import com.mist.dao.DaoKeys;
+import com.mist.exception.InvalidDocumentException;
+import java.nio.file.Files;
+import javafx.scene.control.MenuItem;
+import javafx.stage.WindowEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * The game editor (EDIT-1 to EDIT-9), its editable achievements table and how the dashboard opens it (STUDIO-4).
@@ -209,6 +215,112 @@ class GameEditorTest extends MistUiTest {
         click("backButton");
 
         assertEquals(View.STUDIO, navigator.current());
+    }
+
+    @Test
+    void aDatabaseFailureWhileSavingOffersARetry() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        type("descriptionArea", "Saved on the second try.");
+        db.failNextCall();
+
+        click("saveButton");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        click("dialogRetry");
+
+        assertEquals("Saved on the second try.", db.gameByName(DemoData.DRAFT_GAME).getDescription());
+        assertEquals(msg("editor.saved"), text("formMessage"));
+    }
+
+    @Test
+    void aDatabaseFailureWhilePublishingOffersARetry() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        db.failNextCall();
+
+        click("publishButton");
+        click("dialogConfirm");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        assertEquals(GameStatus.DRAFT, db.gameByName(DemoData.DRAFT_GAME).getStatus());
+        click("dialogRetry");
+
+        assertEquals(GameStatus.PUBLISHED, db.gameByName(DemoData.DRAFT_GAME).getStatus());
+    }
+
+    @Test
+    void aValueTheDatabaseRefusesIsAWarningWithoutRetry() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        db.failNextCall(new InvalidDocumentException(DaoKeys.INVALID_DOCUMENT));
+
+        click("saveButton");
+
+        assertEquals(msg(DaoKeys.INVALID_DOCUMENT), dialogMessage());
+        assertFalse(visible("dialogRetry"));
+    }
+
+    @Test
+    void aDatabaseFailureWhileUploadingTheCoverKeepsTheOldOne() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        ObjectId oldCover = db.gameByName(DemoData.DRAFT_GAME).getCoverId();
+        files.answerImage(png("cover.png"));
+        db.failNextCall();
+
+        click("changeCoverButton");
+
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        assertEquals(oldCover, db.gameByName(DemoData.DRAFT_GAME).getCoverId());
+    }
+
+    @Test
+    void anOversizedCoverIsRefused() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        ObjectId oldCover = db.gameByName(DemoData.DRAFT_GAME).getCoverId();
+        Path big = folder.resolve("big.png");
+        Files.write(big, new byte[3 * 1024 * 1024]);
+        files.answerImage(big);
+
+        click("changeCoverButton");
+
+        assertEquals(msg(ModelKeys.MEDIA_SIZE), dialogMessage());
+        assertEquals(oldCover, db.gameByName(DemoData.DRAFT_GAME).getCoverId());
+    }
+
+    @Test
+    void anUnreadableScreenshotIsReported() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        files.answerImage(folder.resolve("gone.png"));
+
+        click("addScreenshotButton");
+
+        assertEquals(msg("error.fileUnreadable"), dialogMessage());
+        assertEquals(2, db.gameByName(DemoData.DRAFT_GAME).getScreenshotIds().size());
+    }
+
+    @Test
+    void achievementsAreAddedAndRemovedFromTheContextMenu() throws Exception {
+        openEditor(DemoData.DRAFT_GAME);
+        ContextMenu menu = achievements().getContextMenu();
+
+        robot.interact(() -> menu.getOnShowing().handle(new WindowEvent(menu, WindowEvent.WINDOW_SHOWING)));
+        assertTrue(menuItem(menu, "removeAchievementItem").isDisable());
+        robot.interact(menuItem(menu, "addAchievementItem")::fire);
+        assertEquals(4, achievements().getItems().size());
+
+        robot.interact(() -> achievements().getSelectionModel().select(0));
+        robot.interact(() -> menu.getOnShowing().handle(new WindowEvent(menu, WindowEvent.WINDOW_SHOWING)));
+        assertFalse(menuItem(menu, "removeAchievementItem").isDisable());
+        robot.interact(menuItem(menu, "removeAchievementItem")::fire);
+
+        assertEquals(3, achievements().getItems().size());
+    }
+
+    /**
+     * Returns an item of a context menu.
+     *
+     * @param menu the menu
+     * @param id   the item's fx:id
+     * @return the item
+     */
+    private static MenuItem menuItem(ContextMenu menu, String id) {
+        return menu.getItems().stream().filter(item -> id.equals(item.getId())).findFirst().orElseThrow();
     }
 
     /**

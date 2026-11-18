@@ -10,6 +10,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
+import com.mist.dao.DaoKeys;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -86,6 +87,20 @@ class WishlistTest extends MistUiTest {
         click("wishlistLink");
 
         assertTrue(list().getItems().isEmpty());
+    }
+
+    @Test
+    void aDatabaseFailureWhileMovingAGameOffersARetry() throws Exception {
+        openWishlist();
+        robot.interact(() -> list().getSelectionModel().select(0));
+        db.failNextCall();
+
+        click("addToCartButton");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        click("dialogRetry");
+
+        assertTrue(list().getItems().isEmpty());
+        assertEquals("2", text("cartBadge"));
     }
 
     /**

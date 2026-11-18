@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Year;
 import java.time.YearMonth;
+import com.mist.dao.DaoKeys;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -151,6 +152,21 @@ class RegisterTest extends MistUiTest {
         click("backLink");
 
         assertEquals(View.LOGIN, navigator.current());
+    }
+
+    @Test
+    void aDatabaseFailureWhileRegisteringOffersARetry() {
+        fillAccount("ana@mist.com");
+        fillPlayer("ana_b", "4111 1111 1111 1111");
+        db.failNextCall();
+
+        click("registerButton");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        assertNull(db.userByEmail("ana@mist.com"));
+        click("dialogRetry");
+
+        assertEquals(View.LOGIN, navigator.current());
+        assertInstanceOf(Player.class, db.userByEmail("ana@mist.com"));
     }
 
     /**

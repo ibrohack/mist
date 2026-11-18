@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToggleButton?>
@@ -11,7 +12,10 @@
 <VBox prefWidth="480" styleClass="gap-[12px]"
       xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.mist.ui.controller.ReviewDialog">
-  <Label fx:id="gameNameLabel" styleClass="mist-subtitle" wrapText="true"/>
+  <HBox alignment="CENTER_LEFT" styleClass="gap-[8px]">
+    <Label fx:id="gameNameLabel" styleClass="mist-subtitle" wrapText="true" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+    <Button fx:id="reviewHelpButton" text="?" styleClass="mist-toggle,mist-help-button" onAction="#onHelp"/>
+  </HBox>
   <Label text="%review.rating" styleClass="mist-caption"/>
   <HBox fx:id="starsBox" styleClass="gap-[4px]">
     <ToggleButton fx:id="star1" text="★" styleClass="mist-star" onAction="#onStar"/>

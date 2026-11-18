@@ -61,4 +61,10 @@ public class OfflineController {
                     }
                 });
     }
+
+    /** HELP-1: opens the help on the offline topic. */
+    @FXML
+    private void onHelp() {
+        context.navigator().showHelp();
+    }
 }

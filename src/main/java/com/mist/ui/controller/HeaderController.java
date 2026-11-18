@@ -12,6 +12,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,6 +25,9 @@ import java.util.Map;
  * on display, so the matching link is highlighted.</p>
  */
 public class HeaderController {
+
+    /** The UI's own log: user actions and the errors shown to the user. */
+    private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
 
     /** What the controller works with. */
     private final UiContext context;
@@ -117,6 +122,7 @@ public class HeaderController {
             link.setSelected(true);
             return;
         }
+        LOG.info("Header link to {}", target);
         context.navigator().show(target);
     }
 

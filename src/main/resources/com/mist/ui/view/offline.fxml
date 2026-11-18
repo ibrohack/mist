@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -32,4 +33,11 @@
     <Button fx:id="retryButton" text="%offline.retry" defaultButton="true" onAction="#onRetry"/>
     <Label fx:id="retryStatus" text="%offline.stillOffline" styleClass="mist-message-error"/>
   </VBox>
+  <!-- HELP-1: the same "?" as on Login; F1 works too. -->
+  <Button fx:id="helpButton" text="?" styleClass="mist-toggle,mist-help-button" onAction="#onHelp"
+          StackPane.alignment="TOP_RIGHT">
+    <StackPane.margin>
+      <Insets top="16" right="16"/>
+    </StackPane.margin>
+  </Button>
 </StackPane>

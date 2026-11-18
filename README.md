@@ -5,6 +5,7 @@ It is a layered JavaFX application backed by MongoDB, where clients buy and rate
 
 | Document | For |
 | --- | --- |
+| [docs/user-manual.md](docs/user-manual.md), [docs/manual-usuario.md](docs/manual-usuario.md) | The user manual, in English and Spanish, with a screenshot of every screen |
 | [docs/architecture.md](docs/architecture.md) | Installation, the layers and why MIST is built this way |
 | [docs/data-model.md](docs/data-model.md) | The MongoDB collections, transactions, validators and the operation log |
 | [docs/ui-design.md](docs/ui-design.md) | The aspect and behavior of every screen |

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import com.mist.dao.DaoKeys;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -146,6 +147,21 @@ class OrdersTest extends MistUiTest {
         assertEquals(1, table().getRoot().getChildren().size());
         click("backButton");
         assertEquals(View.LIBRARY, navigator.current());
+    }
+
+    @Test
+    void aDatabaseFailureWhileReturningOffersARetry() throws Exception {
+        openOrders();
+        select("Super Mario Odyssey");
+        click("returnButton");
+        db.failNextCall();
+
+        click("dialogConfirm");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        click("dialogRetry");
+
+        assertEquals(I18n.format("library.returned", Formats.money(new BigDecimal("49.99"))), dialogMessage());
+        assertNotNull(row("Super Mario Odyssey").item().refundedAt());
     }
 
     /**
