@@ -607,6 +607,12 @@
   -fx-border-width: 0 0 0 3;
 }
 
+/* Operation log details: ids and filters line up in a fixed-width font. */
+.table-cell.mist-log-details {
+  -fx-font-family: "monospace";
+  -fx-font-size: 12px;
+}
+
 .mist-outcome-ok {
   -fx-text-fill: -mist-acid;
   -fx-font-weight: 700;
@@ -807,6 +813,12 @@
 }
 
 /* Cart (docs/ui-design.md, "Cart"). */
+.scroll-pane.mist-summary-scroll {
+  -fx-background-color: transparent;
+  -fx-background: transparent;
+  -fx-padding: 0;
+}
+
 .mist-badge {
   -fx-background-color: -mist-acid;
   -fx-background-radius: 10;

@@ -52,13 +52,13 @@
 
     <!-- Buy box -->
     <HBox fx:id="buyBox" alignment="CENTER_LEFT" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[16px]">
-      <Label fx:id="buyTitle" styleClass="mist-subtitle" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+      <Label fx:id="buyTitle" styleClass="mist-subtitle" HBox.hgrow="ALWAYS" maxWidth="Infinity" minWidth="0"/>
       <Label fx:id="statusLabel" styleClass="mist-message-ok"/>
-      <Label fx:id="priceLabel" styleClass="mist-price,mist-price-large"/>
+      <Label fx:id="priceLabel" styleClass="mist-price,mist-price-large" minWidth="-Infinity"/>
       <Button fx:id="wishlistButton" text="%game.addToWishlist" styleClass="mist-button-secondary"
-              onAction="#onAddToWishlist"/>
-      <Button fx:id="addToCartButton" text="%game.addToCart" onAction="#onAddToCart"/>
-      <Button fx:id="goToCartButton" text="%game.goToCart" onAction="#onGoToCart"/>
+              minWidth="-Infinity" onAction="#onAddToWishlist"/>
+      <Button fx:id="addToCartButton" text="%game.addToCart" minWidth="-Infinity" onAction="#onAddToCart"/>
+      <Button fx:id="goToCartButton" text="%game.goToCart" minWidth="-Infinity" onAction="#onGoToCart"/>
       <Label fx:id="ownedLabel" text="%game.owned" styleClass="mist-message-ok"/>
       <Label fx:id="notOnSaleLabel" text="%game.notOnSale" styleClass="mist-caption"/>
     </HBox>

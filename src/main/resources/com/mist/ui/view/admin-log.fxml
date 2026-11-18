@@ -10,6 +10,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -18,22 +19,26 @@
 <VBox styleClass="mist-bg-void,p-8,gap-[20px]"
       xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.mist.ui.controller.AdminLogController">
-  <VBox styleClass="gap-[6px]">
-    <Label text="%log.title" styleClass="mist-title"/>
-    <Label text="%log.subtitle" styleClass="mist-caption"/>
-  </VBox>
-
   <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
-    <DatePicker fx:id="dayPicker" promptText="%log.day" prefWidth="160" editable="false"/>
-    <TextField fx:id="userFilter" promptText="%log.user" prefWidth="220"/>
-    <ComboBox fx:id="operationFilter" prefWidth="170"/>
-    <CheckBox fx:id="failedOnly" text="%log.failedOnly"/>
+    <VBox styleClass="gap-[6px]">
+      <Label text="%log.title" styleClass="mist-title"/>
+      <Label text="%log.subtitle" styleClass="mist-caption"/>
+    </VBox>
     <Region HBox.hgrow="ALWAYS"/>
-    <Label fx:id="countLabel" styleClass="mist-caption"/>
-    <Button fx:id="refreshButton" text="%log.refresh" styleClass="mist-button-secondary" onAction="#onRefresh"/>
+    <Label fx:id="countLabel" styleClass="mist-caption" minWidth="-Infinity"/>
+    <Button fx:id="refreshButton" text="%log.refresh" styleClass="mist-button-secondary" minWidth="-Infinity"
+            onAction="#onRefresh"/>
   </HBox>
 
-  <TableView fx:id="logTable" VBox.vgrow="ALWAYS">
+  <!-- The filters wrap onto a second line when the window is narrow. -->
+  <FlowPane alignment="CENTER_LEFT" hgap="12" vgap="12">
+    <DatePicker fx:id="dayPicker" promptText="%log.day" prefWidth="170" minWidth="140" editable="false"/>
+    <TextField fx:id="userFilter" promptText="%log.user" prefWidth="260" minWidth="160"/>
+    <ComboBox fx:id="operationFilter" prefWidth="180" minWidth="140"/>
+    <CheckBox fx:id="failedOnly" text="%log.failedOnly" minWidth="-Infinity"/>
+  </FlowPane>
+
+  <TableView fx:id="logTable" VBox.vgrow="ALWAYS" minHeight="200">
     <placeholder>
       <Label fx:id="emptyLabel" text="%log.empty" styleClass="mist-caption"/>
     </placeholder>
@@ -42,7 +47,7 @@
       <TableColumn fx:id="userColumn" text="%log.column.user" prefWidth="200"/>
       <TableColumn fx:id="operationColumn" text="%log.column.operation" prefWidth="110"/>
       <TableColumn fx:id="collectionColumn" text="%log.column.collection" prefWidth="100"/>
-      <TableColumn fx:id="detailsColumn" text="%log.column.details" prefWidth="460"/>
+      <TableColumn fx:id="detailsColumn" text="%log.column.details" prefWidth="460" styleClass="mist-log-details"/>
       <TableColumn fx:id="outcomeColumn" text="%log.column.outcome" prefWidth="100"/>
     </columns>
     <columnResizePolicy>
