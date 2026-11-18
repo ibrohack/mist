@@ -15,12 +15,20 @@ import java.util.Objects;
  * <p>The outermost {@link #call(Work)} opens a session, begins a transaction and binds the session to the current
  * thread; every DAO call on that thread then uses it, and nested calls join it. Outside a transaction, each DAO call
  * runs in a short transaction of its own.</p>
+ *
+ * <p>The outermost transaction writes {@code BEGIN}, then {@code COMMIT} or {@code ROLLBACK}, to the operation log, and
+ * the DAO lines in between carry its number. When MongoDB reports a transient conflict (another transaction wrote the
+ * same document first), the whole work runs again in a new transaction, up to {@value #MAX_ATTEMPTS} times; that is
+ * why the work must load what it changes inside the transaction.</p>
  */
 public final class HibernateTransactions implements TransactionRunner {
 
+    /** How many times a transaction runs at most when MongoDB reports a transient conflict. */
+    static final int MAX_ATTEMPTS = 3;
+
     /** Opens the sessions. */
     private final SessionFactory sessionFactory;
-    /** Writes the rollbacks to the operation log. */
+    /** Writes the transaction boundaries, retries and rollbacks to the operation log. */
     private final DbOperationLogger log;
     /** The session of the transaction running on this thread. */
     private final ThreadLocal<Session> current = new ThreadLocal<>();
@@ -42,12 +50,37 @@ public final class HibernateTransactions implements TransactionRunner {
         if (current.get() != null) {
             return work.run();
         }
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return attempt(work);
+            } catch (MistException | RuntimeException failure) {
+                // Another transaction changed the same documents first: MongoDB asks to run the whole work again.
+                if (attempt >= MAX_ATTEMPTS || !PersistenceErrors.isTransient(failure)) {
+                    throw failure;
+                }
+                log.failed("RETRY", "-", "attempt " + (attempt + 1) + " of " + MAX_ATTEMPTS + " after "
+                        + PersistenceErrors.describe(failure));
+            }
+        }
+    }
+
+    /**
+     * Runs work once in a new session and transaction, bound to this thread, and commits it.
+     *
+     * @param work the work
+     * @param <T>  the type of the result
+     * @return what the work returned, after the commit
+     * @throws MistException what the work threw, or a {@code DataAccessException} if the database failed
+     */
+    private <T> T attempt(Work<T> work) throws MistException {
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
             current.set(session);
+            log.begin();
             try {
                 T result = work.run();
                 transaction.commit();
+                log.commit();
                 return result;
             } catch (Throwable failure) {
                 rollback(transaction, failure);
@@ -102,7 +135,7 @@ public final class HibernateTransactions implements TransactionRunner {
             failure.addSuppressed(rollbackFailure);
         }
         String reason = failure instanceof MistException ? failure.getMessage() : PersistenceErrors.describe(failure);
-        log.failed("ROLLBACK", "-", reason);
+        log.rollback(reason);
     }
 
     /**
