@@ -13,7 +13,9 @@
 
 <!-- Store: the featured carousel and the New / Top sellers / Free tabs, or the search results.
      See docs/ui-design.md, "Store". -->
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="mist-bg-void"
+<!-- fitToHeight lets the lists fill a tall window; the page only scrolls when the window is shorter than the
+     carousel plus the lists' minimum height. -->
+<ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" styleClass="mist-bg-void"
             xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.mist.ui.controller.StoreController">
   <VBox styleClass="p-8,gap-[20px]">
@@ -25,9 +27,10 @@
     </HBox>
 
     <!-- Browsing: the carousel and the tabs. -->
-    <VBox fx:id="browseBox" styleClass="gap-[20px]">
-      <Pagination fx:id="featured" maxPageIndicatorCount="5" prefHeight="300" styleClass="mist-featured"/>
-      <TabPane fx:id="tabs" tabClosingPolicy="UNAVAILABLE" prefHeight="520">
+    <VBox fx:id="browseBox" VBox.vgrow="ALWAYS" styleClass="gap-[20px]">
+      <Pagination fx:id="featured" maxPageIndicatorCount="5" prefHeight="300" minHeight="300"
+                  styleClass="mist-featured"/>
+      <TabPane fx:id="tabs" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" minHeight="320">
         <tabs>
           <Tab fx:id="newTab" text="%store.tab.new">
             <ListView fx:id="newList" styleClass="mist-game-list"/>
@@ -43,9 +46,9 @@
     </VBox>
 
     <!-- Searching: the results. -->
-    <VBox fx:id="resultsBox" styleClass="gap-[12px]">
+    <VBox fx:id="resultsBox" VBox.vgrow="ALWAYS" styleClass="gap-[12px]">
       <Label fx:id="resultsTitle" styleClass="mist-subtitle"/>
-      <ListView fx:id="resultsList" prefHeight="560" styleClass="mist-game-list"/>
+      <ListView fx:id="resultsList" VBox.vgrow="ALWAYS" minHeight="320" styleClass="mist-game-list"/>
     </VBox>
   </VBox>
 </ScrollPane>
