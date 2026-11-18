@@ -127,6 +127,22 @@ and behavior of every screen.
     events instead of moving the mouse.
 13. **Packaging is a jpackage app image**, not an installer, so no WiX is needed; see the README.
 14. **Javadoc covers private members too** and fails on any missing comment (`./mvnw javadoc:javadoc`).
+15. **Reports are filled from what the screen shows.** The receipt takes the order on screen and the sales report the
+    dashboard's figures; labels come from the UI bundles (`$R{...}`) and values arrive formatted by `Formats`, so a PDF
+    matches the screen and its language. The DejaVu fonts are embedded (for the euro sign and accents), and the JDT
+    compiler builds the templates, so the app image needs no `jdk.compiler`.
+16. **Two tables are edited in place**, as the rubric asks: the dashboard's price column saves on commit and puts the
+    stored price back when the service refuses it; the editor's achievement cells check their length on commit and
+    are saved with the rest of the game.
+17. **New game asks only for a name and a price**, what `createDraft` needs, and opens the draft in the editor. The
+    service answers an incomplete draft with one key (`model.game.incomplete`), so the editor checks the publishing
+    rules itself first and marks each missing field.
+18. **Prices are typed in either language**: `12,99`, `12.99` and `12,99 €` are the same price, everywhere a price is
+    entered.
+19. **Returns are offered in two places**: the library's context menu, for the game at hand, and the orders tree,
+    which also shows what was refunded and gives each order's receipt.
+20. **The early library view was rebuilt**: its own blue palette and fixed texts gave way to the brand tokens and the
+    bundles, and the empty-library art is rebuilt in FXML like the splash and offline screens.
 
 ## Changes to the preliminary plan
 
@@ -146,7 +162,7 @@ and behavior of every screen.
 | Dates / embedded data | not fixed | `java.time.Instant` only; embedded documents are `@Embeddable @Struct` classes |
 | Catalog search | text index | the driver finds the ids with `$regex` on a quoted pattern, then Hibernate loads the games; no text index |
 | Config | `mist.properties` read by `AppConfig` | same, plus system-property and environment-variable overrides |
-| Brand images | splash, empty and offline SVGs converted to PNG | splash and offline rebuilt in FXML (the empty library later, the same way); only the launcher icon becomes PNG |
+| Brand images | splash, empty and offline SVGs converted to PNG | splash, offline and empty library rebuilt in FXML; only the launcher icon becomes PNG |
 | Styling | `mist-theme.css` | TailwindFX utilities + `mist-theme.css` brand layer |
 | Packaging | `javafx-maven-plugin` jlink + jpackage | jpackage app image of a classpath app (`-Ppackage`), because jlink cannot take Hibernate's automatic modules; no installer, so no WiX |
 | Tests | JUnit for services and DAOs, TestFX for flows | TestFX tests of every screen on the real services over in-memory DAOs; no service or DAO unit tests |

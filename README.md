@@ -72,6 +72,42 @@ Every demo account uses the password `mist2026`:
 | `marc@mist.local`   | Player    | Two games and two reviews                                           |
 | `nora@mist.local`   | Player    | Two games bought 20 days ago and two reviews                        |
 
+### Demo script
+
+A walk through every use case, one role at a time. F1 opens the help of the current screen at any point, and the user
+menu (the avatar, top right) switches the language and the theme.
+
+**Guest.** On the login screen, press *Enter as guest*. Browse the store's carousel and its New, Top sellers and Free
+tabs, search for `lantern`, and open a game. *Add to cart* asks you to log in.
+
+**Player** (`lucia@mist.local`).
+
+1. *Cart*: Gravewind Tactics is waiting. Tick the terms, check out, confirm, and save the receipt as a PDF.
+2. *Wishlist*: move Starlit Drift to the cart, or remove it.
+3. *Library*: search, sort and filter by tag. Right-click Tidebreak Harbor and write a review; it shows on the game
+   page.
+4. Right-click Neon Courier 2088 and *Return* it (it was bought today, so it is inside the 14 days).
+5. *Orders*: the returned game shows its refund date; the 20-day-old order cannot be returned. Download a receipt.
+6. User menu, *Profile*: change the avatar, the card or the password, one row at a time.
+
+**Developer** (`nebula@mist.local`).
+
+1. The dashboard opens with the revenue, units and games on sale, the revenue chart and the table of games.
+2. Double-click Tidebreak Harbor's price, type `19,99` and press Enter. Type `free` instead and the old price comes
+   back with a warning.
+3. *New game*: give a name and a price; the editor opens. *Publish* marks in red what the draft lacks. Fill it in,
+   change the cover, add tags, languages and achievements (double-click a cell), *Save*, then *Publish*.
+4. Back on the dashboard, select The Quiet Signal (complete already) and *Publish* it; select a published game and
+   *Take off sale*.
+5. *Sales report* saves the dashboard's figures as a PDF.
+
+**Admin** (`admin@mist.local`). The operation log opens on the newest day with database operations. Filter by day,
+user, operation or *Failed only*, and right-click a row to copy it. What other users do while you watch shows up after
+*Refresh*.
+
+**Offline.** Stop the database (`docker compose down`) and start MIST: the offline screen appears. Start it again
+(`docker compose up -d`) and press *Retry*.
+
 From an IDE, run `com.mist.Launcher`, not `MistApp`: JavaFX refuses to start an `Application` subclass as the main
 class of a classpath app. Maven generates the TailwindFX stylesheet during `process-resources`, so let the IDE build
 with Maven, or run `./mvnw process-resources` once after changing the style classes in a view.
@@ -106,7 +142,9 @@ src/main/java/com/mist/
 ├─ Launcher, MistApp     entry point and JavaFX application
 ├─ MistContext           opens the data layer and builds every service for the UI
 ├─ ui/                   navigation (Navigator, SceneRouter, View), UiContext, I18n, Styles, UserSession
-│  ├─ controller/        FXML controllers, one per view
+│  ├─ controller/        FXML controllers, one per view, and the dialogs (review, new game)
+│  ├─ component/         custom list cells, and the row models of the achievements table and the orders tree
+│  ├─ report/            PDF reports (receipt, sales) with JasperReports
 │  └─ support/           background tasks, error reporting, dialogs, form validation, formats, images
 ├─ service/              use cases (Auth, User, Store, Library, Review, Publishing, Media, Log), forms, DemoData
 ├─ dao/                  one interface per collection, plus TransactionRunner
@@ -116,7 +154,7 @@ src/main/java/com/mist/
 ├─ exception/            checked exceptions rooted at MistException
 └─ logging/              database operation log
 src/main/resources/
-├─ com/mist/ui/          views (FXML), mist-theme.css, Space Grotesk fonts, launcher icons
+├─ com/mist/ui/          views (FXML), report templates (JRXML), the themes, Space Grotesk fonts, launcher icons
 ├─ i18n/                 messages_es.properties, messages_en.properties
 └─ mist.properties, logback.xml
 src/main/packaging/      the Windows icon and the zip descriptor of the app image

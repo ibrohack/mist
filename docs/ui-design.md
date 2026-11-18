@@ -42,6 +42,8 @@ Default control behavior (typing in a field, scrolling a list, opening a combo b
 | `Formats` | `com.mist.ui.support` | Locale-aware money (EUR), dates and enum labels. |
 | `Images` | `com.mist.ui.support` | Loads covers, screenshots and avatars through `MediaService#image(ObjectId)` in the background, with a cache. |
 | `FilePicker` | `com.mist.ui` | Wraps `FileChooser` (open an image, save a PDF), so tests can stub the native dialogs. |
+| `Reports` | `com.mist.ui.report` | Fills the JRXML templates (receipt, sales) with what the screen shows and exports them as PDF with JasperReports; any failure is a `ReportException`. |
+| `GameForms` | `com.mist.ui.support` | Builds the `GameForm` of an edit from a stored game, and reads a price typed in either language (`12,99`, `12.99`, `12,99 €`). |
 | `HelpController` | `com.mist.ui.controller` | The help window's content ([C-6](#c-6-help)); `Navigator#showHelp()` opens the window. |
 | `DemoData`, `LogService` | `com.mist.service` | The demo content seeded into an empty database, and the admins' reader of the operation log. |
 | Controllers | `com.mist.ui.controller` | One per FXML view. They call services only through `UiTasks` and never touch DAOs (enforced by `LayerRulesTest`). |
@@ -193,6 +195,7 @@ flowchart LR
     subgraph SHELL [Shell: header + user menu]
         STORE -->|open game| GAME[Game page]
         GAME -->|Add to cart| CART[Cart]
+        GAME -->|Write a review| REVIEW
         STORE -->|header Cart| CART
         STORE -->|header Wishlist| WISHLIST[Wishlist]
         WISHLIST -->|open game| GAME
@@ -235,8 +238,7 @@ flowchart LR
 | Developer dashboard | `STUDIO` | `studio.fxml` | `StudioController` | developer | UC-18 View sales and export the report, UC-17 Delist a game |
 | Game editor | `GAME_EDITOR` | `game-editor.fxml` | `GameEditorController` | developer | UC-15 Create and edit a game, UC-16 Publish a game |
 
-The store, game, cart, wishlist, library, orders, dashboard and editor screens are detailed in their own sections,
-added with their implementation.
+Every screen is detailed below, with the reports and the help window after the screens that use them.
 
 ## Screens
 
@@ -644,13 +646,15 @@ editable table of the developer's games, with the actions **New game**, **Edit**
 | `priceColumn` | `TableColumn<Game, BigDecimal>`, `TextFieldTableCell` with a money converter | **Editable** |
 | `releaseColumn` | `TableColumn<Game, LocalDate>` | Localized date |
 | `unitsColumn`, `revenueColumn`, `ratingColumn` | `TableColumn<Game, ...>` | Count, money, average |
+| `newGameButton`, `salesReportButton` | `Button` (primary, secondary) | Always enabled |
+| `editButton`, `publishButton`, `delistButton` | `Button` | Enabled for a selected game, a draft, a published game |
 
 Context menu of the table: **Edit** (`editItem`), **Publish** (`publishItem`), **Delist** (`delistItem`).
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
 | STUDIO-1 | `StudioController#onNavigatedTo` | developer | `PublishingService#sales(ObjectId)` | **R1** Cards, chart and table. **R2** No games: placeholder `studio.empty`. |
-| STUDIO-2 | `priceColumn.onEditCommit → StudioController#onPriceCommit` | a number from 0 to 999.99 (`model.game.price`) | `PublishingService#update(ObjectId, ObjectId, GameForm)` with the game's other values unchanged | **R1** The row and the cards update. **R2** Invalid text or a rejection: the cell goes back to the old price; warning. |
+| STUDIO-2 | `priceColumn.onEditCommit → StudioController#onPriceCommit` | a number from 0 to 999.99 (`model.game.price`) | `PublishingService#update(ObjectId, ObjectId, GameForm)` with the game's other values unchanged | **R1** The dashboard reloads: the row, the cards and the sales report read the saved price. **R2** Invalid text or a rejection: the cell goes back to the old price; warning. |
 | STUDIO-3 | `newGameButton.onAction → StudioController#onNewGame` | name and price | `PublishingService#createDraft(ObjectId, String, BigDecimal)` | **R1** `Navigator#show(GAME_EDITOR, ObjectId)`. **R2** `ValidationException(model.game.*)`: message in the dialog. |
 | STUDIO-4 | `editButton`, `editItem` or a double click `→ StudioController#onEdit` | a game is selected | none | `Navigator#show(GAME_EDITOR, ObjectId)` |
 | STUDIO-5 | `publishButton` or `publishItem` `→ StudioController#onPublish` | a draft is selected | Confirmation, then `PublishingService#publish(ObjectId, ObjectId)` | **R1** The row shows Published. **R2** `ValidationException(model.game.incomplete)`: warning; the editor shows what is missing. |
@@ -662,7 +666,8 @@ Context menu of the table: **Edit** (`editItem`), **Publish** (`publishItem`), *
 **Aspect.** A scrollable form in groups: **Details** (name, price, release date, PEGI, description with a counter),
 **Media** (the cover and the screenshots, each with its button), **Requirements** (five fields), **Tags** (chips with
 a remove cross and a field to add one), **Languages** (check boxes), and **Achievements** (an editable table with Add
-and Remove). The bottom bar holds **Back**, **Save**, **Publish** and **Delist**, and the status of the game.
+and Remove). The top bar holds **Back**, the game's name and status chip, and **Delist**, **Publish** and **Save**
+(the default button); the form's message shows under it.
 
 | fx:id | Control | Format |
 |---|---|---|
@@ -677,7 +682,7 @@ and Remove). The bottom bar holds **Back**, **Save**, **Publish** and **Delist**
 | `languagesPane` | `FlowPane` of `CheckBox` | Two-letter codes, named in the UI language |
 | `achievementsTable` | `TableView<AchievementRow>`, editable | **Editable** name (up to 80) and description (up to 300) cells |
 | `addAchievementButton`, `removeAchievementButton` | `Button` | |
-| `statusLabel`, `formMessage` | `Label` | |
+| `titleLabel`, `statusLabel`, `formMessage` | `Label` | The game's name, its status chip, the form's message |
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
@@ -695,7 +700,8 @@ and Remove). The bottom bar holds **Back**, **Save**, **Publish** and **Delist**
 
 `Reports#sales(Developer, SalesReport, Path)` fills `com/mist/ui/report/sales.jrxml` with the dashboard's data: the
 studio, the date, the totals, and one line per game with its status, price, units, revenue and rating, in the UI
-language.
+language. The three summary cards repeat the dashboard's. A studio with no games still gets the header, the cards and
+zero totals (`whenNoDataType="AllSectionsNoDetail"`).
 
 ### Help
 
