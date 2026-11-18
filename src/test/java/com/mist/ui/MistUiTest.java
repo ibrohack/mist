@@ -5,6 +5,7 @@ import com.mist.fake.FakeDatabase;
 import com.mist.fake.MutableClock;
 import com.mist.fake.StubFilePicker;
 import com.mist.logging.DbOperationLogger;
+import com.mist.service.DemoData;
 import com.mist.ui.support.Dialogs;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
@@ -29,7 +30,8 @@ import java.util.Optional;
 /**
  * Base of the UI tests: MIST's real views, controllers and services on an in-memory data layer.
  *
- * <p>Each test gets a fresh {@link FakeDatabase}, a clock stopped at {@link #NOW}, and a {@link UiContext} whose
+ * <p>Each test gets a fresh {@link FakeDatabase} holding the {@link DemoData} (unless it overrides
+ * {@link #prepare()}), a clock stopped at {@link #NOW}, and a {@link UiContext} whose
  * service calls run on the JavaFX thread, so the screen is up to date as soon as an interaction returns. Interactions
  * fire the controls' own events on the JavaFX thread ({@link #click}, {@link #type}, {@link #choose}) instead of
  * moving the real mouse, so the tests do not take over the desktop.</p>
@@ -97,12 +99,13 @@ public abstract class MistUiTest {
     }
 
     /**
-     * Prepares data before the UI starts; the default does nothing.
+     * Prepares data before the UI starts; the default seeds the demo accounts and catalog.
      *
      * @throws Exception if preparing fails
      */
     protected void prepare() throws Exception {
-        // Nothing by default.
+        new DemoData(backend.users(), backend.games(), backend.orders(), backend.reviews(), backend.media(),
+                backend.transactions(), clock).seedIfEmpty();
     }
 
     /** Opens the first screen; the default shows the splash. */

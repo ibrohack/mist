@@ -3,13 +3,18 @@ package com.mist;
 import com.mist.config.AppConfig;
 import com.mist.dao.hibernate.HibernateDataAccess;
 import com.mist.exception.DataAccessException;
+import com.mist.exception.MistException;
 import com.mist.service.AuthService;
+import com.mist.service.DemoData;
 import com.mist.service.LibraryService;
 import com.mist.service.MediaService;
 import com.mist.service.PublishingService;
 import com.mist.service.ReviewService;
 import com.mist.service.StoreService;
 import com.mist.service.UserService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.util.Objects;
@@ -18,9 +23,12 @@ import java.util.Objects;
  * Wires MIST together: opens the data access layer and builds every service on it. The UI gets its services from here.
  *
  * <p>Open it once, when the splash checks the database, and close it when the app stops. Opening fails with a
- * {@link DataAccessException} if MongoDB cannot be reached, so the splash can show the offline state.</p>
+ * {@link DataAccessException} if MongoDB cannot be reached, so the splash can show the offline state. Unless
+ * {@code mist.seed.demo} is {@code false}, opening also fills an empty database with {@link DemoData}.</p>
  */
 public final class MistContext implements AutoCloseable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MistContext.class);
 
     private final HibernateDataAccess data;
     private final AuthService auth;
@@ -66,10 +74,35 @@ public final class MistContext implements AutoCloseable {
         Objects.requireNonNull(clock, "clock");
         HibernateDataAccess data = HibernateDataAccess.open(config);
         try {
-            return new MistContext(data, clock);
-        } catch (RuntimeException e) {
+            MistContext context = new MistContext(data, clock);
+            if (config.seedDemoData()) {
+                seed(data, clock);
+            }
+            return context;
+        } catch (DataAccessException | RuntimeException e) {
             data.close();
             throw e;
+        }
+    }
+
+    /**
+     * Fills an empty database with the demo content. A demo value that breaks a rule is a bug in the demo data, not a
+     * reason to keep MIST closed, so it is only logged; a database failure still fails the opening.
+     *
+     * @param data  the open data access layer
+     * @param clock the clock the content is dated with
+     * @throws DataAccessException if the database fails while seeding
+     */
+    private static void seed(HibernateDataAccess data, Clock clock) throws DataAccessException {
+        try {
+            if (new DemoData(data.users(), data.games(), data.orders(), data.reviews(), data.media(),
+                    data.transactions(), clock).seedIfEmpty()) {
+                LOG.info("Seeded the demo data into an empty database");
+            }
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (MistException e) {
+            LOG.error("The demo data broke a rule and was not fully seeded: {}", e.getMessage(), e);
         }
     }
 
