@@ -13,6 +13,8 @@ import com.mist.model.Media;
 import com.mist.model.Order;
 import com.mist.model.OrderStatus;
 import com.mist.model.PaymentCard;
+import com.mist.model.Phone;
+import com.mist.model.Player;
 import com.mist.model.Pegi;
 import com.mist.model.Review;
 import com.mist.model.Role;
@@ -51,9 +53,11 @@ import java.util.Set;
  * every start: it creates what is missing and brings existing validators up to date. Each step writes a line to the
  * operation log: {@code CREATE_COLLECTION}, {@code SET_VALIDATOR} or {@code CREATE_INDEX}.</p>
  *
- * <p>The validators repeat the model's limits, taken from its constants. Optional fields allow {@code null}, because
- * Hibernate writes a missing value as {@code null}. In {@code users}, fields of other roles are absent, so a
- * {@code oneOf} on {@code role} requires each role's own fields.</p>
+ * <p>The validators repeat the model's limits and patterns, taken from its constants, so the model and the database
+ * enforce one rule. Optional fields allow {@code null}, because Hibernate writes a missing value as {@code null}. In
+ * {@code users}, fields of other roles are absent, so a {@code oneOf} on {@code role} requires each role's own fields.
+ * Every document and embedded document rejects fields it does not declare ({@code additionalProperties: false}).
+ * {@code media} also checks the size of the image with {@code $binarySize}, which {@code $jsonSchema} cannot do.</p>
  */
 public final class SchemaSetup {
 
@@ -92,11 +96,11 @@ public final class SchemaSetup {
         MongoDatabase database = connection.client().getDatabase(connection.databaseName());
         Set<String> existing = database.listCollectionNames().into(new HashSet<>());
 
-        validate(database, existing, "users", users(), log);
-        validate(database, existing, "games", games(), log);
-        validate(database, existing, "orders", orders(), log);
-        validate(database, existing, "reviews", reviews(), log);
-        validate(database, existing, "media", media(), log);
+        validate(database, existing, "users", schema(users()), log);
+        validate(database, existing, "games", schema(games()), log);
+        validate(database, existing, "orders", schema(orders()), log);
+        validate(database, existing, "reviews", schema(reviews()), log);
+        validate(database, existing, "media", new Document("$and", List.of(schema(media()), imageSize())), log);
 
         MongoCollection<Document> users = database.getCollection("users");
         index(log, users, Indexes.ascending("email"), new IndexOptions().unique(true));
@@ -120,17 +124,38 @@ public final class SchemaSetup {
     }
 
     /**
+     * Wraps a schema into a validator.
+     *
+     * @param jsonSchema the {@code $jsonSchema}
+     * @return the validator
+     */
+    private static Document schema(Document jsonSchema) {
+        return new Document("$jsonSchema", jsonSchema);
+    }
+
+    /**
+     * Builds the query part of the {@code media} validator: the image holds 1 byte to {@link Media#MAX_BYTES}.
+     *
+     * @return the {@code $expr} condition
+     */
+    private static Document imageSize() {
+        Document size = new Document("$binarySize", "$data");
+        return new Document("$expr", new Document("$and", List.of(
+                new Document("$gte", List.of(size, 1)),
+                new Document("$lte", List.of(size, Media.MAX_BYTES)))));
+    }
+
+    /**
      * Creates a collection with its validator, or updates the validator, and logs what was done.
      *
-     * @param database   the database
-     * @param existing   the collections that exist
-     * @param name       the collection
-     * @param jsonSchema its {@code $jsonSchema}
-     * @param log        the operation log
+     * @param database  the database
+     * @param existing  the collections that exist
+     * @param name      the collection
+     * @param validator its validator: a {@code $jsonSchema}, possibly with query conditions
+     * @param log       the operation log
      */
-    private static void validate(MongoDatabase database, Set<String> existing, String name, Document jsonSchema,
+    private static void validate(MongoDatabase database, Set<String> existing, String name, Document validator,
                                  DbOperationLogger log) {
-        Document validator = new Document("$jsonSchema", jsonSchema);
         if (!existing.contains(name)) {
             try {
                 database.createCollection(name, new CreateCollectionOptions().validationOptions(new ValidationOptions()
@@ -192,11 +217,11 @@ public final class SchemaSetup {
                 .append("role", oneOfEnum(Role.class))
                 .append("firstName", text(1, User.MAX_FIRST_NAME_LENGTH))
                 .append("lastName", text(1, User.MAX_LAST_NAME_LENGTH))
-                .append("email", text(3, User.MAX_EMAIL_LENGTH))
+                .append("email", text(3, User.MAX_EMAIL_LENGTH).append("pattern", anchored(User.EMAIL_REGEX)))
                 .append("passwordHash", type(STRING).append("pattern", "^\\$argon2id\\$"))
                 .append("phone", object(true, new Document()
-                        .append("countryCode", type(STRING))
-                        .append("number", type(STRING)), "countryCode", "number"))
+                        .append("countryCode", matching(Phone.COUNTRY_CODE_REGEX))
+                        .append("number", matching(Phone.NUMBER_REGEX)), "countryCode", "number"))
                 .append("address", address(true))
                 .append("avatarId", type(OBJECT_ID, NULL))
                 .append("createdAt", type(DATE))
@@ -205,7 +230,7 @@ public final class SchemaSetup {
                 .append("preferences", object(false, new Document()
                         .append("language", oneOfEnum(Language.class))
                         .append("theme", oneOfEnum(Theme.class)), "language", "theme"))
-                .append("nickname", text(3, 24))
+                .append("nickname", matching(Player.NICKNAME_REGEX))
                 .append("card", card())
                 .append("library", array(object(false, new Document()
                         .append("gameId", type(OBJECT_ID))
@@ -234,6 +259,7 @@ public final class SchemaSetup {
                 .append("required", List.of("_id", "role", "firstName", "lastName", "email", "passwordHash",
                         "createdAt", "status", "preferences"))
                 .append("properties", properties)
+                .append("additionalProperties", false)
                 .append("oneOf", List.of(player, developer, admin));
     }
 
@@ -247,10 +273,10 @@ public final class SchemaSetup {
         return object(nullable, new Document()
                 .append("street", text(1, Address.MAX_STREET_LENGTH))
                 .append("details", optionalText(Address.MAX_DETAILS_LENGTH))
-                .append("postalCode", type(STRING))
+                .append("postalCode", matching(Address.POSTAL_CODE_REGEX))
                 .append("city", text(1, Address.MAX_CITY_LENGTH))
                 .append("province", optionalText(Address.MAX_PROVINCE_LENGTH))
-                .append("country", type(STRING).append("pattern", "^[A-Z]{2}$")),
+                .append("country", matching(Address.COUNTRY_REGEX)),
                 "street", "postalCode", "city", "country");
     }
 
@@ -263,7 +289,7 @@ public final class SchemaSetup {
         return object(false, new Document()
                 .append("holderName", text(1, PaymentCard.MAX_HOLDER_LENGTH))
                 .append("brand", oneOfEnum(CardBrand.class))
-                .append("last4", type(STRING).append("pattern", "^[0-9]{4}$"))
+                .append("last4", matching(PaymentCard.LAST4_REGEX))
                 .append("expiryMonth", type(INT).append("minimum", 1).append("maximum", 12))
                 .append("expiryYear", type(INT)
                         .append("minimum", PaymentCard.MIN_EXPIRY_YEAR)
@@ -315,7 +341,8 @@ public final class SchemaSetup {
         return new Document("bsonType", OBJECT)
                 .append("required", List.of("_id", "name", "price", "developerId", "screenshotIds", "tags",
                         "languages", "achievements", "stats", "status", "createdAt"))
-                .append("properties", properties);
+                .append("properties", properties)
+                .append("additionalProperties", false);
     }
 
     // ---------------------------------------------------------------------------------------------------- orders
@@ -342,7 +369,8 @@ public final class SchemaSetup {
                 .append("createdAt", type(DATE));
         return new Document("bsonType", OBJECT)
                 .append("required", List.of("_id", "playerId", "items", "total", "status", "paidWith", "createdAt"))
-                .append("properties", properties);
+                .append("properties", properties)
+                .append("additionalProperties", false);
     }
 
     // --------------------------------------------------------------------------------------------------- reviews
@@ -362,7 +390,8 @@ public final class SchemaSetup {
                 .append("createdAt", type(DATE));
         return new Document("bsonType", OBJECT)
                 .append("required", List.of("_id", "playerId", "gameId", "rating", "createdAt"))
-                .append("properties", properties);
+                .append("properties", properties)
+                .append("additionalProperties", false);
     }
 
     // ----------------------------------------------------------------------------------------------------- media
@@ -382,7 +411,8 @@ public final class SchemaSetup {
                 .append("createdAt", type(DATE));
         return new Document("bsonType", OBJECT)
                 .append("required", List.of("_id", "contentType", "data", "fileName", "ownerId", "createdAt"))
-                .append("properties", properties);
+                .append("properties", properties)
+                .append("additionalProperties", false);
     }
 
     // --------------------------------------------------------------------------------------------------- helpers
@@ -406,6 +436,27 @@ public final class SchemaSetup {
      */
     private static Document text(int minLength, int maxLength) {
         return type(STRING).append("minLength", minLength).append("maxLength", maxLength);
+    }
+
+    /**
+     * Builds the schema of a text that must match a model pattern as a whole.
+     *
+     * @param regex the model's regular expression, without anchors
+     * @return the schema
+     */
+    private static Document matching(String regex) {
+        return type(STRING).append("pattern", anchored(regex));
+    }
+
+    /**
+     * Anchors a model pattern, because {@code $jsonSchema} matches anywhere in the text while the model matches the
+     * whole text.
+     *
+     * @param regex the model's regular expression
+     * @return {@code ^(?:regex)$}
+     */
+    private static String anchored(String regex) {
+        return "^(?:" + regex + ")$";
     }
 
     /**
@@ -449,7 +500,8 @@ public final class SchemaSetup {
      */
     private static Document object(boolean nullable, Document properties, String... required) {
         Document object = nullable ? type(OBJECT, NULL) : type(OBJECT);
-        return object.append("required", List.of(required)).append("properties", properties);
+        return object.append("required", List.of(required)).append("properties", properties)
+                .append("additionalProperties", false);
     }
 
     /**
