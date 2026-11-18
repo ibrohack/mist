@@ -28,43 +28,43 @@ class GameTest extends MistUiTest {
     @Test
     void theContextMenuOpensTheGamePage() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        select("newList", "Starlit Drift");
+        select("newList", "Red Dead Redemption 2");
 
         MenuItem open = list("newList").getContextMenu().getItems().getFirst();
         robot.interact(open::fire);
 
         assertEquals(View.GAME, navigator.current());
-        assertEquals("Starlit Drift", text("nameTitle"));
-        assertEquals("Lumen Works", text("studioText"));
-        assertEquals(price(db.gameByName("Starlit Drift")), text("priceLabel"));
+        assertEquals("Red Dead Redemption 2", text("nameTitle"));
+        assertEquals("Rockstar Studios", text("studioText"));
+        assertEquals(price(db.gameByName("Red Dead Redemption 2")), text("priceLabel"));
         assertEquals(3, this.<FlowPane>node("tagsPane").getChildren().size());
         assertEquals(3, this.<HBox>node("thumbnails").getChildren().size());
         assertEquals("Windows 10 64-bit", text("osText"));
         assertTrue(text("languagesText").contains("japonés"));
-        assertEquals("PEGI 12", text("pegiBadge"));
+        assertEquals("PEGI 18", text("pegiBadge"));
         assertEquals(3, this.<ListView<Achievement>>node("achievementsList").getItems().size());
     }
 
     @Test
     void enterOnAListAndTheBannerAlsoOpenGames() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        select("topList", "Ashen Lanterns");
+        select("topList", "Grand Theft Auto V");
         ListView<Game> top = list("topList");
         robot.interact(() -> top.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.ENTER,
                 false, false, false, false)));
-        assertEquals("Ashen Lanterns", text("nameTitle"));
+        assertEquals("Grand Theft Auto V", text("nameTitle"));
 
         click("backButton");
         assertEquals(View.STORE, navigator.current());
         click("featuredOpen");
-        assertEquals("Starlit Drift", text("nameTitle"));
+        assertEquals("Red Dead Redemption 2", text("nameTitle"));
     }
 
     @Test
     void anOwnedGameSaysSoInsteadOfOfferingToBuy() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
 
-        openGame("Ashen Lanterns");
+        openGame("Grand Theft Auto V");
 
         assertTrue(visible("ownedLabel"));
         assertFalse(visible("addToCartButton"));
@@ -74,7 +74,7 @@ class GameTest extends MistUiTest {
     @Test
     void addingToTheCartAndTheWishlistUpdatesTheBuyBox() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        openGame("Pixel Pantry");
+        openGame("Tony Hawk's Pro Skater 2");
 
         click("addToCartButton");
         assertFalse(visible("addToCartButton"));
@@ -83,7 +83,7 @@ class GameTest extends MistUiTest {
         click("wishlistButton");
         assertEquals(msg("game.onWishlist"), text("wishlistButton"));
         Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
-        ObjectId pantry = db.gameByName("Pixel Pantry").getId();
+        ObjectId pantry = db.gameByName("Tony Hawk's Pro Skater 2").getId();
         assertTrue(lucia.getCartGameIds().contains(pantry));
         assertTrue(lucia.getWishlistGameIds().contains(pantry));
     }
@@ -92,7 +92,7 @@ class GameTest extends MistUiTest {
     void aGuestIsAskedToLogInToBuy() throws Exception {
         robot.interact(() -> navigator.show(View.LOGIN));
         click("guestLink");
-        openGame("Starlit Drift");
+        openGame("Red Dead Redemption 2");
 
         click("addToCartButton");
         assertEquals(msg("game.loginToBuy"), dialogMessage());
@@ -105,7 +105,7 @@ class GameTest extends MistUiTest {
     void developersOnlySeeThePrice() throws Exception {
         loginAs(DemoData.DEVELOPER_EMAIL);
 
-        openGame("Starlit Drift");
+        openGame("Red Dead Redemption 2");
 
         assertTrue(visible("priceLabel"));
         assertFalse(visible("addToCartButton"));
@@ -116,7 +116,7 @@ class GameTest extends MistUiTest {
     void reviewsShowTheirAuthorsByPages() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
 
-        openGame("Ashen Lanterns");
+        openGame("Grand Theft Auto V");
 
         ListView<GameReview> reviews = node("reviewsList");
         assertEquals(2, reviews.getItems().size());

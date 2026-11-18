@@ -31,33 +31,33 @@ class StudioTest extends MistUiTest {
 
         assertEquals(View.STUDIO, navigator.current());
         assertTrue(visible("studioLink"));
-        assertEquals("Nebula Forge", text("studioTitle"));
-        assertEquals(7, table().getItems().size());
-        assertEquals(Formats.money(new BigDecimal("99.96")), text("revenueLabel"));
-        assertEquals("5", text("unitsLabel"));
-        assertEquals("6", text("publishedLabel"));
+        assertEquals("Rockstar North", text("studioTitle"));
+        assertEquals(3, table().getItems().size());
+        assertEquals(Formats.money(new BigDecimal("59.98")), text("revenueLabel"));
+        assertEquals("2", text("unitsLabel"));
+        assertEquals("2", text("publishedLabel"));
         BarChart<String, Number> chart = node("revenueChart");
-        assertEquals(6, chart.getData().getFirst().getData().size());
+        assertEquals(2, chart.getData().getFirst().getData().size());
     }
 
     @Test
     void aPriceIsEditedInPlaceAndSaved() throws Exception {
         loginAs(DemoData.DEVELOPER_EMAIL);
 
-        editPrice("Tidebreak Harbor", "17,50");
+        editPrice("Grand Theft Auto IV", "17,50");
 
-        assertEquals(new BigDecimal("17.50"), db.gameByName("Tidebreak Harbor").getPrice());
-        assertEquals(new BigDecimal("17.50"), row("Tidebreak Harbor").getPrice());
+        assertEquals(new BigDecimal("17.50"), db.gameByName("Grand Theft Auto IV").getPrice());
+        assertEquals(new BigDecimal("17.50"), row("Grand Theft Auto IV").getPrice());
     }
 
     @Test
     void aWrongPriceGoesBackAndWarns() throws Exception {
         loginAs(DemoData.DEVELOPER_EMAIL);
 
-        editPrice("Tidebreak Harbor", "1500");
+        editPrice("Grand Theft Auto IV", "1500");
 
         assertEquals(msg(ModelKeys.GAME_PRICE), dialogMessage());
-        assertEquals(new BigDecimal("24.99"), db.gameByName("Tidebreak Harbor").getPrice());
+        assertEquals(new BigDecimal("19.99"), db.gameByName("Grand Theft Auto IV").getPrice());
     }
 
     @Test
@@ -72,7 +72,7 @@ class StudioTest extends MistUiTest {
         assertEquals(View.GAME_EDITOR, navigator.current());
         assertEquals("Hollow Echo", text("titleLabel"));
         click("backButton");
-        assertEquals(8, table().getItems().size());
+        assertEquals(4, table().getItems().size());
         assertEquals(GameStatus.DRAFT, row("Hollow Echo").getStatus());
         assertEquals(new BigDecimal("12.99"), row("Hollow Echo").getPrice());
     }
@@ -87,7 +87,7 @@ class StudioTest extends MistUiTest {
         click("dialogConfirm");
 
         assertEquals(msg(ModelKeys.GAME_PRICE), text("formMessage"));
-        assertEquals(7, table().getItems().size());
+        assertEquals(3, table().getItems().size());
     }
 
     @Test
@@ -100,7 +100,7 @@ class StudioTest extends MistUiTest {
         click("dialogConfirm");
 
         assertEquals(GameStatus.PUBLISHED, db.gameByName(DemoData.DRAFT_GAME).getStatus());
-        assertEquals("7", text("publishedLabel"));
+        assertEquals("3", text("publishedLabel"));
     }
 
     @Test
@@ -123,15 +123,15 @@ class StudioTest extends MistUiTest {
     @Test
     void aPublishedGameIsTakenOffSale() throws Exception {
         loginAs(DemoData.DEVELOPER_EMAIL);
-        select("Ashen Lanterns");
+        select("Grand Theft Auto V");
         assertTrue(this.<Button>node("publishButton").isDisable());
 
         click("delistButton");
         click("dialogConfirm");
 
-        assertEquals(GameStatus.DELISTED, row("Ashen Lanterns").getStatus());
+        assertEquals(GameStatus.DELISTED, row("Grand Theft Auto V").getStatus());
         assertTrue(backend.services().store().newReleases(50).stream()
-                .noneMatch(game -> game.getName().equals("Ashen Lanterns")));
+                .noneMatch(game -> game.getName().equals("Grand Theft Auto V")));
     }
 
     @Test

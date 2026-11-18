@@ -34,15 +34,15 @@ class RegisterTest extends MistUiTest {
 
     @Test
     void playerRegistersAndLandsOnLoginWithTheEmail() {
-        fillAccount("ana@mist.local");
+        fillAccount("ana@mist.com");
         fillPlayer("ana_b", "4111 1111 1111 1111");
 
         click("registerButton");
 
         assertEquals(View.LOGIN, navigator.current());
-        assertEquals("ana@mist.local", text("emailField"));
+        assertEquals("ana@mist.com", text("emailField"));
         assertEquals(msg("register.done"), text("formMessage"));
-        User ana = db.userByEmail("ana@mist.local");
+        User ana = db.userByEmail("ana@mist.com");
         Player player = assertInstanceOf(Player.class, ana);
         assertEquals("ana_b", player.getNickname());
         assertEquals("1111", player.getCard().last4());
@@ -54,21 +54,21 @@ class RegisterTest extends MistUiTest {
         click("developerRadio");
         assertFalse(visible("nicknameField"));
         assertTrue(visible("studioNameField"));
-        fillAccount("studio@mist.local");
+        fillAccount("studio@mist.com");
         type("studioNameField", "Moonlit Bytes");
         type("bankAccountField", "GB29 NWBK 6016 1331 9268 19");
 
         click("registerButton");
 
         assertEquals(View.LOGIN, navigator.current());
-        Developer developer = assertInstanceOf(Developer.class, db.userByEmail("studio@mist.local"));
+        Developer developer = assertInstanceOf(Developer.class, db.userByEmail("studio@mist.com"));
         assertEquals("Moonlit Bytes", developer.getStudioName());
         assertEquals("GB29NWBK60161331926819", developer.getBankAccount());
     }
 
     @Test
     void passwordsAreCheckedBeforeCallingTheService() {
-        fillAccount("ana@mist.local");
+        fillAccount("ana@mist.com");
         fillPlayer("ana_b", "4111111111111111");
         type("passwordField", "short");
         type("repeatField", "other");
@@ -97,7 +97,7 @@ class RegisterTest extends MistUiTest {
 
     @Test
     void takenNicknameIsMarkedOnTheNicknameField() {
-        fillAccount("ana@mist.local");
+        fillAccount("ana@mist.com");
         fillPlayer("lucia", "4111111111111111");
 
         click("registerButton");
@@ -108,20 +108,20 @@ class RegisterTest extends MistUiTest {
 
     @Test
     void cardNumberFailingItsChecksumIsMarked() {
-        fillAccount("ana@mist.local");
+        fillAccount("ana@mist.com");
         fillPlayer("ana_b", "4111 1111 1111 1112");
 
         click("registerButton");
 
         assertTrue(marked("cardNumberField"));
         assertEquals(msg(ModelKeys.CARD_NUMBER), text("formMessage"));
-        assertNull(db.userByEmail("ana@mist.local"));
+        assertNull(db.userByEmail("ana@mist.com"));
     }
 
     @Test
     void expiredCardIsMarkedBeforeCallingTheService() {
         YearMonth lastMonth = YearMonth.now().minusMonths(1);
-        fillAccount("ana@mist.local");
+        fillAccount("ana@mist.com");
         fillPlayer("ana_b", "4111111111111111");
         choose("expiryYearBox", Year.now().getValue());
         choose("expiryMonthBox", lastMonth.getYear() == Year.now().getValue() ? lastMonth.getMonthValue() : 1);
@@ -136,7 +136,7 @@ class RegisterTest extends MistUiTest {
 
     @Test
     void halfAPhoneIsRefused() {
-        fillAccount("ana@mist.local");
+        fillAccount("ana@mist.com");
         fillPlayer("ana_b", "4111111111111111");
         type("phoneNumberField", "");
 

@@ -32,8 +32,8 @@ class CartTest extends MistUiTest {
 
         assertEquals(View.CART, navigator.current());
         assertEquals(1, cart().getItems().size());
-        assertEquals("Gravewind Tactics", cart().getItems().getFirst().getName());
-        assertEquals(I18n.format("cart.total", Formats.money(new BigDecimal("34.99"))), text("totalLabel"));
+        assertEquals("Grand Theft Auto IV", cart().getItems().getFirst().getName());
+        assertEquals(I18n.format("cart.total", Formats.money(new BigDecimal("19.99"))), text("totalLabel"));
         assertTrue(text("cardLabel").contains("•••• 1111"));
         assertEquals("1", text("cartBadge"));
     }
@@ -59,7 +59,7 @@ class CartTest extends MistUiTest {
         contextItem("moveItem");
 
         Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
-        ObjectId gravewind = db.gameByName("Gravewind Tactics").getId();
+        ObjectId gravewind = db.gameByName("Grand Theft Auto IV").getId();
         assertTrue(lucia.getWishlistGameIds().contains(gravewind));
         assertFalse(lucia.getCartGameIds().contains(gravewind));
     }
@@ -72,14 +72,14 @@ class CartTest extends MistUiTest {
         click("termsCheck");
         assertFalse(this.<Button>node("checkoutButton").isDisable());
         click("checkoutButton");
-        assertTrue(dialogMessage().contains(Formats.money(new BigDecimal("34.99"))));
+        assertTrue(dialogMessage().contains(Formats.money(new BigDecimal("19.99"))));
         click("dialogConfirm");
 
-        assertEquals(I18n.format("cart.done", 1, Formats.money(new BigDecimal("34.99"))), dialogMessage());
+        assertEquals(I18n.format("cart.done", 1, Formats.money(new BigDecimal("19.99"))), dialogMessage());
         assertTrue(cart().getItems().isEmpty());
         Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
-        assertTrue(lucia.owns(db.gameByName("Gravewind Tactics").getId()));
-        assertTrue(((Player) context.session().requireUser()).owns(db.gameByName("Gravewind Tactics").getId()));
+        assertTrue(lucia.owns(db.gameByName("Grand Theft Auto IV").getId()));
+        assertTrue(((Player) context.session().requireUser()).owns(db.gameByName("Grand Theft Auto IV").getId()));
         assertFalse(visible("cartBadge"));
     }
 
@@ -92,7 +92,7 @@ class CartTest extends MistUiTest {
         click("dialogCancel");
 
         assertEquals(1, cart().getItems().size());
-        assertFalse(((Player) db.userByEmail(DemoData.PLAYER_EMAIL)).owns(db.gameByName("Gravewind Tactics").getId()));
+        assertFalse(((Player) db.userByEmail(DemoData.PLAYER_EMAIL)).owns(db.gameByName("Grand Theft Auto IV").getId()));
     }
 
     @Test
@@ -109,8 +109,8 @@ class CartTest extends MistUiTest {
     @Test
     void aGameTakenOffSaleMeanwhileIsReported() throws Exception {
         openCart(DemoData.PLAYER_EMAIL);
-        User nebula = backend.services().auth().login(DemoData.DEVELOPER_EMAIL, DemoData.PASSWORD.toCharArray());
-        backend.services().publishing().delist(nebula.getId(), db.gameByName("Gravewind Tactics").getId());
+        User rockstarNorth = backend.services().auth().login(DemoData.DEVELOPER_EMAIL, DemoData.PASSWORD.toCharArray());
+        backend.services().publishing().delist(rockstarNorth.getId(), db.gameByName("Grand Theft Auto IV").getId());
 
         checkOut();
 
@@ -151,7 +151,7 @@ class CartTest extends MistUiTest {
     @Test
     void theGamePageLeadsToTheCart() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        ObjectId gravewind = db.gameByName("Gravewind Tactics").getId();
+        ObjectId gravewind = db.gameByName("Grand Theft Auto IV").getId();
         robot.interact(() -> navigator.show(View.GAME, gravewind));
 
         click("goToCartButton");

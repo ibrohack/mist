@@ -58,8 +58,8 @@ class GameEditorTest extends MistUiTest {
 
         assertEquals(View.GAME_EDITOR, navigator.current());
         assertEquals(DemoData.DRAFT_GAME, text("nameField"));
-        assertEquals("9,99", text("priceField"));
-        assertEquals(Pegi.PEGI_12, this.<ComboBox<Pegi>>node("pegiBox").getValue());
+        assertEquals("79,99", text("priceField"));
+        assertEquals(Pegi.PEGI_18, this.<ComboBox<Pegi>>node("pegiBox").getValue());
         assertEquals(2, this.<FlowPane>node("tagsPane").getChildren().size());
         assertEquals(3, achievements().getItems().size());
         assertTrue(this.<javafx.scene.control.CheckBox>node("lang-es").isSelected());
@@ -70,22 +70,22 @@ class GameEditorTest extends MistUiTest {
     void theWholeFormIsSaved() throws Exception {
         openEditor(DemoData.DRAFT_GAME);
 
-        type("descriptionArea", "A lighthouse, a radio and a message from tomorrow.");
+        type("descriptionArea", "Two outlaws, one state and a heist gone wrong.");
         type("priceField", "11,50");
         type("tagField", "Indie");
         click("addTagButton");
         click("lang-fr");
-        click("removeTag-mystery");
-        editAchievement(0, "First signal");
+        click("removeTag-crime");
+        editAchievement(0, "First heist");
         click("saveButton");
 
         assertEquals(msg("editor.saved"), text("formMessage"));
         Game saved = db.gameByName(DemoData.DRAFT_GAME);
-        assertEquals("A lighthouse, a radio and a message from tomorrow.", saved.getDescription());
+        assertEquals("Two outlaws, one state and a heist gone wrong.", saved.getDescription());
         assertEquals(new BigDecimal("11.50"), saved.getPrice());
-        assertEquals(List.of("narrative", "indie"), saved.getTags());
+        assertEquals(List.of("open world", "indie"), saved.getTags());
         assertTrue(saved.getLanguages().contains("fr"));
-        assertEquals("First signal", saved.getAchievements().getFirst().name());
+        assertEquals("First heist", saved.getAchievements().getFirst().name());
     }
 
     @Test
@@ -95,7 +95,7 @@ class GameEditorTest extends MistUiTest {
         editAchievement(1, "  ");
 
         assertEquals(msg(ModelKeys.ACHIEVEMENT), text("formMessage"));
-        assertEquals("Collector", achievements().getItems().get(1).getName());
+        assertEquals("Bonnie and Clyde", achievements().getItems().get(1).getName());
     }
 
     @Test
@@ -132,7 +132,7 @@ class GameEditorTest extends MistUiTest {
         click("saveButton");
 
         assertTrue(marked("priceField"));
-        assertEquals(new BigDecimal("9.99"), db.gameByName(DemoData.DRAFT_GAME).getPrice());
+        assertEquals(new BigDecimal("79.99"), db.gameByName(DemoData.DRAFT_GAME).getPrice());
     }
 
     @Test
@@ -182,19 +182,19 @@ class GameEditorTest extends MistUiTest {
 
     @Test
     void aPublishedGameIsTakenOffSaleFromTheEditor() throws Exception {
-        openEditor("Ashen Lanterns");
+        openEditor("Grand Theft Auto V");
 
         click("delistButton");
         click("dialogConfirm");
 
-        assertEquals(GameStatus.DELISTED, db.gameByName("Ashen Lanterns").getStatus());
+        assertEquals(GameStatus.DELISTED, db.gameByName("Grand Theft Auto V").getStatus());
         assertTrue(this.<javafx.scene.control.Button>node("publishButton").isDisable());
     }
 
     @Test
     void anotherDevelopersGameIsRefused() throws Exception {
         loginAs(DemoData.DEVELOPER_EMAIL);
-        ObjectId theirs = db.gameByName("Starlit Drift").getId();
+        ObjectId theirs = db.gameByName("Red Dead Redemption 2").getId();
 
         robot.interact(() -> navigator.show(View.GAME_EDITOR, theirs));
 

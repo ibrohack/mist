@@ -51,26 +51,26 @@ class OrdersTest extends MistUiTest {
     @Test
     void aRecentGameIsReturnedFromTheOrders() throws Exception {
         openOrders();
-        select("Tidebreak Harbor");
+        select("Super Mario Odyssey");
         assertFalse(this.<Button>node("returnButton").isDisable());
 
         click("returnButton");
-        assertTrue(dialogMessage().contains(Formats.money(new BigDecimal("24.99"))));
+        assertTrue(dialogMessage().contains(Formats.money(new BigDecimal("49.99"))));
         click("dialogConfirm");
 
-        assertEquals(I18n.format("library.returned", Formats.money(new BigDecimal("24.99"))), dialogMessage());
+        assertEquals(I18n.format("library.returned", Formats.money(new BigDecimal("49.99"))), dialogMessage());
         OrderRow order = table().getRoot().getChildren().getFirst().getValue();
         assertEquals(OrderStatus.PARTIALLY_REFUNDED, order.order().getStatus());
         Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
-        assertFalse(lucia.owns(db.gameByName("Tidebreak Harbor").getId()));
-        assertNotNull(row("Tidebreak Harbor").item().refundedAt());
+        assertFalse(lucia.owns(db.gameByName("Super Mario Odyssey").getId()));
+        assertNotNull(row("Super Mario Odyssey").item().refundedAt());
     }
 
     @Test
     void anOldGameCannotBeReturned() throws Exception {
         openOrders();
 
-        select("Ashen Lanterns");
+        select("Grand Theft Auto V");
 
         assertTrue(this.<Button>node("returnButton").isDisable());
     }
@@ -78,7 +78,7 @@ class OrdersTest extends MistUiTest {
     @Test
     void theWindowClosingMeanwhileIsReported() throws Exception {
         openOrders();
-        select("Neon Courier 2088");
+        select("Metroid Prime");
         clock.advance(Duration.ofDays(15));
 
         click("returnButton");
@@ -105,7 +105,7 @@ class OrdersTest extends MistUiTest {
         loginAs(DemoData.PLAYER_EMAIL);
         click("libraryLink");
         ListView<OwnedGame> list = node("gameList");
-        OwnedGame neon = list.getItems().stream().filter(g -> g.game().getName().equals("Neon Courier 2088"))
+        OwnedGame neon = list.getItems().stream().filter(g -> g.game().getName().equals("Metroid Prime"))
                 .findFirst().orElseThrow();
         robot.interact(() -> list.getSelectionModel().select(neon));
         robot.interact(() -> list.getContextMenu().getOnShowing().handle(null));
@@ -125,7 +125,7 @@ class OrdersTest extends MistUiTest {
         loginAs(DemoData.PLAYER_EMAIL);
         click("libraryLink");
         ListView<OwnedGame> list = node("gameList");
-        OwnedGame paper = list.getItems().stream().filter(g -> g.game().getName().equals("Paper Kites"))
+        OwnedGame paper = list.getItems().stream().filter(g -> g.game().getName().equals("Super Mario Galaxy"))
                 .findFirst().orElseThrow();
         robot.interact(() -> list.getSelectionModel().select(paper));
 

@@ -63,14 +63,28 @@ The splash connects to MongoDB; if it cannot, MIST shows the offline screen with
 On the first start against an empty database, MIST seeds demo content (turn it off with `mist.seed.demo=false`).
 Every demo account uses the password `mist2026`:
 
-| Account             | Role      | What it has                                                         |
-| ------------------- | --------- | ------------------------------------------------------------------- |
-| `admin@mist.local`  | Admin     | The operation log viewer                                            |
-| `nebula@mist.local` | Developer | Nebula Forge: six published games and one draft (The Quiet Signal)  |
-| `lumen@mist.local`  | Developer | Lumen Works: five published games                                   |
-| `lucia@mist.local`  | Player    | Four games (two still returnable), a cart, a wishlist, two reviews  |
-| `marc@mist.local`   | Player    | Two games and two reviews                                           |
-| `nora@mist.local`   | Player    | Two games bought 20 days ago and two reviews                        |
+The catalog is Metacritic's fifteen highest rated games of all time, each sold by the studio that made it, with its
+real cover and screenshots (sources in `src/main/resources/com/mist/demo/SOURCES.md`). None of them is free, so the
+store's Free tab starts empty.
+
+| Account                        | Role      | What it has                                                                 |
+| ------------------------------ | --------- | --------------------------------------------------------------------------- |
+| `admin@mist.com`               | Admin     | The operation log viewer                                                    |
+| `rockstarnorth@mist.com`       | Developer | Rockstar North: GTA IV and GTA V, and Grand Theft Auto VI as a draft        |
+| `rockstar.studios@mist.com`    | Developer | Rockstar Studios: Red Dead Redemption 2, the newest release                 |
+| `nintendo.epd@mist.com`        | Developer | Nintendo EPD: Breath of the Wild and Super Mario Odyssey                    |
+| `nintendo.ead@mist.com`        | Developer | Nintendo EAD: Ocarina of Time                                               |
+| `nintendo.ead.tokyo@mist.com`  | Developer | Nintendo EAD Tokyo: Super Mario Galaxy and Super Mario Galaxy 2             |
+| `dma.design@mist.com`          | Developer | DMA Design: Grand Theft Auto III                                            |
+| `namco@mist.com`               | Developer | Namco: SoulCalibur                                                          |
+| `neversoft@mist.com`           | Developer | Neversoft: Tony Hawk's Pro Skater 2                                         |
+| `rare@mist.com`                | Developer | Rare: Perfect Dark                                                          |
+| `retro.studios@mist.com`       | Developer | Retro Studios: Metroid Prime                                                |
+| `bungie@mist.com`              | Developer | Bungie: Halo: Combat Evolved                                                |
+| `visual.concepts@mist.com`     | Developer | Visual Concepts: NFL 2K1                                                    |
+| `lucia@mist.com`               | Player    | Four games (two still returnable), a cart, a wishlist, two reviews          |
+| `marc@mist.com`                | Player    | Two games and two reviews                                                   |
+| `nora@mist.com`                | Player    | Two games bought 20 days ago and two reviews                                |
 
 ### Demo script
 
@@ -78,30 +92,30 @@ A walk through every use case, one role at a time. F1 opens the help of the curr
 menu (the avatar, top right) switches the language and the theme.
 
 **Guest.** On the login screen, press *Enter as guest*. Browse the store's carousel and its New, Top sellers and Free
-tabs, search for `lantern`, and open a game. *Add to cart* asks you to log in.
+tabs, search for `zelda`, and open a game. *Add to cart* asks you to log in.
 
-**Player** (`lucia@mist.local`).
+**Player** (`lucia@mist.com`).
 
-1. *Cart*: Gravewind Tactics is waiting. Tick the terms, check out, confirm, and save the receipt as a PDF.
-2. *Wishlist*: move Starlit Drift to the cart, or remove it.
-3. *Library*: search, sort and filter by tag. Right-click Tidebreak Harbor and write a review; it shows on the game
+1. *Cart*: Grand Theft Auto IV is waiting. Tick the terms, check out, confirm, and save the receipt as a PDF.
+2. *Wishlist*: move Red Dead Redemption 2 to the cart, or remove it.
+3. *Library*: search, sort and filter by tag. Right-click Super Mario Odyssey and write a review; it shows on the game
    page.
-4. Right-click Neon Courier 2088 and *Return* it (it was bought today, so it is inside the 14 days).
+4. Right-click Metroid Prime and *Return* it (it was bought today, so it is inside the 14 days).
 5. *Orders*: the returned game shows its refund date; the 20-day-old order cannot be returned. Download a receipt.
 6. User menu, *Profile*: change the avatar, the card or the password, one row at a time.
 
-**Developer** (`nebula@mist.local`).
+**Developer** (`rockstarnorth@mist.com`).
 
 1. The dashboard opens with the revenue, units and games on sale, the revenue chart and the table of games.
-2. Double-click Tidebreak Harbor's price, type `19,99` and press Enter. Type `free` instead and the old price comes
+2. Double-click Grand Theft Auto IV's price, type `14,99` and press Enter. Type `free` instead and the old price comes
    back with a warning.
 3. *New game*: give a name and a price; the editor opens. *Publish* marks in red what the draft lacks. Fill it in,
    change the cover, add tags, languages and achievements (double-click a cell), *Save*, then *Publish*.
-4. Back on the dashboard, select The Quiet Signal (complete already) and *Publish* it; select a published game and
+4. Back on the dashboard, select Grand Theft Auto VI (complete already) and *Publish* it; select a published game and
    *Take off sale*.
 5. *Sales report* saves the dashboard's figures as a PDF.
 
-**Admin** (`admin@mist.local`). The operation log opens on the newest day with database operations. Filter by day,
+**Admin** (`admin@mist.com`). The operation log opens on the newest day with database operations. Filter by day,
 user, operation or *Failed only*, and right-click a row to copy it. What other users do while you watch shows up after
 *Refresh*.
 

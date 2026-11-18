@@ -52,8 +52,8 @@ class ProfileTest extends MistUiTest {
     void developerSeesStudioAndAMaskedIban() throws Exception {
         openProfile(DemoData.DEVELOPER_EMAIL);
 
-        assertEquals("Nebula Forge", text("studioValue"));
-        assertEquals("ES91 •••• 1332", text("bankValue"));
+        assertEquals("Rockstar North", text("studioValue"));
+        assertEquals("GB25 •••• 5678", text("bankValue"));
         assertFalse(visible("nicknameValue"));
     }
 

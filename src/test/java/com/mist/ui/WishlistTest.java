@@ -26,7 +26,7 @@ class WishlistTest extends MistUiTest {
 
         assertEquals(View.WISHLIST, navigator.current());
         assertEquals(1, list().getItems().size());
-        assertEquals("Starlit Drift", list().getItems().getFirst().getName());
+        assertEquals("Red Dead Redemption 2", list().getItems().getFirst().getName());
         assertTrue(this.<Button>node("addToCartButton").isDisable());
     }
 
@@ -38,7 +38,7 @@ class WishlistTest extends MistUiTest {
         click("addToCartButton");
 
         Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
-        ObjectId starlit = db.gameByName("Starlit Drift").getId();
+        ObjectId starlit = db.gameByName("Red Dead Redemption 2").getId();
         assertTrue(lucia.getCartGameIds().contains(starlit));
         assertFalse(lucia.getWishlistGameIds().contains(starlit));
         assertTrue(list().getItems().isEmpty());
@@ -53,7 +53,7 @@ class WishlistTest extends MistUiTest {
         contextItem("removeItem");
 
         assertTrue(((Player) db.userByEmail(DemoData.PLAYER_EMAIL)).getWishlistGameIds().isEmpty());
-        assertEquals(I18n.format("wishlist.removed", "Starlit Drift"), text("statusLabel"));
+        assertEquals(I18n.format("wishlist.removed", "Red Dead Redemption 2"), text("statusLabel"));
     }
 
     @Test
@@ -64,14 +64,14 @@ class WishlistTest extends MistUiTest {
         contextItem("openItem");
 
         assertEquals(View.GAME, navigator.current());
-        assertEquals("Starlit Drift", text("nameTitle"));
+        assertEquals("Red Dead Redemption 2", text("nameTitle"));
     }
 
     @Test
     void aGameTakenOffSaleCannotMoveToTheCart() throws Exception {
         openWishlist();
-        User lumen = backend.services().auth().login(DemoData.SECOND_DEVELOPER_EMAIL, DemoData.PASSWORD.toCharArray());
-        backend.services().publishing().delist(lumen.getId(), db.gameByName("Starlit Drift").getId());
+        User rockstarStudios = backend.services().auth().login(DemoData.SECOND_DEVELOPER_EMAIL, DemoData.PASSWORD.toCharArray());
+        backend.services().publishing().delist(rockstarStudios.getId(), db.gameByName("Red Dead Redemption 2").getId());
         robot.interact(() -> list().getSelectionModel().select(0));
 
         click("addToCartButton");

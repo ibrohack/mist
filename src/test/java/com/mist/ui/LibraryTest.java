@@ -33,7 +33,7 @@ class LibraryTest extends MistUiTest {
         openLibrary(DemoData.PLAYER_EMAIL);
 
         assertEquals(View.LIBRARY, navigator.current());
-        assertEquals(List.of("Tidebreak Harbor", "Neon Courier 2088", "Ashen Lanterns", "Paper Kites"), names());
+        assertEquals(List.of("Super Mario Odyssey", "Metroid Prime", "Grand Theft Auto V", "Super Mario Galaxy"), names());
         assertEquals(4, this.<TilePane>node("gameGrid").getChildren().size());
         assertFalse(visible("emptyState"));
     }
@@ -42,24 +42,24 @@ class LibraryTest extends MistUiTest {
     void recentPurchasesSayUntilWhenTheyCanBeReturned() throws Exception {
         openLibrary(DemoData.PLAYER_EMAIL);
 
-        assertTrue(caption("Tidebreak Harbor").startsWith(msg("library.returnableUntil").substring(0, 10)));
-        assertEquals("", caption("Ashen Lanterns"));
+        assertTrue(caption("Super Mario Odyssey").startsWith(msg("library.returnableUntil").substring(0, 10)));
+        assertEquals("", caption("Grand Theft Auto V"));
     }
 
     @Test
     void searchSortAndTagFilterTheListAndTheGrid() throws Exception {
         openLibrary(DemoData.PLAYER_EMAIL);
 
-        type("searchField", "ash");
-        assertEquals(List.of("Ashen Lanterns"), names());
+        type("searchField", "auto");
+        assertEquals(List.of("Grand Theft Auto V"), names());
         assertEquals(1, this.<TilePane>node("gameGrid").getChildren().size());
 
         type("searchField", "");
         choose("sortBox", "library.sort.name");
-        assertEquals("Ashen Lanterns", names().getFirst());
+        assertEquals("Grand Theft Auto V", names().getFirst());
 
-        choose("tagFilter", "puzzle");
-        assertEquals(List.of("Paper Kites"), names());
+        choose("tagFilter", "space");
+        assertEquals(List.of("Super Mario Galaxy"), names());
     }
 
     @Test
@@ -71,17 +71,17 @@ class LibraryTest extends MistUiTest {
         robot.interact(open::fire);
 
         assertEquals(View.GAME, navigator.current());
-        assertEquals("Ashen Lanterns", text("nameTitle"));
+        assertEquals("Grand Theft Auto V", text("nameTitle"));
     }
 
     @Test
     void anEmptyLibraryShowsTheBrandEmptyState() throws Exception {
-        backend.services().auth().registerPlayer(new PlayerSignUp("Eva", "Sanz", "eva@mist.local",
+        backend.services().auth().registerPlayer(new PlayerSignUp("Eva", "Sanz", "eva@mist.com",
                 DemoData.PASSWORD.toCharArray(), new PhoneForm(null, null),
                 new AddressForm("Calle Sol 2", null, "41001", "Sevilla", null, "ES"), "eva_s",
                 new CardForm("Eva Sanz", "4111111111111111", 12, Year.now().getValue() + 2)));
 
-        openLibrary("eva@mist.local");
+        openLibrary("eva@mist.com");
 
         assertTrue(visible("emptyState"));
         assertEquals(msg("library.empty.title"), text("emptyTitle"));

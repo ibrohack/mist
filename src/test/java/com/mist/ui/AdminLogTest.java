@@ -30,15 +30,15 @@ class AdminLogTest extends MistUiTest {
 
     /** Yesterday's log, rolled at midnight. */
     private static final List<String> YESTERDAY = List.of(
-            "2026-11-17 09:00:00 | user=anonymous | FIND | users | email=lucia@mist.local | OK",
-            "2026-11-17 09:00:01 | user=lucia@mist.local | UPDATE | users | _id=1 | OK",
-            "2026-11-17 22:10:00 | user=marc@mist.local | FIND | games | status=PUBLISHED | OK");
+            "2026-11-17 09:00:00 | user=anonymous | FIND | users | email=lucia@mist.com | OK",
+            "2026-11-17 09:00:01 | user=lucia@mist.com | UPDATE | users | _id=1 | OK",
+            "2026-11-17 22:10:00 | user=marc@mist.com | FIND | games | status=PUBLISHED | OK");
     /** Today's log, still in the current file. */
     private static final List<String> TODAY = List.of(
-            "2026-11-18 10:00:00 | user=lucia@mist.local | INSERT | orders | playerId=1 | OK",
-            "2026-11-18 10:00:01 | user=lucia@mist.local | UPDATE | games | _id=2, status=PUBLISHED | OK",
-            "2026-11-18 10:05:00 | user=marc@mist.local | INSERT | reviews | gameId=2 | FAILED",
-            "2026-11-18 10:05:01 | user=marc@mist.local | ROLLBACK | - | DuplicateKey: E11000 | FAILED",
+            "2026-11-18 10:00:00 | user=lucia@mist.com | INSERT | orders | playerId=1 | OK",
+            "2026-11-18 10:00:01 | user=lucia@mist.com | UPDATE | games | _id=2, status=PUBLISHED | OK",
+            "2026-11-18 10:05:00 | user=marc@mist.com | INSERT | reviews | gameId=2 | FAILED",
+            "2026-11-18 10:05:01 | user=marc@mist.com | ROLLBACK | - | DuplicateKey: E11000 | FAILED",
             "this line is not a log entry");
 
     @Test
@@ -90,7 +90,7 @@ class AdminLogTest extends MistUiTest {
         robot.interact(() -> table().getSelectionModel().select(0));
 
         contextItem("filterUserItem");
-        assertEquals("marc@mist.local", text("userFilter"));
+        assertEquals("marc@mist.com", text("userFilter"));
 
         contextItem("filterOperationItem");
         assertEquals(1, table().getItems().size());
@@ -101,7 +101,7 @@ class AdminLogTest extends MistUiTest {
         writeLogs();
         loginAs(DemoData.ADMIN_EMAIL);
         Files.writeString(backend.logDirectory().resolve("mist-db.log"),
-                "2026-11-18 11:00:00 | user=nora@mist.local | FIND | games | limit=20 | OK\n",
+                "2026-11-18 11:00:00 | user=nora@mist.com | FIND | games | limit=20 | OK\n",
                 java.nio.file.StandardOpenOption.APPEND);
 
         click("refreshButton");
