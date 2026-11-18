@@ -31,6 +31,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -43,6 +45,9 @@ import java.util.Objects;
  * <p>Implements the behaviors LIB-1 to LIB-6 of {@code docs/ui-design.md}.</p>
  */
 public class LibraryController implements NavigationAware {
+
+    /** The UI's own log: user actions and the errors shown to the user. */
+    private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
 
     /** The sort by acquisition date, newest first. */
     private static final String SORT_RECENT = "library.sort.recent";
@@ -206,6 +211,7 @@ public class LibraryController implements NavigationAware {
     private void onOpen() {
         OwnedGame item = gameList.getSelectionModel().getSelectedItem();
         if (item != null) {
+            LOG.info("Opening {} from the library", item.game().getName());
             context.navigator().show(View.GAME, item.game().getId());
         }
     }
@@ -215,6 +221,7 @@ public class LibraryController implements NavigationAware {
     private void onReview() {
         OwnedGame item = selected();
         if (item != null) {
+            LOG.info("Reviewing {} from the library", item.game().getName());
             ReviewDialog.show(context, item.game(),
                     () -> Dialogs.info(context.navigator().window(), I18n.text("review.published")));
         }
@@ -227,6 +234,7 @@ public class LibraryController implements NavigationAware {
         if (item == null || !item.returnable()) {
             return;
         }
+        LOG.info("Asking to return {}", item.game().getName());
         Dialogs.confirm(context.navigator().window(), I18n.format("library.return.confirm", item.game().getName()),
                 "library.return", () -> context.tasks().run(gameList, () -> {
                     var amount = context.services().library().returnGame(context.session().userId(),
@@ -235,6 +243,7 @@ public class LibraryController implements NavigationAware {
                     return amount;
                 }, amount -> {
                     // R1: the refund is done and the game leaves the library.
+                    LOG.info("Returned {} for {}", item.game().getName(), amount);
                     Dialogs.info(context.navigator().window(), I18n.format("library.returned", Formats.money(amount)));
                     load();
                 }));

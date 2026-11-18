@@ -11,6 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,6 +27,9 @@ import java.util.ResourceBundle;
  * lines. The operation log's topic is listed for admins only.</p>
  */
 public class HelpController implements HelpPanel {
+
+    /** The UI's own log: user actions and the errors shown to the user. */
+    private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
 
     /** What the controller works with. */
     private final UiContext context;
@@ -85,6 +90,7 @@ public class HelpController implements HelpPanel {
     @Override
     public void select(View screen) {
         View topic = topicList.getItems().contains(screen) ? screen : View.SHELL;
+        LOG.info("Help opened on the {} topic", topic);
         topicList.getSelectionModel().select(topic);
         topicList.scrollTo(topic);
     }
@@ -116,6 +122,7 @@ public class HelpController implements HelpPanel {
     /** HELP-3: closes the window. */
     @FXML
     private void onClose() {
+        LOG.info("Help closed");
         closeButton.getScene().getWindow().hide();
     }
 

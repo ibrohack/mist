@@ -13,6 +13,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller of the wishlist: the games the player wants, to move to the cart or remove.
@@ -20,6 +22,9 @@ import javafx.scene.input.MouseButton;
  * <p>Implements the behaviors WISH-1 to WISH-4 of {@code docs/ui-design.md}.</p>
  */
 public class WishlistController implements NavigationAware {
+
+    /** The UI's own log: user actions and the errors shown to the user. */
+    private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
 
     /** What the controller works with. */
     private final UiContext context;
@@ -88,6 +93,7 @@ public class WishlistController implements NavigationAware {
         if (game == null) {
             return;
         }
+        LOG.info("Moving {} from the wishlist to the cart", game.getName());
         context.tasks().run(wishlistList, () -> {
             context.services().store().addToCart(context.session().userId(), game.getId());
             return context.services().store().removeFromWishlist(context.session().userId(), game.getId());
@@ -106,6 +112,7 @@ public class WishlistController implements NavigationAware {
         if (game == null) {
             return;
         }
+        LOG.info("Removing {} from the wishlist", game.getName());
         context.tasks().run(wishlistList, () -> context.services().store().removeFromWishlist(
                 context.session().userId(), game.getId()), player -> {
                     context.session().update(player);

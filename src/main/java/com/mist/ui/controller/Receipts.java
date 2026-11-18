@@ -6,6 +6,8 @@ import com.mist.ui.I18n;
 import com.mist.ui.UiContext;
 import com.mist.ui.report.Reports;
 import com.mist.ui.support.Dialogs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -14,6 +16,9 @@ import java.time.ZoneId;
  * Saves an order's receipt as a PDF where the user chooses; shared by the cart (CART-6) and the orders (ORD-3).
  */
 final class Receipts {
+
+    /** The UI's own log: user actions and the errors shown to the user. */
+    private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
 
     /** Not instantiable: a holder of the receipt action. */
     private Receipts() {
@@ -31,6 +36,7 @@ final class Receipts {
         // R3: a cancelled chooser does nothing.
         context.files().savePdf(context.navigator().window(), I18n.format("report.receipt.file", day))
                 .ifPresent(target -> context.tasks().run(null, () -> {
+                    LOG.info("Saving the receipt of order {} to {}", order.getId(), target);
                     Reports.receipt(order, buyer, target);
                     return target;
                 }, saved -> Dialogs.info(context.navigator().window(), I18n.format("report.saved", saved)),
