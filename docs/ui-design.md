@@ -182,6 +182,10 @@ Dark (default) or light, chosen in the user menu. `Styles#applyTheme(Scene, Them
 window (non-modal, `help.fxml` with `HelpController`). It lists one topic
 per screen (`help.<topic>.title`, `help.<topic>.body`) and opens on the topic of the current screen.
 
+The **?** buttons are on Login, Register and Offline (`helpButton`), and in the review dialog (`reviewHelpButton`)
+and the new game dialog (`newGameHelpButton`). A dialog has no topic of its own: its **?** opens the topic of the
+screen underneath (library or game page, dashboard), whose text explains the dialog.
+
 ### C-7 Keyboard
 
 Each form has a default button (Enter) and a cancel button (Esc) where it makes sense. Menu items have accelerators,
@@ -269,11 +273,13 @@ progress bar (`progress`), indeterminate while connecting.
 
 **Aspect.** Void background; centered card in surface color with the MIST mark and a crossed acid dot (from
 `mist-offline.svg`), the title `offlineTitle` (`%offline.title`), the message `offlineMessage` (`%offline.message`),
-the primary button `retryButton` (`%offline.retry`) and a caption `retryStatus` (hidden until a retry fails).
+the primary button `retryButton` (`%offline.retry`) and a caption `retryStatus` (hidden until a retry fails). A
+**?** button (`helpButton`) sits in the top right corner.
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
 | OFFLINE-1 | `retryButton.onAction → OfflineController#onRetry` | none | `UiContext#connect()` | **R1** Connected: `Navigator#show(LOGIN)`. **R2** `DataAccessException`: `retryStatus` shows `offline.stillOffline`; the button is enabled again. |
+| OFFLINE-2 | `helpButton.onAction → OfflineController#onHelp`, or F1 | none | `Navigator#showHelp()` | The help opens on the offline topic: check MongoDB, then Retry. |
 
 ### Login
 
@@ -520,8 +526,8 @@ achievements; and the reviews with paging.
 | `priceLabel`, `addToCartButton`, `wishlistButton`, `ownedLabel` | `Label`, `Button`, `Button`, `Label` | Price or "Free"; buttons by state |
 | `languagesText`, `pegiBadge` | `Label` | Language names in the UI language; "PEGI 16" |
 | `requirementsGrid` | `GridPane` | OS, processor, memory, graphics, storage |
-| `achievementsList` | `ListView<Achievement>` | Name and description |
-| `reviewsList`, `reviewsPages` | `ListView<GameReview>`, `Pagination` | Stars, nickname, date, text; 5 per page |
+| `achievementsList` | `ListView<Achievement>` | Name and description; context menu **Copy achievement** (`copyAchievementItem`) |
+| `reviewsList`, `reviewsPages` | `ListView<GameReview>`, `Pagination` | Stars, nickname, date, text; 5 per page; context menu **Copy review** (`copyReviewItem`) |
 
 The buy box by state: a guest sees Add to cart, which asks to log in; a player sees Add to cart or "In your cart"
 (`goToCartButton`), Add to wishlist or "On your wishlist", or "In your library" when the game is owned; developers and
@@ -536,6 +542,8 @@ admins see only the price.
 | GAME-5 | `wishlistButton.onAction → GameController#onAddToWishlist` | player | `StoreService#addToWishlist(ObjectId, ObjectId)` | **R1** The button says "On your wishlist" and is disabled. **R2** as GAME-3. |
 | GAME-6 | `reviewsPages.currentPageIndex` changes `→ GameController#loadReviews` | none | `ReviewService#reviews(ObjectId, int, int)` | The page of reviews shows (placeholder `game.noReviews`). |
 | GAME-7 | `backButton.onAction → GameController#onBack` | none | none | `Navigator#back()`, or the store if there is no previous screen. |
+| GAME-9 | `copyAchievementItem.onAction → GameController#onCopyAchievement` | an achievement is selected; otherwise the item is disabled when the menu shows | `Clipboard#setContent` | The clipboard holds `game.copiedAchievement`: "name: description". |
+| GAME-10 | `copyReviewItem.onAction → GameController#onCopyReview` | a review is selected; otherwise the item is disabled | `Clipboard#setContent` | The clipboard holds `game.copiedReview`: "nickname (stars/5): text". |
 
 ### Cart
 
@@ -613,8 +621,9 @@ Context menu of the list and of each card: **Open** (`openItem`), **Write a revi
 
 ### Review dialog
 
-**Aspect.** A themed dialog: the game's name, five star buttons, a text area with a character counter
-(`commentCounter`, "{0}/2000"), a message line, and the buttons **Publish** (`dialogConfirm`) and **Cancel**.
+**Aspect.** A themed dialog: the game's name with a **?** button (`reviewHelpButton`, C-6) on its right, five star
+buttons, a text area with a character counter (`commentCounter`, "{0}/2000"), a message line, and the buttons
+**Publish** (`dialogConfirm`) and **Cancel**.
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
@@ -680,7 +689,8 @@ Context menu of the table: **Edit** (`editItem`), **Publish** (`publishItem`), *
 
 ### New game dialog
 
-**Aspect.** A themed, window-modal dialog over the dashboard: a hint, **Name** (`nameField`) and **Price**
+**Aspect.** A themed, window-modal dialog over the dashboard: a hint with a **?** button (`newGameHelpButton`, C-6),
+**Name** (`nameField`) and **Price**
 (`priceField`, prompt `19,99`), a message line (`formMessage`), and the buttons **Create** (`dialogConfirm`) and
 **Cancel** (`dialogCancel`).
 
@@ -714,8 +724,8 @@ and Remove). The top bar holds **Back**, the game's name and status chip, and **
 | `osField` ... `storageField` | `TextField` | All five or none, up to 80 each |
 | `tagsPane`, `tagField`, `addTagButton` | `FlowPane` of chips, `TextField`, `Button` | Up to 10 tags of up to 24 characters |
 | `languagesPane` | `FlowPane` of `CheckBox` | Two-letter codes, named in the UI language |
-| `achievementsTable` | `TableView<AchievementRow>`, editable | **Editable** name (up to 80) and description (up to 300) cells |
-| `addAchievementButton`, `removeAchievementButton` | `Button` | |
+| `achievementsTable` | `TableView<AchievementRow>`, editable | **Editable** name (up to 80) and description (up to 300) cells; context menu **Add achievement** (`addAchievementItem`) and **Remove achievement** (`removeAchievementItem`, disabled without a selected row) |
+| `addAchievementButton`, `removeAchievementButton`, or the table's `addAchievementItem`, `removeAchievementItem` | `Button` | |
 | `titleLabel`, `statusLabel`, `formMessage` | `Label` | The game's name, its status chip, the form's message |
 
 | ID | Trigger | Checks | Calls | Responses |
