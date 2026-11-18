@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+
+<!-- Profile: the avatar and one row per editable item; a pencil opens the row's editor in place.
+     See docs/ui-design.md, "Profile". -->
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="mist-bg-void"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mist.ui.controller.ProfileController">
+  <VBox alignment="TOP_CENTER" styleClass="py-10,px-6">
+    <VBox maxWidth="760" styleClass="gap-[20px]">
+
+      <!-- Header: avatar, name, role, member since, avatar buttons. -->
+      <HBox alignment="CENTER_LEFT" styleClass="gap-[20px]">
+        <StackPane>
+          <Circle fx:id="avatarCircle" radius="48" styleClass="mist-avatar"/>
+          <Label fx:id="avatarInitials" styleClass="mist-avatar-initials,mist-avatar-initials-large"/>
+          <ImageView fx:id="avatarImage" fitWidth="96" fitHeight="96" visible="false"/>
+        </StackPane>
+        <VBox styleClass="gap-[4px]">
+          <Label fx:id="nameTitle" styleClass="mist-title"/>
+          <Label fx:id="roleLabel" styleClass="mist-caption"/>
+          <Label fx:id="memberSinceLabel" styleClass="mist-caption"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <VBox styleClass="gap-[8px]">
+          <Button fx:id="changeAvatarButton" text="%profile.changeAvatar" styleClass="mist-button-secondary"
+                  maxWidth="Infinity" onAction="#onChangeAvatar"/>
+          <Button fx:id="removeAvatarButton" text="%profile.removeAvatar" styleClass="mist-button-secondary"
+                  maxWidth="Infinity" onAction="#onRemoveAvatar"/>
+        </VBox>
+      </HBox>
+
+      <Label fx:id="formMessage" wrapText="true"/>
+
+      <VBox styleClass="mist-bg-surface,mist-rounded,mist-profile-rows">
+
+        <!-- Name -->
+        <VBox fx:id="nameRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%profile.name" styleClass="mist-profile-label"/>
+            <Label fx:id="nameValue" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="nameEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="nameEditor" styleClass="mist-profile-editor">
+            <HBox styleClass="gap-[12px]">
+              <TextField fx:id="firstNameField" promptText="%field.firstName" HBox.hgrow="ALWAYS"/>
+              <TextField fx:id="lastNameField" promptText="%field.lastName" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="nameSave" text="%profile.save" onAction="#onSaveProfile"/>
+              <Button fx:id="nameCancel" text="%dialog.cancel" styleClass="mist-button-secondary" onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Email -->
+        <VBox fx:id="emailRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%field.email" styleClass="mist-profile-label"/>
+            <Label fx:id="emailValue" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="emailEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="emailEditor" styleClass="mist-profile-editor">
+            <TextField fx:id="emailField" promptText="%login.email.prompt"/>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="emailSave" text="%profile.save" onAction="#onSaveProfile"/>
+              <Button fx:id="emailCancel" text="%dialog.cancel" styleClass="mist-button-secondary" onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Phone -->
+        <VBox fx:id="phoneRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%field.phoneNumber" styleClass="mist-profile-label"/>
+            <Label fx:id="phoneValue" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="phoneEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="phoneEditor" styleClass="mist-profile-editor">
+            <HBox styleClass="gap-[12px]">
+              <TextField fx:id="phoneCodeField" promptText="+34" prefWidth="90" minWidth="90"/>
+              <TextField fx:id="phoneNumberField" promptText="%field.optional" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="phoneSave" text="%profile.save" onAction="#onSaveProfile"/>
+              <Button fx:id="phoneCancel" text="%dialog.cancel" styleClass="mist-button-secondary" onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Address -->
+        <VBox fx:id="addressRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%profile.address" styleClass="mist-profile-label"/>
+            <Label fx:id="addressValue" HBox.hgrow="ALWAYS" maxWidth="Infinity" wrapText="true"/>
+            <Button fx:id="addressEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="addressEditor" styleClass="mist-profile-editor">
+            <TextField fx:id="streetField" promptText="%field.street"/>
+            <HBox styleClass="gap-[12px]">
+              <TextField fx:id="detailsField" promptText="%field.details" HBox.hgrow="ALWAYS"/>
+              <TextField fx:id="postalCodeField" promptText="%field.postalCode" prefWidth="140"/>
+            </HBox>
+            <HBox styleClass="gap-[12px]">
+              <TextField fx:id="cityField" promptText="%field.city" HBox.hgrow="ALWAYS"/>
+              <TextField fx:id="provinceField" promptText="%field.province" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <ComboBox fx:id="countryBox" maxWidth="Infinity" promptText="%field.country"/>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="addressSave" text="%profile.save" onAction="#onSaveProfile"/>
+              <Button fx:id="addressCancel" text="%dialog.cancel" styleClass="mist-button-secondary"
+                      onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Password -->
+        <VBox fx:id="passwordRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%field.password" styleClass="mist-profile-label"/>
+            <Label fx:id="passwordValue" text="••••••••" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="passwordEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="passwordEditor" styleClass="mist-profile-editor">
+            <PasswordField fx:id="currentPasswordField" promptText="%profile.currentPassword"/>
+            <HBox styleClass="gap-[12px]">
+              <PasswordField fx:id="newPasswordField" promptText="%profile.newPassword" HBox.hgrow="ALWAYS"/>
+              <PasswordField fx:id="repeatPasswordField" promptText="%field.repeatPassword" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <Label text="%register.passwordHint" styleClass="mist-caption" wrapText="true"/>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="passwordSave" text="%profile.save" onAction="#onSavePassword"/>
+              <Button fx:id="passwordCancel" text="%dialog.cancel" styleClass="mist-button-secondary"
+                      onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Nickname (player) -->
+        <VBox fx:id="nicknameRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%field.nickname" styleClass="mist-profile-label"/>
+            <Label fx:id="nicknameValue" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="nicknameEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="nicknameEditor" styleClass="mist-profile-editor">
+            <TextField fx:id="nicknameField"/>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="nicknameSave" text="%profile.save" onAction="#onSaveNickname"/>
+              <Button fx:id="nicknameCancel" text="%dialog.cancel" styleClass="mist-button-secondary"
+                      onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Card (player) -->
+        <VBox fx:id="cardRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%profile.card" styleClass="mist-profile-label"/>
+            <Label fx:id="cardValue" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="cardEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="cardEditor" styleClass="mist-profile-editor">
+            <TextField fx:id="cardHolderField" promptText="%field.cardHolder"/>
+            <HBox styleClass="gap-[12px]">
+              <TextField fx:id="cardNumberField" promptText="%field.cardNumber" HBox.hgrow="ALWAYS"/>
+              <ComboBox fx:id="expiryMonthBox" promptText="%field.expiryMonth" prefWidth="100"/>
+              <ComboBox fx:id="expiryYearBox" promptText="%field.expiryYear" prefWidth="110"/>
+            </HBox>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="cardSave" text="%profile.save" onAction="#onSaveCard"/>
+              <Button fx:id="cardCancel" text="%dialog.cancel" styleClass="mist-button-secondary" onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Studio (developer) -->
+        <VBox fx:id="studioRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%field.studioName" styleClass="mist-profile-label"/>
+            <Label fx:id="studioValue" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="studioEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="studioEditor" styleClass="mist-profile-editor">
+            <TextField fx:id="studioNameField"/>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="studioSave" text="%profile.save" onAction="#onSaveStudio"/>
+              <Button fx:id="studioCancel" text="%dialog.cancel" styleClass="mist-button-secondary"
+                      onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+
+        <!-- Bank account (developer) -->
+        <VBox fx:id="bankRow" styleClass="mist-profile-row">
+          <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+            <Label text="%profile.bank" styleClass="mist-profile-label"/>
+            <Label fx:id="bankValue" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="bankEdit" styleClass="mist-icon-button" onAction="#onEdit"/>
+          </HBox>
+          <VBox fx:id="bankEditor" styleClass="mist-profile-editor">
+            <TextField fx:id="bankAccountField" promptText="ES91 2100 0418 4502 0005 1332"/>
+            <HBox styleClass="gap-[8px]">
+              <Button fx:id="bankSave" text="%profile.save" onAction="#onSaveBank"/>
+              <Button fx:id="bankCancel" text="%dialog.cancel" styleClass="mist-button-secondary" onAction="#onCancel"/>
+            </HBox>
+          </VBox>
+        </VBox>
+      </VBox>
+
+      <!-- Danger zone -->
+      <VBox styleClass="mist-bg-surface,mist-rounded,mist-danger-zone,gap-[8px]">
+        <Label text="%profile.deactivate.title" styleClass="mist-subtitle"/>
+        <Label fx:id="deactivateHint" styleClass="mist-caption" wrapText="true"/>
+        <Button fx:id="deactivateButton" text="%profile.deactivate.button" styleClass="mist-button-danger"
+                onAction="#onDeactivate"/>
+      </VBox>
+    </VBox>
+  </VBox>
+</ScrollPane>

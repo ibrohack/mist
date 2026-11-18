@@ -134,7 +134,8 @@ public final class Navigator {
     /** Opens the shell of a session that just started, on its first screen. */
     public void home() {
         history.clear();
-        show(View.SHELL);
+        current = null;
+        show(View.PROFILE);
     }
 
     /**

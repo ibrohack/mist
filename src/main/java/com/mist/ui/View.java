@@ -23,7 +23,10 @@ public enum View {
     LOGIN("view/login.fxml", Placement.WINDOW),
 
     /** Registration of a player or a developer. */
-    REGISTER("view/register.fxml", Placement.WINDOW);
+    REGISTER("view/register.fxml", Placement.WINDOW),
+
+    /** The user's profile: personal data, password, avatar, card or studio, and deactivation. */
+    PROFILE("view/profile.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {

@@ -19,10 +19,10 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,8 @@ public class ShellController implements ShellHost, NavigationAware {
     private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
     /** Size the avatar image is decoded at. */
     private static final double AVATAR_SIZE = 64;
+    /** Radius of the avatar in the header. */
+    private static final double AVATAR_RADIUS = 16;
 
     /** What the controller works with. */
     private final UiContext context;
@@ -59,12 +61,18 @@ public class ShellController implements ShellHost, NavigationAware {
     /** The user menu: avatar, name and the session's options. */
     @FXML
     private MenuButton userMenu;
-    /** The avatar circle, filled with the user's image. */
+    /** The avatar's background circle. */
     @FXML
     private Circle avatarCircle;
+    /** The avatar image, clipped to a circle; hidden while there is none. */
+    @FXML
+    private ImageView avatarImage;
     /** The user's initials, shown while there is no avatar image. */
     @FXML
     private Label avatarInitials;
+    /** Opens the profile. */
+    @FXML
+    private MenuItem profileItem;
     /** Switches the UI to Spanish. */
     @FXML
     private RadioMenuItem spanishItem;
@@ -96,6 +104,7 @@ public class ShellController implements ShellHost, NavigationAware {
     /** Marks the current language and theme in the user menu. */
     @FXML
     private void initialize() {
+        avatarImage.setClip(new Circle(AVATAR_RADIUS, AVATAR_RADIUS, AVATAR_RADIUS));
         spanishItem.setSelected(I18n.language() == Language.ES);
         englishItem.setSelected(I18n.language() == Language.EN);
         darkItem.setSelected(context.navigator().theme() == Theme.DARK);
@@ -140,6 +149,12 @@ public class ShellController implements ShellHost, NavigationAware {
         savePreferences();
     }
 
+    /** SHELL-2: opens the profile. */
+    @FXML
+    private void onProfile() {
+        context.navigator().show(View.PROFILE);
+    }
+
     /** SHELL-7: ends the session and returns to the login screen. */
     @FXML
     private void onLogout() {
@@ -173,6 +188,7 @@ public class ShellController implements ShellHost, NavigationAware {
     /** SHELL-1: shows the user's name, initials and avatar in the user menu. */
     private void showUser() {
         User user = context.session().user().orElse(null);
+        profileItem.setVisible(user != null);
         if (user == null) {
             userMenu.setText(I18n.text("shell.guest"));
             avatarInitials.setText("?");
@@ -180,18 +196,19 @@ public class ShellController implements ShellHost, NavigationAware {
         }
         userMenu.setText(user instanceof Player player ? player.getNickname() : user.fullName());
         avatarInitials.setText(initials(user));
-        avatarCircle.setFill(null);
+        avatarImage.setVisible(false);
         avatarInitials.setVisible(true);
         context.images().load(user.getAvatarId(), AVATAR_SIZE, AVATAR_SIZE, this::showAvatar);
     }
 
     /**
-     * Fills the avatar circle with the user's image.
+     * Shows the user's image in the avatar circle.
      *
      * @param image the decoded avatar
      */
     private void showAvatar(Image image) {
-        avatarCircle.setFill(new ImagePattern(image));
+        avatarImage.setImage(image);
+        avatarImage.setVisible(true);
         avatarInitials.setVisible(false);
     }
 

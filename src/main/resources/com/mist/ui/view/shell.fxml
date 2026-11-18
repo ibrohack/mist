@@ -41,9 +41,12 @@
           <StackPane fx:id="avatarBox">
             <Circle fx:id="avatarCircle" radius="16" styleClass="mist-avatar"/>
             <Label fx:id="avatarInitials" styleClass="mist-avatar-initials"/>
+            <ImageView fx:id="avatarImage" fitWidth="32" fitHeight="32" visible="false"/>
           </StackPane>
         </graphic>
         <items>
+          <MenuItem fx:id="profileItem" text="%menu.profile" accelerator="Shortcut+P" onAction="#onProfile"/>
+          <SeparatorMenuItem/>
           <Menu fx:id="languageMenu" text="%menu.language">
             <items>
               <RadioMenuItem fx:id="spanishItem" text="%menu.language.es" toggleGroup="$languageGroup"

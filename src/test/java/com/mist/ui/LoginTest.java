@@ -29,7 +29,7 @@ class LoginTest extends MistUiTest {
     void playerLogsInAndReachesTheShell() {
         logIn(DemoData.PLAYER_EMAIL, DemoData.PASSWORD);
 
-        assertEquals(View.SHELL, navigator.current());
+        assertTrue(navigator.current().inShell());
         assertTrue(context.session().isLoggedIn());
         assertEquals("lucia", text("userMenu"));
     }

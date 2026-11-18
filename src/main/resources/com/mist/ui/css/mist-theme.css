@@ -430,3 +430,54 @@
   -fx-font-size: 25px;
   -fx-font-weight: 600;
 }
+
+/* Profile (docs/ui-design.md, "Profile"). */
+.mist-avatar-initials-large {
+  -fx-font-size: 28px;
+}
+
+.mist-profile-rows {
+  -fx-padding: 4 20;
+}
+
+.mist-profile-row {
+  -fx-padding: 14 0;
+  -fx-spacing: 12;
+  -fx-border-color: transparent transparent -mist-border transparent;
+}
+
+.mist-profile-label {
+  -fx-min-width: 170;
+  -fx-pref-width: 170;
+  -fx-text-fill: -mist-ash;
+}
+
+.mist-profile-editor {
+  -fx-spacing: 10;
+  -fx-padding: 4 0 4 182;
+}
+
+.button.mist-icon-button {
+  -fx-background-color: transparent;
+  -fx-padding: 6;
+}
+
+.button.mist-icon-button:hover {
+  -fx-background-color: -mist-void;
+}
+
+.mist-icon {
+  -fx-fill: -mist-ash;
+  -fx-scale-x: 0.8;
+  -fx-scale-y: 0.8;
+}
+
+.button.mist-icon-button:hover .mist-icon {
+  -fx-fill: -mist-acid;
+}
+
+.mist-danger-zone {
+  -fx-padding: 20;
+  -fx-border-color: derive(-mist-danger, -40%);
+  -fx-border-radius: 3;
+}

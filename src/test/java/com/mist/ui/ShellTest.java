@@ -4,7 +4,6 @@ import com.mist.dao.DaoKeys;
 import com.mist.model.Language;
 import com.mist.model.Theme;
 import com.mist.service.DemoData;
-import javafx.scene.control.MenuButton;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,8 +29,7 @@ class ShellTest extends MistUiTest {
         menu("userMenu", "englishItem");
 
         assertEquals(Language.EN, I18n.language());
-        MenuButton userMenu = node("userMenu");
-        assertEquals("Language", userMenu.getItems().getFirst().getText());
+        assertEquals("Language", menuItem("userMenu", "languageMenu").orElseThrow().getText());
         assertEquals(Language.EN, db.userByEmail(DemoData.PLAYER_EMAIL).getPreferences().language());
     }
 

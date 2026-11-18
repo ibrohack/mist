@@ -12,6 +12,7 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -20,7 +21,8 @@ import java.util.function.Consumer;
  *
  * <p>The services throw checked {@link MistException}s whose message is a bundle key, so the dialog shows the message
  * in the current language. Rule violations get a warning; database failures an error with a Retry button; anything
- * else, which would be a bug, is logged with its stack trace and gets a generic message. A deactivated account ends
+ * else, which would be a bug, is logged with its stack trace and gets a generic message. A file that cannot be read
+ * or written gets its own message. A deactivated account ends
  * the session. Every report is written to {@code mist-app.log} through the logger {@code com.mist.ui}.</p>
  */
 public final class ErrorReporter {
@@ -71,6 +73,11 @@ public final class ErrorReporter {
             case DataAccessException e -> {
                 LOG.warn("Database failure shown to the user: {}", e.getMessage(), e);
                 Dialogs.error(owner, I18n.textOrKey(e.getMessage()), retry);
+            }
+            case IOException e -> {
+                // A file the user picked could not be read or written: a platform error, not a bug.
+                LOG.warn("File error shown to the user: {}", e.toString());
+                Dialogs.error(owner, I18n.text("error.fileUnreadable"), null);
             }
             default -> unexpected(owner, error);
         }
