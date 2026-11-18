@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Developer dashboard: sales cards, revenue chart and the editable table of games.
+     See docs/ui-design.md, "Developer dashboard". -->
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="mist-bg-void"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mist.ui.controller.StudioController">
+  <VBox styleClass="p-8,gap-[20px]">
+    <HBox alignment="CENTER_LEFT" styleClass="gap-[12px]">
+      <VBox styleClass="gap-[4px]">
+        <Label fx:id="studioTitle" styleClass="mist-title"/>
+        <Label text="%studio.subtitle" styleClass="mist-caption"/>
+      </VBox>
+      <Region HBox.hgrow="ALWAYS"/>
+      <Button fx:id="newGameButton" text="%studio.newGame" onAction="#onNewGame"/>
+    </HBox>
+
+    <!-- Summary cards -->
+    <HBox styleClass="gap-[16px]">
+      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[4px]">
+        <Label text="%studio.revenue" styleClass="mist-caption"/>
+        <Label fx:id="revenueLabel" styleClass="mist-stat"/>
+      </VBox>
+      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[4px]">
+        <Label text="%studio.units" styleClass="mist-caption"/>
+        <Label fx:id="unitsLabel" styleClass="mist-stat"/>
+      </VBox>
+      <VBox HBox.hgrow="ALWAYS" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[4px]">
+        <Label text="%studio.published" styleClass="mist-caption"/>
+        <Label fx:id="publishedLabel" styleClass="mist-stat"/>
+      </VBox>
+    </HBox>
+
+    <!-- Revenue per game -->
+    <VBox styleClass="mist-bg-surface,mist-rounded,p-6,gap-[8px]">
+      <Label text="%studio.chart" styleClass="mist-subtitle"/>
+      <BarChart fx:id="revenueChart" legendVisible="false" animated="false" prefHeight="260">
+        <xAxis>
+          <CategoryAxis side="BOTTOM"/>
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT"/>
+        </yAxis>
+      </BarChart>
+    </VBox>
+
+    <!-- Games -->
+    <VBox styleClass="gap-[10px]">
+      <HBox alignment="CENTER_LEFT" styleClass="gap-[10px]">
+        <Label text="%studio.games" styleClass="mist-subtitle"/>
+        <Label text="%studio.priceHint" styleClass="mist-caption"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="publishButton" text="%studio.publish" styleClass="mist-button-secondary" onAction="#onPublish"/>
+        <Button fx:id="delistButton" text="%studio.delist" styleClass="mist-button-danger" onAction="#onDelist"/>
+      </HBox>
+      <TableView fx:id="gamesTable" editable="true" prefHeight="360">
+        <placeholder>
+          <Label text="%studio.empty" styleClass="mist-caption"/>
+        </placeholder>
+        <columns>
+          <TableColumn fx:id="nameColumn" text="%studio.column.name" prefWidth="240" editable="false"/>
+          <TableColumn fx:id="statusColumn" text="%studio.column.status" prefWidth="130" editable="false"/>
+          <TableColumn fx:id="priceColumn" text="%studio.column.price" prefWidth="120"/>
+          <TableColumn fx:id="releaseColumn" text="%studio.column.release" prefWidth="140" editable="false"/>
+          <TableColumn fx:id="unitsColumn" text="%studio.column.units" prefWidth="90" editable="false"/>
+          <TableColumn fx:id="revenueColumn" text="%studio.column.revenue" prefWidth="130" editable="false"/>
+          <TableColumn fx:id="ratingColumn" text="%studio.column.rating" prefWidth="90" editable="false"/>
+        </columns>
+        <columnResizePolicy>
+          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+        </columnResizePolicy>
+        <contextMenu>
+          <ContextMenu fx:id="gameMenu">
+            <items>
+              <MenuItem fx:id="publishItem" text="%studio.publish" onAction="#onPublish"/>
+              <MenuItem fx:id="delistItem" text="%studio.delist" onAction="#onDelist"/>
+            </items>
+          </ContextMenu>
+        </contextMenu>
+      </TableView>
+    </VBox>
+  </VBox>
+</ScrollPane>

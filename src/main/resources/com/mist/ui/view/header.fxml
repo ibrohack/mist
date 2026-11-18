@@ -25,6 +25,8 @@
       <Label fx:id="cartBadge" styleClass="mist-badge"/>
     </graphic>
   </ToggleButton>
+  <ToggleButton fx:id="studioLink" text="%nav.studio" toggleGroup="$links" styleClass="mist-nav-link"
+                onAction="#onLink"/>
   <ToggleButton fx:id="logLink" text="%nav.log" toggleGroup="$links" styleClass="mist-nav-link"
                 onAction="#onLink"/>
 </HBox>

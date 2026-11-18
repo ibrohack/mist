@@ -196,7 +196,13 @@ public final class Navigator {
     public void home() {
         history.clear();
         current = null;
-        show(context.session().hasRole(Role.ADMIN) ? View.ADMIN_LOG : View.STORE);
+        View first = View.STORE;
+        if (context.session().hasRole(Role.ADMIN)) {
+            first = View.ADMIN_LOG;
+        } else if (context.session().hasRole(Role.DEVELOPER)) {
+            first = View.STUDIO;
+        }
+        show(first);
     }
 
     /**

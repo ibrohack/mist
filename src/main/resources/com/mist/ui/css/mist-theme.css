@@ -752,3 +752,44 @@
 .dialog-pane.mist-dialog .text-area .content {
   -fx-background-color: -mist-surface;
 }
+
+/* Developer dashboard (docs/ui-design.md, "Developer dashboard"). */
+.mist-stat {
+  -fx-font-size: 28px;
+  -fx-font-weight: 700;
+}
+
+.mist-status-draft {
+  -fx-text-fill: -mist-ash;
+}
+
+.mist-status-published {
+  -fx-text-fill: -mist-acid;
+  -fx-border-color: -mist-acid;
+}
+
+.mist-status-delisted {
+  -fx-text-fill: -mist-danger;
+  -fx-border-color: -mist-danger;
+}
+
+.chart-bar {
+  -fx-bar-fill: -mist-acid;
+}
+
+.chart-plot-background {
+  -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines,
+.chart-horizontal-grid-lines {
+  -fx-stroke: -mist-border;
+}
+
+.axis {
+  -fx-tick-label-fill: -mist-ash;
+}
+
+.table-row-cell .text-field {
+  -fx-padding: 2 6;
+}

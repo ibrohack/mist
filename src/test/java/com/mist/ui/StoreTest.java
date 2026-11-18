@@ -101,6 +101,7 @@ class StoreTest extends MistUiTest {
     @Test
     void developersAndGuestsCanOnlyOpenGames() throws Exception {
         loginAs(DemoData.DEVELOPER_EMAIL);
+        click("storeLink");
         assertEquals(List.of("openItem"), itemIds(list("newList").getContextMenu()));
 
         menu("userMenu", "logoutItem");

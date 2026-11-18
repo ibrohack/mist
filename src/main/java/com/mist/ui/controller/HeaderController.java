@@ -51,6 +51,9 @@ public class HeaderController {
     /** How many games are in the cart. */
     @FXML
     private Label cartBadge;
+    /** Opens the dashboard, for developers. */
+    @FXML
+    private ToggleButton studioLink;
     /** Opens the operation log, for admins. */
     @FXML
     private ToggleButton logLink;
@@ -71,6 +74,7 @@ public class HeaderController {
         targets.put(libraryLink, View.LIBRARY);
         targets.put(wishlistLink, View.WISHLIST);
         targets.put(cartLink, View.CART);
+        targets.put(studioLink, View.STUDIO);
         targets.put(logLink, View.ADMIN_LOG);
         context.session().versionProperty().addListener(new WeakChangeListener<>(sessionListener));
         refresh();
@@ -85,6 +89,7 @@ public class HeaderController {
         int inCart = player == null ? 0 : player.getCartGameIds().size();
         cartBadge.setText(String.valueOf(inCart));
         cartBadge.setVisible(inCart > 0);
+        show(studioLink, context.session().hasRole(Role.DEVELOPER));
         show(logLink, context.session().hasRole(Role.ADMIN));
     }
 

@@ -47,7 +47,10 @@ public enum View {
     LIBRARY("view/library.fxml", Placement.SHELL),
 
     /** The player's orders, with returns and receipts. */
-    ORDERS("view/orders.fxml", Placement.SHELL);
+    ORDERS("view/orders.fxml", Placement.SHELL),
+
+    /** The developer's dashboard: sales and the editable table of games. */
+    STUDIO("view/studio.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {

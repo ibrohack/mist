@@ -33,3 +33,8 @@
 .toggle-button.mist-star:selected {
   -fx-text-fill: #3f6600;
 }
+
+.mist-status-published {
+  -fx-text-fill: #3f6600;
+  -fx-border-color: #3f6600;
+}
