@@ -66,7 +66,7 @@ public class CartCell extends ListCell<Game> {
         });
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        row = new HBox(14, frame, name, spacer, price, removeButton);
+        row = new HBox(16, frame, name, spacer, price, removeButton);
         row.setAlignment(Pos.CENTER_LEFT);
     }
 

@@ -28,7 +28,7 @@
           <Label fx:id="avatarInitials" styleClass="mist-avatar-initials,mist-avatar-initials-large"/>
           <ImageView fx:id="avatarImage" fitWidth="96" fitHeight="96" visible="false"/>
         </StackPane>
-        <VBox styleClass="gap-[4px]">
+        <VBox styleClass="gap-[6px]">
           <Label fx:id="nameTitle" styleClass="mist-title"/>
           <Label fx:id="roleLabel" styleClass="mist-caption"/>
           <Label fx:id="memberSinceLabel" styleClass="mist-caption"/>

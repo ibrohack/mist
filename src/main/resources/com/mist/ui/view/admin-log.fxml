@@ -15,10 +15,10 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- Operation log (admin): a filter bar over the day's entries. See docs/ui-design.md, "Operation log". -->
-<VBox styleClass="mist-bg-void,p-8,gap-[16px]"
+<VBox styleClass="mist-bg-void,p-8,gap-[20px]"
       xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.mist.ui.controller.AdminLogController">
-  <VBox styleClass="gap-[4px]">
+  <VBox styleClass="gap-[6px]">
     <Label text="%log.title" styleClass="mist-title"/>
     <Label text="%log.subtitle" styleClass="mist-caption"/>
   </VBox>

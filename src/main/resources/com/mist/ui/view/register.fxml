@@ -27,7 +27,7 @@
       <HBox alignment="CENTER_RIGHT">
         <Button fx:id="helpButton" text="?" styleClass="mist-toggle,mist-help-button" onAction="#onHelp"/>
       </HBox>
-      <VBox styleClass="gap-[4px]">
+      <VBox styleClass="gap-[6px]">
         <Label text="%register.title" styleClass="mist-title"/>
         <Label text="%register.subtitle" styleClass="mist-caption" wrapText="true"/>
       </VBox>
