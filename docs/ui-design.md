@@ -399,8 +399,8 @@ Day [2026-11-18 v]  User [________]  Operation [All v]  [x] Failed only   [Refre
 +---------------------+------------------+-----------+-------------+-------------------------------+---------+
 | Time                | User             | Operation | Collection  | Details                       | Outcome |
 +---------------------+------------------+-----------+-------------+-------------------------------+---------+
-| 18:41:07            | lucia@mist.local | INSERT    | orders      | id=6721f3...                  | OK      |
-| 18:42:13            | marc@mist.local  | ROLLBACK  | -           | DuplicateKey...               | FAILED  |
+| 18:41:07            | lucia@mist.com   | INSERT    | orders      | id=6721f3...                  | OK      |
+| 18:42:13            | marc@mist.com    | ROLLBACK  | -           | DuplicateKey...               | FAILED  |
 ```
 
 | fx:id | Control | Format |
