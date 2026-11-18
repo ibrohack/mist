@@ -390,7 +390,7 @@ so WiX is not required. The app still needs MongoDB as described above.
 .\mvnw.cmd -Pjar package
 ```
 
-The `jar` profile builds `target/MIST-1.0.0.jar`, a single JAR with every library inside. It needs a Java 25 runtime
+The `jar` profile builds `target/dist/MIST-1.0.0.jar`, a single JAR with every library inside. It needs a Java 25 runtime
 on the computer, and runs with:
 
 ```powershell

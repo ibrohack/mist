@@ -437,7 +437,7 @@
       </build>
     </profile>
 
-    <!-- ./mvnw -Pjar package: one executable jar, target/MIST-<version>.jar, with every runtime library inside, run
+    <!-- ./mvnw -Pjar package: one executable jar, target/dist/MIST-<version>.jar, with every runtime library inside, run
          with java -jar on a Java 25 runtime. JavaFX's native libraries are those of the build machine's platform, so
          a jar built on Windows runs on Windows. -->
     <profile>
@@ -459,8 +459,9 @@
                   <goal>shade</goal>
                 </goals>
                 <configuration>
-                  <shadedArtifactAttached>true</shadedArtifactAttached>
-                  <finalName>MIST-${app.version}</finalName>
+                  <!-- Its own folder: Windows ignores case, so target/MIST-<version>.jar would overwrite the
+                       project's plain mist-<version>.jar. -->
+                  <outputFile>${project.build.directory}/dist/MIST-${app.version}.jar</outputFile>
                   <createDependencyReducedPom>false</createDependencyReducedPom>
                   <filters>
                     <!-- Signatures of signed libraries (Bouncy Castle) no longer match once merged, and the module
