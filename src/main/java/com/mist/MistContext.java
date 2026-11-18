@@ -62,7 +62,7 @@ public final class MistContext implements AutoCloseable {
      */
     private MistContext(HibernateDataAccess data, Clock clock) {
         this.data = data;
-        this.auth = new AuthService(data.users(), clock);
+        this.auth = new AuthService(data.users(), data.transactions(), clock);
         this.users = new UserService(data.users(), data.games(), data.media(), data.transactions(), clock);
         this.store = new StoreService(data.games(), data.users(), data.orders(), data.transactions(), clock);
         this.library = new LibraryService(data.users(), data.games(), data.orders(), data.transactions(), clock);

@@ -87,24 +87,26 @@ public class PublishingService {
      * @throws MistException         if the account cannot act, the game does not exist or the database fails
      */
     public Game update(ObjectId developerId, ObjectId gameId, GameForm form) throws MistException {
-        Objects.requireNonNull(form, "form");
-        Game game = owned(Accounts.activeDeveloper(users, developerId), gameId);
-        SystemRequirements requirements = Rules.check(
-                () -> form.requirements() == null ? null : form.requirements().toRequirements());
-        List<Achievement> achievements = Rules.check(() -> form.achievements() == null ? List.<Achievement>of()
-                : form.achievements().stream().map(AchievementForm::toAchievement).toList());
-        Rules.apply(() -> {
-            game.rename(form.name());
-            game.changeDescription(form.description());
-            game.changePrice(form.price());
-            game.changeReleaseDay(form.releaseDay());
-            game.changePegi(form.pegi());
-            game.changeRequirements(requirements);
-            game.changeTags(form.tags() == null ? List.of() : form.tags());
-            game.changeLanguages(form.languages() == null ? List.of() : form.languages());
-            game.changeAchievements(achievements);
+        return transactions.call(() -> {
+            Objects.requireNonNull(form, "form");
+            Game game = owned(Accounts.activeDeveloper(users, developerId), gameId);
+            SystemRequirements requirements = Rules.check(
+                    () -> form.requirements() == null ? null : form.requirements().toRequirements());
+            List<Achievement> achievements = Rules.check(() -> form.achievements() == null ? List.<Achievement>of()
+                    : form.achievements().stream().map(AchievementForm::toAchievement).toList());
+            Rules.apply(() -> {
+                game.rename(form.name());
+                game.changeDescription(form.description());
+                game.changePrice(form.price());
+                game.changeReleaseDay(form.releaseDay());
+                game.changePegi(form.pegi());
+                game.changeRequirements(requirements);
+                game.changeTags(form.tags() == null ? List.of() : form.tags());
+                game.changeLanguages(form.languages() == null ? List.of() : form.languages());
+                game.changeAchievements(achievements);
+            });
+            return games.save(game);
         });
-        return games.save(game);
     }
 
     /**
@@ -222,9 +224,11 @@ public class PublishingService {
      * @throws MistException         if the account cannot act, the game does not exist or the database fails
      */
     public Game delist(ObjectId developerId, ObjectId gameId) throws MistException {
-        Game game = owned(Accounts.activeDeveloper(users, developerId), gameId);
-        Rules.apply(game::delist);
-        return games.save(game);
+        return transactions.call(() -> {
+            Game game = owned(Accounts.activeDeveloper(users, developerId), gameId);
+            Rules.apply(game::delist);
+            return games.save(game);
+        });
     }
 
     /**

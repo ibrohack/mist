@@ -1,5 +1,6 @@
 package com.mist.config;
 
+import com.mist.logging.DbOperationLogger;
 import com.mist.model.AccountStatus;
 import com.mist.model.Achievement;
 import com.mist.model.Address;
@@ -19,6 +20,7 @@ import com.mist.model.SystemRequirements;
 import com.mist.model.Theme;
 import com.mist.model.User;
 import com.mongodb.MongoCommandException;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
@@ -30,6 +32,7 @@ import com.mongodb.client.model.ValidationLevel;
 import com.mongodb.client.model.ValidationOptions;
 import org.bson.BsonType;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.Decimal128;
 
 import java.math.BigDecimal;
@@ -44,8 +47,9 @@ import java.util.Set;
  * unique rules need.
  *
  * <p>All of this goes through the driver on the shared {@code MongoClient}, because the Hibernate MongoDB extension
- * cannot create validators or these index types. {@link #apply(MongoConnection)} is safe to run on every start: it
- * creates what is missing and brings existing validators up to date.</p>
+ * cannot create validators or these index types. {@link #apply(MongoConnection, DbOperationLogger)} is safe to run on
+ * every start: it creates what is missing and brings existing validators up to date. Each step writes a line to the
+ * operation log: {@code CREATE_COLLECTION}, {@code SET_VALIDATOR} or {@code CREATE_INDEX}.</p>
  *
  * <p>The validators repeat the model's limits, taken from its constants. Optional fields allow {@code null}, because
  * Hibernate writes a missing value as {@code null}. In {@code users}, fields of other roles are absent, so a
@@ -78,51 +82,54 @@ public final class SchemaSetup {
     }
 
     /**
-     * Creates or updates the five collections, their validators and their indexes.
+     * Creates or updates the five collections, their validators and their indexes, and logs each step.
      *
      * @param connection the shared client and the database name
+     * @param log        the operation log
      * @throws com.mongodb.MongoException if the server cannot be reached or rejects a command
      */
-    public static void apply(MongoConnection connection) {
+    public static void apply(MongoConnection connection, DbOperationLogger log) {
         MongoDatabase database = connection.client().getDatabase(connection.databaseName());
         Set<String> existing = database.listCollectionNames().into(new HashSet<>());
 
-        validate(database, existing, "users", users());
-        validate(database, existing, "games", games());
-        validate(database, existing, "orders", orders());
-        validate(database, existing, "reviews", reviews());
-        validate(database, existing, "media", media());
+        validate(database, existing, "users", users(), log);
+        validate(database, existing, "games", games(), log);
+        validate(database, existing, "orders", orders(), log);
+        validate(database, existing, "reviews", reviews(), log);
+        validate(database, existing, "media", media(), log);
 
         MongoCollection<Document> users = database.getCollection("users");
-        users.createIndex(Indexes.ascending("email"), new IndexOptions().unique(true));
-        users.createIndex(Indexes.ascending("nickname"), new IndexOptions().unique(true)
+        index(log, users, Indexes.ascending("email"), new IndexOptions().unique(true));
+        index(log, users, Indexes.ascending("nickname"), new IndexOptions().unique(true)
                 .partialFilterExpression(Filters.type("nickname", BsonType.STRING)));
-        users.createIndex(Indexes.ascending("studioName"), new IndexOptions().unique(true)
+        index(log, users, Indexes.ascending("studioName"), new IndexOptions().unique(true)
                 .partialFilterExpression(Filters.type("studioName", BsonType.STRING)));
 
         MongoCollection<Document> games = database.getCollection("games");
-        games.createIndex(Indexes.ascending("status", "releaseDate"));
-        games.createIndex(Indexes.ascending("status", "stats.unitsSold"));
-        games.createIndex(Indexes.ascending("developerId"));
+        index(log, games, Indexes.ascending("status", "releaseDate"), new IndexOptions());
+        index(log, games, Indexes.ascending("status", "stats.unitsSold"), new IndexOptions());
+        index(log, games, Indexes.ascending("developerId"), new IndexOptions());
 
-        database.getCollection("orders").createIndex(Indexes.ascending("playerId", "createdAt"));
+        index(log, database.getCollection("orders"), Indexes.ascending("playerId", "createdAt"), new IndexOptions());
 
         MongoCollection<Document> reviews = database.getCollection("reviews");
-        reviews.createIndex(Indexes.ascending("gameId", "playerId"), new IndexOptions().unique(true));
-        reviews.createIndex(Indexes.ascending("gameId", "createdAt"));
+        index(log, reviews, Indexes.ascending("gameId", "playerId"), new IndexOptions().unique(true));
+        index(log, reviews, Indexes.ascending("gameId", "createdAt"), new IndexOptions());
 
-        database.getCollection("media").createIndex(Indexes.ascending("ownerId"));
+        index(log, database.getCollection("media"), Indexes.ascending("ownerId"), new IndexOptions());
     }
 
     /**
-     * Creates a collection with its validator, or updates the validator.
+     * Creates a collection with its validator, or updates the validator, and logs what was done.
      *
      * @param database   the database
      * @param existing   the collections that exist
      * @param name       the collection
      * @param jsonSchema its {@code $jsonSchema}
+     * @param log        the operation log
      */
-    private static void validate(MongoDatabase database, Set<String> existing, String name, Document jsonSchema) {
+    private static void validate(MongoDatabase database, Set<String> existing, String name, Document jsonSchema,
+                                 DbOperationLogger log) {
         Document validator = new Document("$jsonSchema", jsonSchema);
         if (!existing.contains(name)) {
             try {
@@ -130,17 +137,46 @@ public final class SchemaSetup {
                         .validator(validator)
                         .validationLevel(ValidationLevel.STRICT)
                         .validationAction(ValidationAction.ERROR)));
+                log.ok("CREATE_COLLECTION", name, "validator=$jsonSchema, level=strict, action=error");
                 return;
             } catch (MongoCommandException e) {
                 if (e.getErrorCode() != NAMESPACE_EXISTS) {
+                    log.failed("CREATE_COLLECTION", name, e.getErrorCodeName());
                     throw e;
                 }
             }
         }
-        database.runCommand(new Document("collMod", name)
-                .append("validator", validator)
-                .append("validationLevel", "strict")
-                .append("validationAction", "error"));
+        try {
+            database.runCommand(new Document("collMod", name)
+                    .append("validator", validator)
+                    .append("validationLevel", "strict")
+                    .append("validationAction", "error"));
+            log.ok("SET_VALIDATOR", name, "validator=$jsonSchema, level=strict, action=error");
+        } catch (MongoException e) {
+            log.failed("SET_VALIDATOR", name, e.getClass().getSimpleName() + " " + e.getCode());
+            throw e;
+        }
+    }
+
+    /**
+     * Creates an index if it does not exist yet, and logs it.
+     *
+     * @param log        the operation log
+     * @param collection the collection
+     * @param keys       the indexed fields
+     * @param options    unique, partial or none
+     */
+    private static void index(DbOperationLogger log, MongoCollection<Document> collection, Bson keys,
+                              IndexOptions options) {
+        String name = collection.getNamespace().getCollectionName();
+        String details = "keys=" + keys.toBsonDocument().toJson() + (options.isUnique() ? ", unique" : "");
+        try {
+            collection.createIndex(keys, options);
+            log.ok("CREATE_INDEX", name, details);
+        } catch (MongoException e) {
+            log.failed("CREATE_INDEX", name, details + " (" + e.getClass().getSimpleName() + " " + e.getCode() + ")");
+            throw e;
+        }
     }
 
     // ----------------------------------------------------------------------------------------------------- users

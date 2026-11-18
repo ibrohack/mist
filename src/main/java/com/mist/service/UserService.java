@@ -87,16 +87,18 @@ public class UserService {
      * @throws MistException            if the account cannot act or the database fails
      */
     public User updateProfile(ObjectId userId, ProfileForm form) throws MistException {
-        Objects.requireNonNull(form, "form");
-        String email = Rules.check(() -> User.normalizeEmail(form.email()));
-        Address address = Rules.check(() -> form.address() == null ? null : form.address().toAddress());
-        Phone phone = Rules.check(() -> PhoneForm.toPhone(form.phone()));
-        User user = Accounts.active(users, userId);
-        if (!email.equals(user.getEmail()) && users.existsByEmail(email)) {
-            throw new DuplicateEntityException(ServiceKeys.USER_EMAIL_TAKEN);
-        }
-        Rules.apply(() -> user.changeProfile(form.firstName(), form.lastName(), email, phone, address));
-        return users.save(user);
+        return transactions.call(() -> {
+            Objects.requireNonNull(form, "form");
+            String email = Rules.check(() -> User.normalizeEmail(form.email()));
+            Address address = Rules.check(() -> form.address() == null ? null : form.address().toAddress());
+            Phone phone = Rules.check(() -> PhoneForm.toPhone(form.phone()));
+            User user = Accounts.active(users, userId);
+            if (!email.equals(user.getEmail()) && users.existsByEmail(email)) {
+                throw new DuplicateEntityException(ServiceKeys.USER_EMAIL_TAKEN);
+            }
+            Rules.apply(() -> user.changeProfile(form.firstName(), form.lastName(), email, phone, address));
+            return users.save(user);
+        });
     }
 
     /**
@@ -110,13 +112,15 @@ public class UserService {
      * @throws MistException            if the account cannot act or the database fails
      */
     public Player changeNickname(ObjectId playerId, String nickname) throws MistException {
-        Player player = Accounts.activePlayer(users, playerId);
-        String wanted = nickname == null ? null : nickname.strip();
-        if (wanted != null && !wanted.equals(player.getNickname()) && users.existsByNickname(wanted)) {
-            throw new DuplicateEntityException(ServiceKeys.USER_NICKNAME_TAKEN);
-        }
-        Rules.apply(() -> player.changeNickname(wanted));
-        return users.save(player);
+        return transactions.call(() -> {
+            Player player = Accounts.activePlayer(users, playerId);
+            String wanted = nickname == null ? null : nickname.strip();
+            if (wanted != null && !wanted.equals(player.getNickname()) && users.existsByNickname(wanted)) {
+                throw new DuplicateEntityException(ServiceKeys.USER_NICKNAME_TAKEN);
+            }
+            Rules.apply(() -> player.changeNickname(wanted));
+            return users.save(player);
+        });
     }
 
     /**
@@ -129,9 +133,11 @@ public class UserService {
      * @throws MistException       if the account cannot act or the database fails
      */
     public Player changeCard(ObjectId playerId, CardForm card) throws MistException {
-        Player player = Accounts.activePlayer(users, playerId);
-        Rules.apply(() -> player.changeCard(card == null ? null : card.toCard(YearMonth.now(clock))));
-        return users.save(player);
+        return transactions.call(() -> {
+            Player player = Accounts.activePlayer(users, playerId);
+            Rules.apply(() -> player.changeCard(card == null ? null : card.toCard(YearMonth.now(clock))));
+            return users.save(player);
+        });
     }
 
     /**
@@ -145,13 +151,15 @@ public class UserService {
      * @throws MistException            if the account cannot act or the database fails
      */
     public Developer changeStudioName(ObjectId developerId, String studioName) throws MistException {
-        Developer developer = Accounts.activeDeveloper(users, developerId);
-        String wanted = studioName == null ? null : studioName.strip();
-        if (wanted != null && !wanted.equals(developer.getStudioName()) && users.existsByStudioName(wanted)) {
-            throw new DuplicateEntityException(ServiceKeys.USER_STUDIO_NAME_TAKEN);
-        }
-        Rules.apply(() -> developer.changeStudioName(wanted));
-        return users.save(developer);
+        return transactions.call(() -> {
+            Developer developer = Accounts.activeDeveloper(users, developerId);
+            String wanted = studioName == null ? null : studioName.strip();
+            if (wanted != null && !wanted.equals(developer.getStudioName()) && users.existsByStudioName(wanted)) {
+                throw new DuplicateEntityException(ServiceKeys.USER_STUDIO_NAME_TAKEN);
+            }
+            Rules.apply(() -> developer.changeStudioName(wanted));
+            return users.save(developer);
+        });
     }
 
     /**
@@ -164,9 +172,11 @@ public class UserService {
      * @throws MistException       if the account cannot act or the database fails
      */
     public Developer changeBankAccount(ObjectId developerId, String bankAccount) throws MistException {
-        Developer developer = Accounts.activeDeveloper(users, developerId);
-        Rules.apply(() -> developer.changeBankAccount(bankAccount));
-        return users.save(developer);
+        return transactions.call(() -> {
+            Developer developer = Accounts.activeDeveloper(users, developerId);
+            Rules.apply(() -> developer.changeBankAccount(bankAccount));
+            return users.save(developer);
+        });
     }
 
     /**
@@ -183,9 +193,11 @@ public class UserService {
         if (language == null || theme == null) {
             throw new ValidationException(ServiceKeys.INVALID_INPUT);
         }
-        User user = Accounts.active(users, userId);
-        user.changePreferences(new Preferences(language, theme));
-        return users.save(user);
+        return transactions.call(() -> {
+            User user = Accounts.active(users, userId);
+            user.changePreferences(new Preferences(language, theme));
+            return users.save(user);
+        });
     }
 
     /**

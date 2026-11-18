@@ -35,6 +35,7 @@
     <DatePicker fx:id="dayPicker" promptText="%log.day" prefWidth="170" minWidth="140" editable="false"/>
     <TextField fx:id="userFilter" promptText="%log.user" prefWidth="260" minWidth="160"/>
     <ComboBox fx:id="operationFilter" prefWidth="180" minWidth="140"/>
+    <TextField fx:id="transactionFilter" promptText="%log.transaction" prefWidth="130" minWidth="110"/>
     <CheckBox fx:id="failedOnly" text="%log.failedOnly" minWidth="-Infinity"/>
   </FlowPane>
 
@@ -45,6 +46,7 @@
     <columns>
       <TableColumn fx:id="timeColumn" text="%log.column.time" prefWidth="90"/>
       <TableColumn fx:id="userColumn" text="%log.column.user" prefWidth="200"/>
+      <TableColumn fx:id="transactionColumn" text="%log.column.transaction" prefWidth="70"/>
       <TableColumn fx:id="operationColumn" text="%log.column.operation" prefWidth="110"/>
       <TableColumn fx:id="collectionColumn" text="%log.column.collection" prefWidth="100"/>
       <TableColumn fx:id="detailsColumn" text="%log.column.details" prefWidth="460" styleClass="mist-log-details"/>
@@ -59,6 +61,7 @@
           <MenuItem fx:id="copyItem" text="%log.copy" onAction="#onCopy"/>
           <MenuItem fx:id="filterUserItem" text="%log.filterUser" onAction="#onFilterUser"/>
           <MenuItem fx:id="filterOperationItem" text="%log.filterOperation" onAction="#onFilterOperation"/>
+          <MenuItem fx:id="filterTransactionItem" text="%log.filterTransaction" onAction="#onFilterTransaction"/>
         </items>
       </ContextMenu>
     </contextMenu>

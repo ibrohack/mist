@@ -10,6 +10,8 @@ public final class DaoKeys {
     public static final String FAILURE = "dao.failure";
     /** A write broke a unique index. */
     public static final String DUPLICATE = "dao.duplicate";
+    /** The collection's validator rejected a document: a value broke a rule the form did not check. */
+    public static final String INVALID_DOCUMENT = "dao.invalidDocument";
 
     /** Not instantiable: a holder of bundle keys. */
     private DaoKeys() {

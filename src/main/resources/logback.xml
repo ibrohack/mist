@@ -20,7 +20,7 @@
     </encoder>
   </appender>
 
-  <!-- Database operation log: date | user | OPERATION | collection | details | OK/FAILED -->
+  <!-- Database operation log: date | user | transaction | OPERATION | collection | details | OK/FAILED -->
   <appender name="DB" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${LOG_DIR}/mist-db.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -28,7 +28,7 @@
       <maxHistory>30</maxHistory>
     </rollingPolicy>
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss} | user=%X{user:-anonymous} | %msg%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss} | user=%X{user:-anonymous} | tx=%X{tx:--} | %msg%n</pattern>
     </encoder>
   </appender>
 

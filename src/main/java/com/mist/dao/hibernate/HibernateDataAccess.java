@@ -4,6 +4,7 @@ import com.mist.config.AppConfig;
 import com.mist.config.HibernateBootstrap;
 import com.mist.config.MongoConnection;
 import com.mist.config.SchemaSetup;
+import com.mist.dao.DaoKeys;
 import com.mist.dao.GameDao;
 import com.mist.dao.MediaDao;
 import com.mist.dao.OrderDao;
@@ -64,15 +65,17 @@ public final class HibernateDataAccess implements AutoCloseable {
      *
      * @param config the connection settings
      * @return the open data access layer
-     * @throws DataAccessException if MongoDB cannot be reached within the server selection timeout, or rejects the
-     *                             schema setup
+     * @throws DataAccessException if the connection string is invalid, MongoDB cannot be reached within the server
+     *                             selection timeout, or it rejects the schema setup
      */
     public static HibernateDataAccess open(AppConfig config) throws DataAccessException {
         DbOperationLogger log = new DbOperationLogger();
-        MongoConnection connection = new MongoConnection(config);
+        MongoConnection connection = null;
         SessionFactory sessionFactory = null;
         try {
-            SchemaSetup.apply(connection);
+            // Inside the try: a malformed connection string fails here and must be logged and translated too.
+            connection = new MongoConnection(config);
+            SchemaSetup.apply(connection, log);
             sessionFactory = HibernateBootstrap.buildSessionFactory(connection, MistModel.ANNOTATED_CLASSES);
             log.ok("CONNECT", "-", "database=" + connection.databaseName());
             return new HibernateDataAccess(connection, sessionFactory, log);
@@ -80,13 +83,16 @@ public final class HibernateDataAccess implements AutoCloseable {
             if (sessionFactory != null) {
                 sessionFactory.close();
             }
-            connection.close();
-            log.failed("CONNECT", "-", "database=" + connection.databaseName() + " ("
+            if (connection != null) {
+                connection.close();
+            }
+            log.failed("CONNECT", "-", "database=" + config.mongoDatabase() + " ("
                     + PersistenceErrors.describe(failure) + ")");
             if (PersistenceErrors.isPersistence(failure)) {
                 throw PersistenceErrors.translate(failure);
             }
-            throw failure;
+            // Without a database the app cannot start, whatever the cause: the splash offers the offline view.
+            throw new DataAccessException(DaoKeys.FAILURE, failure);
         }
     }
 

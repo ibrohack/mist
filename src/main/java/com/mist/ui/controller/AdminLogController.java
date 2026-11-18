@@ -42,7 +42,7 @@ import java.util.function.Function;
 /**
  * Controller of the operation log viewer, where admins read and filter the database operation log of one day.
  *
- * <p>Implements the behaviors LOG-1 to LOG-5 of {@code docs/ui-design.md}.</p>
+ * <p>Implements the behaviors LOG-1 to LOG-6 of {@code docs/ui-design.md}.</p>
  */
 public class AdminLogController implements NavigationAware {
 
@@ -69,6 +69,9 @@ public class AdminLogController implements NavigationAware {
     /** Keeps the entries of one operation. */
     @FXML
     private ComboBox<String> operationFilter;
+    /** Keeps the entries of one transaction number. */
+    @FXML
+    private TextField transactionFilter;
     /** Keeps only the failed entries. */
     @FXML
     private CheckBox failedOnly;
@@ -90,6 +93,9 @@ public class AdminLogController implements NavigationAware {
     /** Who did it. */
     @FXML
     private TableColumn<LogEntry, String> userColumn;
+    /** The transaction it ran in. */
+    @FXML
+    private TableColumn<LogEntry, String> transactionColumn;
     /** What was done. */
     @FXML
     private TableColumn<LogEntry, String> operationColumn;
@@ -114,6 +120,9 @@ public class AdminLogController implements NavigationAware {
     /** Keeps only the selected row's operation. */
     @FXML
     private MenuItem filterOperationItem;
+    /** Keeps only the selected row's transaction. */
+    @FXML
+    private MenuItem filterTransactionItem;
 
     /**
      * Creates the controller.
@@ -130,6 +139,7 @@ public class AdminLogController implements NavigationAware {
         timeColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().time()));
         timeColumn.setCellFactory(column -> textCell(Formats::time));
         userColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().user()));
+        transactionColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().transaction()));
         operationColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().operation()));
         collectionColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().collection()));
         detailsColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().details()));
@@ -166,10 +176,13 @@ public class AdminLogController implements NavigationAware {
         operationFilter.setValue(ALL_OPERATIONS);
         userFilter.textProperty().addListener((observable, before, after) -> applyFilters());
         operationFilter.valueProperty().addListener((observable, before, after) -> applyFilters());
+        transactionFilter.textProperty().addListener((observable, before, after) -> applyFilters());
         failedOnly.selectedProperty().addListener((observable, before, after) -> applyFilters());
         rowMenu.setOnShowing(event -> {
-            boolean none = logTable.getSelectionModel().getSelectedItem() == null;
-            rowMenu.getItems().forEach(item -> item.setDisable(none));
+            LogEntry selected = logTable.getSelectionModel().getSelectedItem();
+            rowMenu.getItems().forEach(item -> item.setDisable(selected == null));
+            // LOG-6: a line outside a transaction has nothing to group by.
+            filterTransactionItem.setDisable(selected == null || !selected.inTransaction());
         });
         applyFilters();
     }
@@ -242,9 +255,11 @@ public class AdminLogController implements NavigationAware {
     private void applyFilters() {
         String user = userFilter.getText() == null ? "" : userFilter.getText().strip().toLowerCase(Locale.ROOT);
         String operation = operationFilter.getValue();
+        String transaction = transactionFilter.getText() == null ? "" : transactionFilter.getText().strip();
         boolean failures = failedOnly.isSelected();
         filtered.setPredicate(entry -> entry.user().toLowerCase(Locale.ROOT).contains(user)
                 && (operation == null || operation.isEmpty() || operation.equals(entry.operation()))
+                && (transaction.isEmpty() || transaction.equals(entry.transaction()))
                 && (!failures || !entry.ok()));
         countLabel.setText(I18n.format("log.count", filtered.size(), entries.size()));
     }
@@ -275,6 +290,15 @@ public class AdminLogController implements NavigationAware {
         LogEntry entry = logTable.getSelectionModel().getSelectedItem();
         if (entry != null) {
             operationFilter.setValue(entry.operation());
+        }
+    }
+
+    /** LOG-6: keeps only the lines of the selected row's transaction, from BEGIN to COMMIT or ROLLBACK. */
+    @FXML
+    private void onFilterTransaction() {
+        LogEntry entry = logTable.getSelectionModel().getSelectedItem();
+        if (entry != null && entry.inTransaction()) {
+            transactionFilter.setText(entry.transaction());
         }
     }
 

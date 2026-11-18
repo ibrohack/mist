@@ -41,10 +41,16 @@ public class LogService {
     public static final String CURRENT_FILE = "mist-db.log";
     /** Name of a rolled file, with the day it holds. */
     private static final Pattern ROLLED_FILE = Pattern.compile("mist-db\\.(\\d{4}-\\d{2}-\\d{2})\\.log");
-    /** Splits a line into its six columns. */
+    /** Splits a line into its columns. */
     private static final Pattern COLUMNS = Pattern.compile(" \\| ");
     /** The prefix of the user column. */
     private static final String USER_PREFIX = "user=";
+    /** The prefix of the transaction column. */
+    private static final String TX_PREFIX = "tx=";
+    /** Columns of a line: date, user, transaction, operation, collection, details and outcome. */
+    private static final int COLUMN_COUNT = 7;
+    /** Columns of a line written before transactions were numbered, which has no transaction column. */
+    private static final int OLD_COLUMN_COUNT = 6;
     /** Length of the date at the start of each line. */
     private static final int DATE_LENGTH = 10;
 
@@ -156,7 +162,8 @@ public class LogService {
     }
 
     /**
-     * Parses one log line: {@code date | user=email | OPERATION | collection | details | OK/FAILED}.
+     * Parses one log line: {@code date | user=email | tx=n | OPERATION | collection | details | OK/FAILED}. A line
+     * written before transactions were numbered has no {@code tx} column and gets {@link LogEntry#NO_TRANSACTION}.
      *
      * @param line the line
      * @return the entry, or empty if the line is in another format
@@ -166,13 +173,24 @@ public class LogService {
             return Optional.empty();
         }
         String[] columns = COLUMNS.split(line, -1);
-        if (columns.length != 6 || !columns[1].startsWith(USER_PREFIX)) {
+        if (columns.length == OLD_COLUMN_COUNT) {
+            // Insert the missing transaction column, so both formats are read the same way below.
+            String[] widened = new String[COLUMN_COUNT];
+            widened[0] = columns[0];
+            widened[1] = columns[1];
+            widened[2] = TX_PREFIX + LogEntry.NO_TRANSACTION;
+            System.arraycopy(columns, 2, widened, 3, OLD_COLUMN_COUNT - 2);
+            columns = widened;
+        }
+        if (columns.length != COLUMN_COUNT || !columns[1].startsWith(USER_PREFIX)
+                || !columns[2].startsWith(TX_PREFIX)) {
             return Optional.empty();
         }
         try {
             LocalDateTime time = LocalDateTime.parse(columns[0], LogEntry.TIME_FORMAT);
-            return Optional.of(new LogEntry(time, columns[1].substring(USER_PREFIX.length()), columns[2],
-                    columns[3], columns[4], "OK".equals(columns[5].strip())));
+            return Optional.of(new LogEntry(time, columns[1].substring(USER_PREFIX.length()),
+                    columns[2].substring(TX_PREFIX.length()), columns[3], columns[4], columns[5],
+                    "OK".equals(columns[6].strip())));
         } catch (DateTimeParseException e) {
             return Optional.empty();
         }

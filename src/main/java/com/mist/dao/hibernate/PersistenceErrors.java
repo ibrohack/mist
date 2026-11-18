@@ -3,6 +3,7 @@ package com.mist.dao.hibernate;
 import com.mist.dao.DaoKeys;
 import com.mist.exception.DataAccessException;
 import com.mist.exception.DuplicateEntityException;
+import com.mist.exception.InvalidDocumentException;
 import com.mongodb.ErrorCategory;
 import com.mongodb.MongoException;
 import jakarta.persistence.PersistenceException;
@@ -23,9 +24,17 @@ import java.util.Set;
  *
  * <p>The MongoDB extension reports a server error as an {@link SQLException} whose vendor code is the MongoDB error
  * code, with the driver's {@link MongoException} as its cause. A duplicate key (codes 11000, 11001 and 12582) becomes a
- * {@link DuplicateEntityException}.</p>
+ * {@link DuplicateEntityException}, and a document the collection's {@code $jsonSchema} rejected (code 121) an
+ * {@link InvalidDocumentException}.</p>
  */
 final class PersistenceErrors {
+
+    /** Server error code when a document fails the collection's {@code $jsonSchema} validator. */
+    static final int DOCUMENT_VALIDATION_FAILURE = 121;
+    /** Server error code when two transactions write the same document at the same time. */
+    static final int WRITE_CONFLICT = 112;
+    /** Error label MongoDB puts on a failure after which the whole transaction can be run again. */
+    static final String TRANSIENT_TRANSACTION_ERROR = "TransientTransactionError";
 
     /** Not instantiable: a holder of error translation helpers. */
     private PersistenceErrors() {
@@ -48,15 +57,37 @@ final class PersistenceErrors {
     }
 
     /**
+     * Tells whether a failure only means that the transaction met another one and can be run again.
+     *
+     * @param failure the failure, possibly already wrapped in a {@code MistException}
+     * @return {@code true} for a write conflict or a failure labelled {@value #TRANSIENT_TRANSACTION_ERROR}
+     */
+    static boolean isTransient(Throwable failure) {
+        for (Throwable cause : chain(failure)) {
+            if (cause instanceof MongoException mongo
+                    && (mongo.hasErrorLabel(TRANSIENT_TRANSACTION_ERROR) || mongo.getCode() == WRITE_CONFLICT)
+                    || cause instanceof SQLException sql && sql.getErrorCode() == WRITE_CONFLICT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Wraps a persistence failure in the matching checked exception.
      *
      * @param failure a failure for which {@link #isPersistence(Throwable)} is {@code true}
-     * @return a {@link DuplicateEntityException} for a broken unique index, otherwise a {@link DataAccessException}
+     * @return a {@link DuplicateEntityException} for a broken unique index, an {@link InvalidDocumentException} for a
+     *         document the validator rejected, otherwise a {@link DataAccessException}
      */
     static DataAccessException translate(RuntimeException failure) {
-        return isDuplicateKey(failure)
-                ? new DuplicateEntityException(DaoKeys.DUPLICATE, failure)
-                : new DataAccessException(DaoKeys.FAILURE, failure);
+        if (isDuplicateKey(failure)) {
+            return new DuplicateEntityException(DaoKeys.DUPLICATE, failure);
+        }
+        if (hasCode(failure, DOCUMENT_VALIDATION_FAILURE)) {
+            return new InvalidDocumentException(DaoKeys.INVALID_DOCUMENT, failure);
+        }
+        return new DataAccessException(DaoKeys.FAILURE, failure);
     }
 
     /**
@@ -91,6 +122,24 @@ final class PersistenceErrors {
                     || cause instanceof MongoException mongo && isDuplicateKey(mongo.getCode())
                     || cause instanceof JDBCException jdbc && isDuplicateKey(jdbc.getErrorCode())
                     || cause instanceof SQLException sql && isDuplicateKey(sql.getErrorCode())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tells whether the driver or the extension reported a given MongoDB error code anywhere in a failure.
+     *
+     * @param failure the failure
+     * @param code    the MongoDB error code
+     * @return {@code true} if a cause carries that code
+     */
+    private static boolean hasCode(Throwable failure, int code) {
+        for (Throwable cause : chain(failure)) {
+            if (cause instanceof MongoException mongo && mongo.getCode() == code
+                    || cause instanceof JDBCException jdbc && jdbc.getErrorCode() == code
+                    || cause instanceof SQLException sql && sql.getErrorCode() == code) {
                 return true;
             }
         }

@@ -14,6 +14,7 @@ import com.mist.model.Order;
 import com.mist.model.OrderItem;
 import com.mist.model.PaymentCard;
 import com.mist.model.Player;
+import com.mist.model.User;
 import org.bson.types.ObjectId;
 
 import java.math.BigDecimal;
@@ -149,15 +150,17 @@ public class StoreService {
      * @throws MistException       if the account cannot act, the game does not exist or the database fails
      */
     public Player addToCart(ObjectId playerId, ObjectId gameId) throws MistException {
-        Player player = Accounts.activePlayer(users, playerId);
-        Game game = purchasable(gameId);
-        if (player.owns(game.getId())) {
-            throw new ValidationException(ModelKeys.PLAYER_ALREADY_OWNED);
-        }
-        if (!player.getCartGameIds().contains(game.getId()) && player.getCartGameIds().size() >= Order.MAX_ITEMS) {
-            throw new ValidationException(ModelKeys.ORDER_ITEMS);
-        }
-        return player.addToCart(game.getId()) ? users.save(player) : player;
+        return transactions.call(() -> {
+            Player player = Accounts.activePlayer(users, playerId);
+            Game game = purchasable(gameId);
+            if (player.owns(game.getId())) {
+                throw new ValidationException(ModelKeys.PLAYER_ALREADY_OWNED);
+            }
+            if (!player.getCartGameIds().contains(game.getId()) && player.getCartGameIds().size() >= Order.MAX_ITEMS) {
+                throw new ValidationException(ModelKeys.ORDER_ITEMS);
+            }
+            return player.addToCart(game.getId()) ? users.save(player) : player;
+        });
     }
 
     /**
@@ -169,8 +172,10 @@ public class StoreService {
      * @throws MistException if the account cannot act or the database fails
      */
     public Player removeFromCart(ObjectId playerId, ObjectId gameId) throws MistException {
-        Player player = Accounts.activePlayer(users, playerId);
-        return player.removeFromCart(gameId) ? users.save(player) : player;
+        return transactions.call(() -> {
+            Player player = Accounts.activePlayer(users, playerId);
+            return player.removeFromCart(gameId) ? users.save(player) : player;
+        });
     }
 
     /**
@@ -194,12 +199,14 @@ public class StoreService {
      * @throws MistException       if the account cannot act, the game does not exist or the database fails
      */
     public Player addToWishlist(ObjectId playerId, ObjectId gameId) throws MistException {
-        Player player = Accounts.activePlayer(users, playerId);
-        Game game = purchasable(gameId);
-        if (player.owns(game.getId())) {
-            throw new ValidationException(ModelKeys.PLAYER_ALREADY_OWNED);
-        }
-        return player.addToWishlist(game.getId()) ? users.save(player) : player;
+        return transactions.call(() -> {
+            Player player = Accounts.activePlayer(users, playerId);
+            Game game = purchasable(gameId);
+            if (player.owns(game.getId())) {
+                throw new ValidationException(ModelKeys.PLAYER_ALREADY_OWNED);
+            }
+            return player.addToWishlist(game.getId()) ? users.save(player) : player;
+        });
     }
 
     /**
@@ -211,8 +218,10 @@ public class StoreService {
      * @throws MistException if the account cannot act or the database fails
      */
     public Player removeFromWishlist(ObjectId playerId, ObjectId gameId) throws MistException {
-        Player player = Accounts.activePlayer(users, playerId);
-        return player.removeFromWishlist(gameId) ? users.save(player) : player;
+        return transactions.call(() -> {
+            Player player = Accounts.activePlayer(users, playerId);
+            return player.removeFromWishlist(gameId) ? users.save(player) : player;
+        });
     }
 
     /**
@@ -266,8 +275,18 @@ public class StoreService {
             }
             player.clearCart();
             users.save(player);
+            // One query for every developer paid by this order, instead of one per developer.
+            Map<ObjectId, Developer> developers = new LinkedHashMap<>();
+            for (User user : users.findByIds(revenueByDeveloper.keySet())) {
+                if (user instanceof Developer developer) {
+                    developers.put(developer.getId(), developer);
+                }
+            }
             for (Map.Entry<ObjectId, BigDecimal> sale : revenueByDeveloper.entrySet()) {
-                Developer developer = Accounts.developer(users, sale.getKey());
+                Developer developer = developers.get(sale.getKey());
+                if (developer == null) {
+                    throw new NotFoundException(ServiceKeys.USER_NOT_FOUND);
+                }
                 developer.recordSale(sale.getValue());
                 users.save(developer);
             }
