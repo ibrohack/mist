@@ -22,8 +22,11 @@ import java.util.regex.Pattern;
 @DiscriminatorValue("PLAYER")
 public class Player extends User {
 
-    /** The shape of a nickname. */
-    private static final Pattern NICKNAME = Pattern.compile("[A-Za-z0-9_.-]{3,24}");
+    /** The shape of a nickname: 3 to 24 letters, digits, dots, dashes or underscores; the validator uses it too. */
+    public static final String NICKNAME_REGEX = "[A-Za-z0-9_.-]{3,24}";
+
+    /** {@link #NICKNAME_REGEX}, compiled. */
+    private static final Pattern NICKNAME = Pattern.compile(NICKNAME_REGEX);
 
     /** The nickname, unique among players. */
     private String nickname;

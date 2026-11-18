@@ -3,6 +3,13 @@
 MIST is a desktop PC game store and community, an alternative to Steam, built for Reto 2.3 "MongoQuest".
 It is a layered JavaFX application backed by MongoDB, where clients buy and rate games and developers publish them.
 
+| Document | For |
+| --- | --- |
+| [docs/architecture.md](docs/architecture.md) | Installation, the layers and why MIST is built this way |
+| [docs/data-model.md](docs/data-model.md) | The MongoDB collections, transactions, validators and the operation log |
+| [docs/ui-design.md](docs/ui-design.md) | The aspect and behavior of every screen |
+| [docs/decisions.md](docs/decisions.md) | The decision log |
+
 ## Prerequisites
 
 - [Temurin JDK 25](https://adoptium.net/)
@@ -136,7 +143,7 @@ with Maven, or run `./mvnw process-resources` once after changing the style clas
 Without Docker, `verify` fails instead of skipping the integration tests.
 
 `./mvnw javadoc:javadoc` builds the API documentation in `target/reports/apidocs`, private members included; it fails
-on any missing comment.
+on any Javadoc warning.
 
 ## Packaging
 
@@ -172,7 +179,7 @@ src/main/resources/
 ├─ i18n/                 messages_es.properties, messages_en.properties
 └─ mist.properties, logback.xml
 src/main/packaging/      the Windows icon and the zip descriptor of the app image
-docs/                    UI design, data model, decision log and the brand kit sources
+docs/                    architecture, UI design, data model, decision log and the brand kit sources
 ```
 
 Layer rules, enforced by `src/test/java/com/mist/architecture/LayerRulesTest.java`:

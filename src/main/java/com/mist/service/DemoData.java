@@ -366,7 +366,9 @@ public final class DemoData {
     }
 
     /**
-     * Seeds the demo content unless the demo admin already exists.
+     * Seeds the demo content unless the demo admin already exists. Everything is written in one transaction, so a
+     * failure leaves the database empty and the next start tries again; the admin is written last, so its presence
+     * means the seed finished.
      *
      * @return {@code true} if the content was created now
      * @throws MistException if the database fails or a demo value breaks a rule
@@ -377,7 +379,7 @@ public final class DemoData {
         }
         DbOperationLogger.setUser("demo-data");
         try {
-            seed();
+            transactions.run(this::seed);
         } finally {
             DbOperationLogger.clearUser();
         }
@@ -392,7 +394,6 @@ public final class DemoData {
     private void seed() throws MistException {
         // One hash for every demo account: they share the documented demo password.
         String hash = new PasswordHasher().hash(PASSWORD.toCharArray());
-        users.save(Admin.create("Ada", "Admin", ADMIN_EMAIL, hash, clock.instant()));
         List<Developer> developers = new ArrayList<>();
         for (Studio studio : STUDIOS) {
             developers.add(users.save(Developer.register(studio.firstName(), studio.lastName(), studio.email(), hash,
@@ -430,6 +431,9 @@ public final class DemoData {
         ratings.rate(nora.getId(), catalog.get("Perfect Dark").getId(), 3,
                 "Brilliant weapons and ideas, but the controls show their age.");
         ratings.rate(nora.getId(), catalog.get("The Legend of Zelda: Ocarina of Time").getId(), 5, null);
+
+        // Last: seedIfEmpty takes the admin as the sign that the seed is complete.
+        users.save(Admin.create("Ada", "Admin", ADMIN_EMAIL, hash, clock.instant()));
     }
 
     /**

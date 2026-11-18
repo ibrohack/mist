@@ -247,6 +247,18 @@ MongoDB runs as replica set `rs0`, so one Hibernate transaction can change sever
 | Rate a game | new `reviews` document; the game's `stats` |
 | Publish a game | the `games` document; the developer's `gameIds` |
 | Deactivate a developer | the `users` document; the developer's games are delisted |
+| Change a game's cover | new `media` document; the game's `coverId`; the old cover is deleted |
+| Add or remove a screenshot | new or deleted `media` document; the game's `screenshotIds` |
+| Change or remove the avatar | new or deleted `media` document; the user's `avatarId` |
+| Seed the demo data | every demo document, so a failure leaves the database empty |
+
+Every change to a single document that is loaded, changed and saved back (cart, wishlist, profile, card, studio
+name, bank account, preferences, password, game details, delist) also runs in one transaction. MongoDB aborts a
+transaction when another one changed the same document first, so a stale copy never overwrites a newer one.
+
+When MongoDB reports such a conflict (code 112, or the `TransientTransactionError` label), the transaction runner
+rolls back and runs the whole use case again after a short random pause, up to 5 attempts. That is why every use case
+loads what it changes inside its transaction.
 
 ## Schema validation and indexes
 
@@ -254,11 +266,20 @@ The extension cannot create validators or every index type, so `SchemaSetup.appl
 driver. It runs on every start: it creates the missing collections, brings the validators up to date with `collMod`,
 and creates the indexes, all idempotently.
 
-- **Validators:** one `$jsonSchema` per collection, built from the limits the model exposes as constants (for example
-  `Review.MAX_COMMENT_LENGTH`).
+- **Validators:** one `$jsonSchema` per collection, built from the limits and patterns the model exposes as constants
+  (for example `Review.MAX_COMMENT_LENGTH` or `User.EMAIL_REGEX`), so the model and the database enforce one rule.
+  - Text fields with a shape are checked with the model's pattern, anchored as `^(?:…)$`: `email`, `nickname`,
+    `phone.countryCode`, `phone.number`, `address.postalCode`, `address.country`, `card.last4`, `bankAccount`,
+    `passwordHash` (Argon2id prefix) and `languages`.
   - Optional fields must allow `null`, because Hibernate writes a missing value as `null`: `bsonType: ["string", "null"]`.
   - In `users`, a `oneOf` on `role` requires `nickname` and `card` for players and `studioName` and `bankAccount` for
     developers.
+  - Every document and embedded document has `additionalProperties: false`, so a field the model does not declare is
+    refused.
+  - `media` combines its `$jsonSchema` with `$expr` and `$binarySize`, so an image holds 1 byte to 2 MiB
+    (`Media.MAX_BYTES`); `$jsonSchema` alone cannot limit binary data.
+  - A refused write fails with code 121, which the data layer turns into `InvalidDocumentException`
+    (`dao.invalidDocument`); the UI shows it as a warning without a Retry button.
 - **Indexes:**
 
 | Collection | Index | Purpose |
@@ -273,6 +294,29 @@ and creates the indexes, all idempotently.
 | `reviews` | `{gameId, playerId}` unique | one review per player and game |
 | `reviews` | `{gameId, createdAt}` | reviews of a game, newest first |
 | `media` | `ownerId` | a user's uploads |
+
+## Operation log
+
+Every database operation writes one line to `~/.mist/logs/mist-db.log`, which rolls into `mist-db.yyyy-MM-dd.log` at
+midnight and is kept 30 days. Admins read it inside MIST, in the operation log view.
+
+```text
+2026-11-18 20:59:30 | user=demo-data | tx=1 | BEGIN | - | - | OK
+2026-11-18 20:59:32 | user=demo-data | tx=1 | INSERT | users | role=ADMIN, email=admin@mist.com | OK
+2026-11-18 20:59:32 | user=demo-data | tx=1 | COMMIT | - | - | OK
+2026-11-18 20:59:33 | user=admin@mist.com | tx=- | LOGIN | users | service.auth.badCredentials | FAILED
+2026-11-18 21:02:10 | user=nora@mist.com | tx=7 | ROLLBACK | - | dao.failure (MongoCommandException: … error 112 (WriteConflict) …) | FAILED
+```
+
+| Column | Content |
+| --- | --- |
+| date | when, in the machine's time zone |
+| user | the logged-in user's email; before login, the email being tried (login, registration); `demo-data` while seeding; `anonymous` otherwise |
+| tx | the number of the transaction the line belongs to, or `-` outside one |
+| operation | `FIND`, `EXISTS`, `SEARCH`, `INSERT`, `UPDATE`, `DELETE`, `BEGIN`, `COMMIT`, `ROLLBACK`, `RETRY`, `LOGIN`, `CONNECT`, `CREATE_COLLECTION`, `SET_VALIDATOR`, `CREATE_INDEX` |
+| collection | the collection touched, or `-` |
+| details | ids, filters or index keys, and the reason of a failure; never a password or a hash |
+| outcome | `OK` or `FAILED` |
 
 ## Notes for the DAO layer
 
