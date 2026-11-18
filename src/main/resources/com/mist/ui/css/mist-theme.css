@@ -406,17 +406,51 @@
   -fx-background-color: transparent;
 }
 
+/* Scroll bars: a visible track and an ash thumb that brightens on hover and turns acid while dragged. Every list,
+   table and scroll pane shows one when its content does not fit. */
 .scroll-bar {
+  -fx-background-color: -mist-track;
+  -fx-background-radius: 6;
+  -fx-background-insets: 0;
+}
+
+.scroll-bar:vertical {
+  -fx-pref-width: 12;
+}
+
+.scroll-bar:horizontal {
+  -fx-pref-height: 12;
+}
+
+.scroll-bar > .track,
+.scroll-bar > .track-background {
   -fx-background-color: transparent;
 }
 
 .scroll-bar > .thumb {
-  -fx-background-color: -mist-border;
-  -fx-background-radius: 3;
+  -fx-background-color: -mist-ash;
+  -fx-background-insets: 2;
+  -fx-background-radius: 6;
+}
+
+.scroll-bar > .thumb:hover {
+  -fx-background-color: derive(-mist-ash, 25%);
+}
+
+.scroll-bar > .thumb:pressed {
+  -fx-background-color: -mist-acid;
+}
+
+.scroll-pane > .corner,
+.virtual-flow > .corner,
+.table-view .corner,
+.tree-table-view .corner {
+  -fx-background-color: -mist-track;
 }
 
 .scroll-bar > .increment-button,
 .scroll-bar > .decrement-button {
+  -fx-background-color: transparent;
   -fx-padding: 0;
 }
 
