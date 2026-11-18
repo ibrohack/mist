@@ -104,24 +104,6 @@ public class LibraryService {
     }
 
     /**
-     * Tells whether a player can still return a game.
-     *
-     * @param playerId the logged-in player
-     * @param gameId   the game
-     * @return {@code true} if the player owns it and its return period is not over
-     * @throws MistException if the account cannot act or the database fails
-     */
-    public boolean canReturn(ObjectId playerId, ObjectId gameId) throws MistException {
-        Player player = Accounts.activePlayer(users, playerId);
-        Optional<LibraryEntry> entry = entry(player, gameId);
-        if (entry.isEmpty()) {
-            return false;
-        }
-        Order order = orders.findById(entry.get().orderId()).orElse(null);
-        return isReturnable(order, gameId, clock.instant()) && order.getPlayerId().equals(player.getId());
-    }
-
-    /**
      * Returns a game for a refund to the card it was paid with, in one transaction: the order item is marked refunded,
      * the game leaves the library, and the sale is taken off the game's statistics and the developer's revenue.
      *
