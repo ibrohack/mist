@@ -1,7 +1,8 @@
 # MIST decision log
 
 Decisions taken while building the project scaffold (week 2, 19 Oct 2026), the model, data access and service layers
-(17 Nov 2026), the user interface (18 Nov 2026), and how they change the preliminary plan of 12 Oct 2026.
+(17 Nov 2026), the user interface (18 Nov 2026), the review against the module rubrics (18 Nov 2026), and how they
+change the preliminary plan of 12 Oct 2026.
 
 ## Scaffold decisions
 
@@ -61,13 +62,15 @@ navigation diagram. [data-model.md](data-model.md) describes every collection an
 3. **Writes flush inside the DAO call**, so a broken unique index fails that call, and is logged against it, instead of
    failing the commit at the end.
 4. **Error translation.** Hibernate, JPA, JDBC and driver failures become `DataAccessException` (`dao.failure`); a
-   duplicate key (MongoDB codes 11000, 11001, 12582) becomes `DuplicateEntityException` (`dao.duplicate`). Model
+   duplicate key (MongoDB codes 11000, 11001, 12582) becomes `DuplicateEntityException` (`dao.duplicate`), and a
+   document a validator rejects (code 121) becomes `InvalidDocumentException` (`dao.invalidDocument`). Model
    exceptions pass through unchanged, after the rollback, for the services to wrap.
-5. **Operation log.** Every DAO call writes `OPERATION | collection | details | OK/FAILED` to `mist-db.log`, and a
-   failed transaction adds a `ROLLBACK` line. The user set at login is kept app-wide, so background threads log it too.
-   Details never contain passwords or hashes.
+5. **Operation log.** Every DAO call writes `date | user | tx | OPERATION | collection | details | OK/FAILED` to
+   `mist-db.log`; the line format is in [data-model.md](data-model.md#operation-log). The user set at login is kept
+   app-wide, so background threads log it too. Details never contain passwords or hashes.
 6. **`SchemaSetup.apply` runs on every start.** It creates missing collections, updates the validators with `collMod`
-   and creates the indexes; all of it is idempotent. The validators are strict and reject invalid writes.
+   and creates the indexes; all of it is idempotent, and each step is logged. The validators are strict and reject
+   invalid writes.
 7. **Paging uses `setFirstResult`/`setMaxResults`**, which the extension translates to `$skip`/`$limit`.
 
 ## Service layer decisions (17 Nov 2026)
@@ -76,7 +79,9 @@ navigation diagram. [data-model.md](data-model.md) describes every collection an
    exists, is active and has the right role. The UI keeps the logged-in `User` that `AuthService.login` returns.
 2. **Raw input in form records** (`PlayerSignUp`, `ProfileForm`, `GameForm`, `CardForm`, `ImageUpload`, ...). The
    services build the model values from them, so every rule violation reaches the UI as a `ValidationException` with
-   the model's bundle key, and the UI never catches unchecked exceptions.
+   the model's bundle key. A few model calls take values the service has already checked (for example
+   `Developer.recordSale` in checkout) and are not wrapped; if one of them threw, it would be a bug, and
+   `ErrorReporter` shows it as an unexpected error.
 3. **Argon2id through Bouncy Castle** (`bcprov-jdk18on`, pure Java). `PasswordHasher` writes the standard PHC string
    with the OWASP minimum cost (`m=19456,t=2,p=1`), a 16-byte salt and a 32-byte hash; checks read the cost from the
    stored string. A one-off check confirmed that `argon2-cffi` verifies MIST's hashes and MIST verifies its hashes.
@@ -115,9 +120,10 @@ and behavior of every screen.
    screen in place. The light theme only redefines the brand tokens.
 7. **Login hides which accounts exist**, as the service does: wrong email and wrong password get the same message.
 8. **The profile edits one row at a time, in place**, as the navigation diagram draws it, instead of a separate form.
-9. **Demo data seeds an empty database** (`DemoData`, `mist.seed.demo=true` by default): an admin, two developers,
-   twelve games with generated art, three players with orders, a cart, a wishlist and reviews. It is the only way an
-   admin account is created.
+9. **Demo data seeds an empty database** (`DemoData`, `mist.seed.demo=true` by default): an admin, 12 developer
+   studios, 15 published games and 1 draft with real cover and screenshot JPGs (art is only drawn when a JPG is
+   missing), three players with 4 orders, a cart, a wishlist and 6 reviews. It is the only way an admin account is
+   created.
 10. **The operation log is read from the files**, `~/.mist/logs/mist-db.log` and its rolled days, by `LogService`, for
     admins only (ADT IL5.1).
 11. **Help comes from the bundles**: one topic per screen (`help.<topic>.*`), so it is translated like the rest and a
@@ -126,7 +132,9 @@ and behavior of every screen.
     covers use cases, rule errors, database failures and file errors without Docker. Interactions fire the controls'
     events instead of moving the mouse.
 13. **Packaging is a jpackage app image**, not an installer, so no WiX is needed; see the README.
-14. **Javadoc covers private members too** and fails on any missing comment (`./mvnw javadoc:javadoc`).
+14. **Javadoc covers private members too** (`show=private`, `doclint=all`) and fails on any warning
+    (`./mvnw javadoc:javadoc`). Doclint does not flag every undocumented private field, so the rubric review also
+    checked every declaration by script.
 15. **Reports are filled from what the screen shows.** The receipt takes the order on screen and the sales report the
     dashboard's figures; labels come from the UI bundles (`$R{...}`) and values arrive formatted by `Formats`, so a PDF
     matches the screen and its language. The DejaVu fonts are embedded (for the euro sign and accents), and the JDT
@@ -143,6 +151,37 @@ and behavior of every screen.
     which also shows what was refunded and gives each order's receipt.
 20. **The early library view was rebuilt**: its own blue palette and fixed texts gave way to the brand tokens and the
     bundles, and the empty-library art is rebuilt in FXML like the splash and offline screens.
+
+## Rubric review decisions (18 Nov 2026)
+
+The ADT and DIN rubrics and the statement were checked item by item against the code. These decisions close the gaps
+found.
+
+1. **No lost updates, without `@Version`.** Every service method that loads a document, changes it and saves it back
+   (cart, wishlist, profile, card, studio name, bank account, preferences, password, game update, delist) now does so
+   inside one transaction, as the multi-document use cases already did. MongoDB aborts a transaction whose document
+   another transaction changed first, so a stale copy is never written back. `@Version` was not used: support for it
+   in `mongodb-hibernate` 1.0.0 is not documented, and the transaction approach needs no schema change.
+2. **Transient conflicts are retried.** When MongoDB reports a write conflict (code 112) or labels a failure
+   `TransientTransactionError`, `HibernateTransactions` runs the whole work again after a short random pause that
+   grows with each attempt, up to 5 attempts, and logs a `RETRY` line. A one-off check (not kept) ran six concurrent
+   wishlist changes for one player: with immediate retries three were lost to repeated conflicts; with the pause all
+   six were kept, in three runs out of three.
+3. **Transactions are numbered in the log.** `BEGIN`, `COMMIT` and `ROLLBACK` lines and every DAO line in between carry
+   the transaction number, so the admin can see which operations a rollback undid. The log viewer shows the column
+   and filters by it.
+4. **Sign-in attempts are logged with the email typed**, and registration with the new email, instead of
+   `anonymous`; each login adds a `LOGIN` line that worked or failed, with the reason key.
+5. **The validators share the model's patterns.** Email, nickname, phone, postal code, country and card digits are
+   public regex constants in the model, used by both the model and `SchemaSetup`. Every document and embedded
+   document rejects undeclared fields (`additionalProperties: false`), which works because Hibernate writes only
+   mapped fields. `media` also bounds the image size with `$binarySize`, which `$jsonSchema` cannot express. A one-off
+   check confirmed MongoDB rejects a bad email, nickname or phone, an extra field (top level or embedded) and an empty
+   image with code 121, and accepts valid copies.
+6. **The demo seed is one transaction**, and the admin, whose presence means "already seeded", is written last; a
+   failure no longer leaves a partial catalog that is never completed.
+7. **Packaging stays a zipped jpackage app image.** An installer (`--type exe`) needs the WiX Toolset on the build
+   machine and adds nothing the course asks for that the app image lacks; see UI decision 13.
 
 ## Changes to the preliminary plan
 
