@@ -60,6 +60,8 @@ public class GameController implements NavigationAware {
     private static final double THUMB_HEIGHT = 54;
     /** How many stars a review can have. */
     private static final int STARS = 5;
+    /** Height of an achievement row. */
+    private static final double ACHIEVEMENT_ROW = 62;
 
     /**
      * A game with the name of its studio, loaded together.
@@ -219,6 +221,8 @@ public class GameController implements NavigationAware {
         pegiBadge.setText(game.getPegi() == null ? "" : "PEGI " + game.getPegi().minimumAge());
         pegiBadge.setVisible(game.getPegi() != null);
         achievementsList.getItems().setAll(game.getAchievements());
+        // Show every achievement without an inner scroll bar, up to a sensible height.
+        achievementsList.setPrefHeight(Math.min(Math.max(1, game.getAchievements().size()), 8) * ACHIEVEMENT_ROW + 6);
         renderMedia();
         updateBuyBox();
         int pages = Math.max(1, (game.getStats().ratingCount() + REVIEWS_PER_PAGE - 1) / REVIEWS_PER_PAGE);
@@ -249,7 +253,10 @@ public class GameController implements NavigationAware {
             thumbnails.getChildren().add(thumbnail);
         }
         mainImage.setImage(null);
-        if (!images.isEmpty()) {
+        // A landscape screenshot fills the frame better than the portrait cover.
+        if (!game.getScreenshotIds().isEmpty()) {
+            showImage(game.getScreenshotIds().getFirst());
+        } else if (!images.isEmpty()) {
             showImage(images.getFirst());
         }
     }

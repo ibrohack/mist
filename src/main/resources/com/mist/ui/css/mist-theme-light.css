@@ -16,6 +16,11 @@
 /* Acid text is unreadable on a light background; acid fills keep their dark text. */
 .mist-text-acid,
 .mist-message-ok,
+.mist-price,
+.mist-stars,
+.mist-outcome-ok,
+.hyperlink,
+.hyperlink:visited,
 .menu-item:focused > .label {
   -fx-text-fill: #3f6600;
 }

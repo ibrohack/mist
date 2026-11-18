@@ -25,7 +25,8 @@
 .button {
   -fx-background-color: -mist-acid;
   -fx-background-radius: 3;
-  -fx-text-fill: -mist-void;
+  /* Acid is the same in both themes, so its text stays dark in both. */
+  -fx-text-fill: #0a0c0b;
   -fx-font-weight: 700;
   -fx-padding: 10 18;
   -fx-cursor: hand;
