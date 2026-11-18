@@ -6,7 +6,7 @@
 
   <groupId>com.mist</groupId>
   <artifactId>mist</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>MIST</name>
@@ -306,7 +306,7 @@
       <id>package</id>
       <properties>
         <!-- jpackage needs a numeric version. -->
-        <app.version>0.1.0</app.version>
+        <app.version>1.0.0</app.version>
         <jpackage.input>${project.build.directory}/jpackage/input</jpackage.input>
         <jpackage.output>${project.build.directory}/jpackage/out</jpackage.output>
       </properties>
@@ -443,7 +443,7 @@
     <profile>
       <id>jar</id>
       <properties>
-        <app.version>0.1.0</app.version>
+        <app.version>1.0.0</app.version>
       </properties>
       <build>
         <plugins>

@@ -25,7 +25,7 @@ The [README](../README.md) has the full steps. In short:
    validators and indexes, and fills an empty database with demo data. The demo accounts share the password
    `mist2026`: `admin@mist.com`, `lucia@mist.com` (player) and `rockstarnorth@mist.com` (developer).
 4. To hand MIST to a user without Java, build the app image with `./mvnw -Ppackage package` and give them
-   `target/MIST-0.1.0-windows.zip`. They unzip it and run `MIST.exe`; MongoDB must still be reachable.
+   `target/MIST-1.0.0-windows.zip`. They unzip it and run `MIST.exe`; MongoDB must still be reachable.
 
 Settings (connection string, database name, demo data) come from `mist.properties` and can be overridden with
 environment variables or system properties. Logs go to `~/.mist/logs`.

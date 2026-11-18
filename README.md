@@ -380,7 +380,7 @@ on any Javadoc warning.
 ```
 
 The `package` profile builds a Windows app image with `jpackage`: `target/jpackage/out/MIST/MIST.exe` with its own
-Java runtime, zipped to `target/MIST-0.1.0-windows.zip`. Unzip it anywhere and run `MIST.exe`; no Java or installer
+Java runtime, zipped to `target/MIST-1.0.0-windows.zip`. Unzip it anywhere and run `MIST.exe`; no Java or installer
 is needed. It is a classpath app image (`jlink` cannot take Hibernate's automatic modules), and it is not an installer,
 so WiX is not required. The app still needs MongoDB as described above.
 
@@ -390,15 +390,15 @@ so WiX is not required. The app still needs MongoDB as described above.
 .\mvnw.cmd -Pjar package
 ```
 
-The `jar` profile builds `target/MIST-0.1.0.jar`, a single JAR with every library inside. It needs a Java 25 runtime
+The `jar` profile builds `target/MIST-1.0.0.jar`, a single JAR with every library inside. It needs a Java 25 runtime
 on the computer, and runs with:
 
 ```powershell
-java -jar MIST-0.1.0.jar
+java -jar MIST-1.0.0.jar
 ```
 
 The settings in [Configuration](#configuration) apply as usual; system properties go before `-jar`, for example
-`java -Dmist.seed.demo=false -jar MIST-0.1.0.jar`. The JAR carries JavaFX's native libraries for the platform it was
+`java -Dmist.seed.demo=false -jar MIST-1.0.0.jar`. The JAR carries JavaFX's native libraries for the platform it was
 built on, so a JAR built on Windows runs on Windows. JavaFX prints an `Unsupported JavaFX configuration` warning at
 start, as it does for any classpath app; it is harmless.
 
