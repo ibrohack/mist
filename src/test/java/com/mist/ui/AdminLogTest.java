@@ -18,13 +18,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+import com.mist.dao.DaoKeys;
+import javafx.stage.WindowEvent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The admins' operation log viewer (LOG-1 to LOG-5) and who can open it (SHELL-6).
+ * The admins' operation log viewer (LOG-1 to LOG-6), with lines written before and after transactions were
+ * numbered, what it does when the database fails, and who can open it (SHELL-6).
  */
 class AdminLogTest extends MistUiTest {
 
@@ -40,6 +43,14 @@ class AdminLogTest extends MistUiTest {
             "2026-11-18 10:05:00 | user=marc@mist.com | INSERT | reviews | gameId=2 | FAILED",
             "2026-11-18 10:05:01 | user=marc@mist.com | ROLLBACK | - | DuplicateKey: E11000 | FAILED",
             "this line is not a log entry");
+    /** A day written after transactions were numbered: two transactions and one line outside any. */
+    private static final List<String> WITH_TRANSACTIONS = List.of(
+            "2026-11-16 12:00:00 | user=lucia@mist.com | tx=7 | BEGIN | - | - | OK",
+            "2026-11-16 12:00:01 | user=lucia@mist.com | tx=7 | INSERT | orders | playerId=1 | OK",
+            "2026-11-16 12:00:02 | user=lucia@mist.com | tx=7 | ROLLBACK | - | dao.failure | FAILED",
+            "2026-11-16 12:01:00 | user=lucia@mist.com | tx=- | FIND | games | limit=20 | OK",
+            "2026-11-16 12:02:00 | user=marc@mist.com | tx=8 | BEGIN | - | - | OK",
+            "2026-11-16 12:02:01 | user=marc@mist.com | tx=8 | COMMIT | - | - | OK");
 
     @Test
     void adminLandsOnTheNewestDayNewestFirst() throws Exception {
@@ -150,6 +161,63 @@ class AdminLogTest extends MistUiTest {
         robot.interact(() -> navigator.show(View.ADMIN_LOG));
 
         assertEquals(msg(ServiceKeys.USER_NOT_ADMIN), dialogMessage());
+    }
+
+    @Test
+    void theRowsOfOneTransactionAreKeptTogether() throws Exception {
+        writeLogs();
+        Files.write(backend.logDirectory().resolve("mist-db.2026-11-16.log"), WITH_TRANSACTIONS);
+        loginAs(DemoData.ADMIN_EMAIL);
+        choose("dayPicker", LocalDate.of(2026, 11, 16));
+        assertEquals(6, table().getItems().size());
+        LogEntry insert = table().getItems().stream().filter(entry -> entry.operation().equals("INSERT"))
+                .findFirst().orElseThrow();
+        robot.interact(() -> table().getSelectionModel().select(insert));
+
+        contextItem("filterTransactionItem");
+
+        assertEquals("7", text("transactionFilter"));
+        assertEquals(3, table().getItems().size());
+        assertTrue(table().getItems().stream().allMatch(entry -> entry.transaction().equals("7")));
+        assertEquals(I18n.format("log.count", 3, 6), text("countLabel"));
+    }
+
+    @Test
+    void linesWithoutATransactionCannotBeGroupedByOne() throws Exception {
+        writeLogs();
+        loginAs(DemoData.ADMIN_EMAIL);
+        robot.interact(() -> table().getSelectionModel().select(0));
+        ContextMenu menu = table().getContextMenu();
+
+        robot.interact(() -> menu.getOnShowing().handle(new WindowEvent(menu, WindowEvent.WINDOW_SHOWING)));
+
+        assertEquals(LogEntry.NO_TRANSACTION, table().getItems().getFirst().transaction());
+        assertTrue(menuItem(menu, "filterTransactionItem").isDisable());
+        assertFalse(menuItem(menu, "filterUserItem").isDisable());
+    }
+
+    @Test
+    void aDatabaseFailureWhileCheckingTheReaderOffersARetry() throws Exception {
+        writeLogs();
+        loginAs(DemoData.ADMIN_EMAIL);
+        db.failNextCall();
+
+        click("refreshButton");
+        assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
+        click("dialogRetry");
+
+        assertEquals(4, table().getItems().size());
+    }
+
+    /**
+     * Returns an item of a context menu.
+     *
+     * @param menu the menu
+     * @param id   the item's fx:id
+     * @return the item
+     */
+    private static MenuItem menuItem(ContextMenu menu, String id) {
+        return menu.getItems().stream().filter(item -> id.equals(item.getId())).findFirst().orElseThrow();
     }
 
     /**
