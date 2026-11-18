@@ -6,23 +6,39 @@ import com.mist.exception.MistException;
 import com.mist.exception.NotFoundException;
 import com.mist.exception.UnauthorizedException;
 import com.mist.exception.ValidationException;
+import com.mist.service.ServiceKeys;
 import com.mist.ui.I18n;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Turns exceptions into what the user sees (behavior C-2 of {@code docs/ui-design.md}).
  *
  * <p>The services throw checked {@link MistException}s whose message is a bundle key, so the dialog shows the message
  * in the current language. Rule violations get a warning; database failures an error with a Retry button; anything
- * else, which would be a bug, is logged with its stack trace and gets a generic message. Every report is written to
- * {@code mist-app.log} through the logger {@code com.mist.ui}.</p>
+ * else, which would be a bug, is logged with its stack trace and gets a generic message. A deactivated account ends
+ * the session. Every report is written to {@code mist-app.log} through the logger {@code com.mist.ui}.</p>
  */
 public final class ErrorReporter {
 
     /** The UI's own log: user actions and the errors shown to the user. */
     private static final Logger LOG = LoggerFactory.getLogger("com.mist.ui");
+
+    /** Ends the session with a message, when the account was deactivated meanwhile. */
+    private Consumer<String> accountClosed = key -> { };
+
+    /**
+     * Sets what ends the session when a service reports that the account was deactivated.
+     *
+     * @param handler receives the bundle key of the message for the login screen
+     */
+    public void onAccountClosed(Consumer<String> handler) {
+        this.accountClosed = Objects.requireNonNull(handler, "handler");
+    }
 
     /**
      * Shows an error that has no retry.
@@ -47,6 +63,10 @@ public final class ErrorReporter {
             // A duplicate is a rule the user broke, even though it is also a DataAccessException.
             case DuplicateEntityException e -> warn(owner, e);
             case NotFoundException e -> warn(owner, e);
+            case UnauthorizedException e when ServiceKeys.ACCOUNT_DEACTIVATED.equals(e.getMessage()) -> {
+                LOG.info("The account was deactivated during the session; signing out");
+                accountClosed.accept(e.getMessage());
+            }
             case UnauthorizedException e -> warn(owner, e);
             case DataAccessException e -> {
                 LOG.warn("Database failure shown to the user: {}", e.getMessage(), e);

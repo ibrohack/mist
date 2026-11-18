@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
@@ -76,6 +77,9 @@ public class ShellController implements ShellHost, NavigationAware {
     /** Switches to the light theme. */
     @FXML
     private RadioMenuItem lightItem;
+    /** Ends the session. */
+    @FXML
+    private MenuItem logoutItem;
     /** Where the screen on display goes. */
     @FXML
     private StackPane content;
@@ -134,6 +138,13 @@ public class ShellController implements ShellHost, NavigationAware {
         LOG.info("Theme changed to {}", theme);
         context.navigator().applyTheme(theme);
         savePreferences();
+    }
+
+    /** SHELL-7: ends the session and returns to the login screen. */
+    @FXML
+    private void onLogout() {
+        LOG.info("Logged out");
+        context.navigator().signOut(null);
     }
 
     /**

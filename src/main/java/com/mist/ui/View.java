@@ -14,7 +14,13 @@ public enum View {
     SPLASH("view/splash.fxml", Placement.WINDOW),
 
     /** The frame of a session: the header with the user menu, around the in-shell screens. */
-    SHELL("view/shell.fxml", Placement.WINDOW);
+    SHELL("view/shell.fxml", Placement.WINDOW),
+
+    /** Login, with the language toggle. */
+    LOGIN("view/login.fxml", Placement.WINDOW),
+
+    /** Registration of a player or a developer. */
+    REGISTER("view/register.fxml", Placement.WINDOW);
 
     /** Where a screen is shown. */
     public enum Placement {

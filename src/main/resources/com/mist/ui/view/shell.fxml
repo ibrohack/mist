@@ -3,7 +3,9 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -58,6 +60,8 @@
                              onAction="#onTheme"/>
             </items>
           </Menu>
+          <SeparatorMenuItem/>
+          <MenuItem fx:id="logoutItem" text="%menu.logout" accelerator="Shortcut+Shift+Q" onAction="#onLogout"/>
         </items>
       </MenuButton>
     </HBox>

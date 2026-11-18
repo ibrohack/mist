@@ -57,6 +57,7 @@ public final class Navigator {
         this.stage = Objects.requireNonNull(stage, "stage");
         this.context = Objects.requireNonNull(context, "context");
         context.attach(this);
+        context.errors().onAccountClosed(this::signOut);
     }
 
     /**
@@ -114,6 +115,20 @@ public final class Navigator {
         } else {
             showInWindow(current, currentParameter);
         }
+    }
+
+    /**
+     * Ends the session and returns to the login screen (SHELL-7), with a message when the session did not end by
+     * choice, such as a deactivated account.
+     *
+     * @param noticeKey the bundle key of the message to show on the login screen, or {@code null}
+     */
+    public void signOut(String noticeKey) {
+        if (context.isConnected()) {
+            context.services().auth().logout();
+        }
+        context.session().end();
+        show(View.LOGIN, noticeKey == null ? null : new LoginNotice(null, noticeKey, false));
     }
 
     /** Opens the shell of a session that just started, on its first screen. */

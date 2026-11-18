@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Register: one scrollable form with the account, contact and account-type groups; the player or developer group
+     shows by role. See docs/ui-design.md, "Register". -->
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="1280" prefHeight="800" styleClass="mist-bg-void"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mist.ui.controller.RegisterController">
+  <fx:define>
+    <ToggleGroup fx:id="roleGroup"/>
+  </fx:define>
+
+  <VBox alignment="TOP_CENTER" styleClass="mist-bg-void,py-12">
+    <VBox fx:id="formBox" maxWidth="560" styleClass="mist-bg-surface,mist-rounded,p-10,gap-[18px]">
+      <VBox styleClass="gap-[4px]">
+        <Label text="%register.title" styleClass="mist-title"/>
+        <Label text="%register.subtitle" styleClass="mist-caption" wrapText="true"/>
+      </VBox>
+
+      <!-- Account -->
+      <Label text="%register.account" styleClass="mist-subtitle"/>
+      <HBox styleClass="gap-[12px]">
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.firstName" labelFor="$firstNameField"/>
+          <TextField fx:id="firstNameField"/>
+        </VBox>
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.lastName" labelFor="$lastNameField"/>
+          <TextField fx:id="lastNameField"/>
+        </VBox>
+      </HBox>
+      <VBox styleClass="gap-[6px]">
+        <Label text="%field.email" labelFor="$emailField"/>
+        <TextField fx:id="emailField" promptText="%login.email.prompt"/>
+      </VBox>
+      <HBox styleClass="gap-[12px]">
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.password" labelFor="$passwordField"/>
+          <PasswordField fx:id="passwordField"/>
+        </VBox>
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.repeatPassword" labelFor="$repeatField"/>
+          <PasswordField fx:id="repeatField"/>
+        </VBox>
+      </HBox>
+      <Label text="%register.passwordHint" styleClass="mist-caption" wrapText="true"/>
+
+      <Separator/>
+
+      <!-- Contact -->
+      <Label text="%register.contact" styleClass="mist-subtitle"/>
+      <HBox styleClass="gap-[12px]">
+        <VBox prefWidth="110" minWidth="110" styleClass="gap-[6px]">
+          <Label text="%field.phoneCode" labelFor="$phoneCodeField"/>
+          <TextField fx:id="phoneCodeField" promptText="+34"/>
+        </VBox>
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.phoneNumber" labelFor="$phoneNumberField"/>
+          <TextField fx:id="phoneNumberField" promptText="%field.optional"/>
+        </VBox>
+      </HBox>
+      <VBox styleClass="gap-[6px]">
+        <Label text="%field.street" labelFor="$streetField"/>
+        <TextField fx:id="streetField"/>
+      </VBox>
+      <HBox styleClass="gap-[12px]">
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.details" labelFor="$detailsField"/>
+          <TextField fx:id="detailsField" promptText="%field.optional"/>
+        </VBox>
+        <VBox prefWidth="160" minWidth="140" styleClass="gap-[6px]">
+          <Label text="%field.postalCode" labelFor="$postalCodeField"/>
+          <TextField fx:id="postalCodeField"/>
+        </VBox>
+      </HBox>
+      <HBox styleClass="gap-[12px]">
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.city" labelFor="$cityField"/>
+          <TextField fx:id="cityField"/>
+        </VBox>
+        <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+          <Label text="%field.province" labelFor="$provinceField"/>
+          <TextField fx:id="provinceField" promptText="%field.optional"/>
+        </VBox>
+      </HBox>
+      <VBox styleClass="gap-[6px]">
+        <Label text="%field.country" labelFor="$countryBox"/>
+        <ComboBox fx:id="countryBox" maxWidth="Infinity"/>
+      </VBox>
+
+      <Separator/>
+
+      <!-- Account type -->
+      <Label text="%register.type" styleClass="mist-subtitle"/>
+      <HBox styleClass="gap-[24px]">
+        <RadioButton fx:id="playerRadio" text="%register.player" toggleGroup="$roleGroup" selected="true"/>
+        <RadioButton fx:id="developerRadio" text="%register.developer" toggleGroup="$roleGroup"/>
+      </HBox>
+
+      <VBox fx:id="playerSection" styleClass="gap-[18px]">
+        <VBox styleClass="gap-[6px]">
+          <Label text="%field.nickname" labelFor="$nicknameField"/>
+          <TextField fx:id="nicknameField"/>
+        </VBox>
+        <VBox styleClass="gap-[6px]">
+          <Label text="%field.cardHolder" labelFor="$cardHolderField"/>
+          <TextField fx:id="cardHolderField"/>
+        </VBox>
+        <HBox styleClass="gap-[12px]">
+          <VBox HBox.hgrow="ALWAYS" styleClass="gap-[6px]">
+            <Label text="%field.cardNumber" labelFor="$cardNumberField"/>
+            <TextField fx:id="cardNumberField" promptText="1234 5678 9012 3456"/>
+          </VBox>
+          <VBox prefWidth="100" minWidth="100" styleClass="gap-[6px]">
+            <Label text="%field.expiryMonth" labelFor="$expiryMonthBox"/>
+            <ComboBox fx:id="expiryMonthBox" maxWidth="Infinity"/>
+          </VBox>
+          <VBox prefWidth="110" minWidth="110" styleClass="gap-[6px]">
+            <Label text="%field.expiryYear" labelFor="$expiryYearBox"/>
+            <ComboBox fx:id="expiryYearBox" maxWidth="Infinity"/>
+          </VBox>
+        </HBox>
+      </VBox>
+
+      <VBox fx:id="developerSection" styleClass="gap-[18px]">
+        <VBox styleClass="gap-[6px]">
+          <Label text="%field.studioName" labelFor="$studioNameField"/>
+          <TextField fx:id="studioNameField"/>
+        </VBox>
+        <VBox styleClass="gap-[6px]">
+          <Label text="%field.bankAccount" labelFor="$bankAccountField"/>
+          <TextField fx:id="bankAccountField" promptText="ES91 2100 0418 4502 0005 1332"/>
+        </VBox>
+      </VBox>
+
+      <Label fx:id="formMessage" wrapText="true"/>
+      <HBox alignment="CENTER_LEFT" styleClass="gap-[16px]">
+        <Button fx:id="registerButton" text="%register.submit" defaultButton="true" onAction="#onRegister"/>
+        <Hyperlink fx:id="backLink" text="%register.back" onAction="#onBack"/>
+      </HBox>
+    </VBox>
+  </VBox>
+</ScrollPane>
