@@ -69,7 +69,9 @@ class StudioTest extends MistUiTest {
         type("priceField", "12,99");
         click("dialogConfirm");
 
-        assertEquals(I18n.format("studio.created", "Hollow Echo"), dialogMessage());
+        assertEquals(View.GAME_EDITOR, navigator.current());
+        assertEquals("Hollow Echo", text("titleLabel"));
+        click("backButton");
         assertEquals(8, table().getItems().size());
         assertEquals(GameStatus.DRAFT, row("Hollow Echo").getStatus());
         assertEquals(new BigDecimal("12.99"), row("Hollow Echo").getPrice());
@@ -108,7 +110,7 @@ class StudioTest extends MistUiTest {
         type("nameField", "Hollow Echo");
         type("priceField", "5");
         click("dialogConfirm");
-        click("dialogOk");
+        click("backButton");
         select("Hollow Echo");
 
         click("publishButton");

@@ -64,6 +64,7 @@
         <Label text="%studio.games" styleClass="mist-subtitle"/>
         <Label text="%studio.priceHint" styleClass="mist-caption"/>
         <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="editButton" text="%studio.edit" styleClass="mist-button-secondary" onAction="#onEdit"/>
         <Button fx:id="publishButton" text="%studio.publish" styleClass="mist-button-secondary" onAction="#onPublish"/>
         <Button fx:id="delistButton" text="%studio.delist" styleClass="mist-button-danger" onAction="#onDelist"/>
       </HBox>
@@ -86,6 +87,7 @@
         <contextMenu>
           <ContextMenu fx:id="gameMenu">
             <items>
+              <MenuItem fx:id="editItem" text="%studio.edit" onAction="#onEdit"/>
               <MenuItem fx:id="publishItem" text="%studio.publish" onAction="#onPublish"/>
               <MenuItem fx:id="delistItem" text="%studio.delist" onAction="#onDelist"/>
             </items>

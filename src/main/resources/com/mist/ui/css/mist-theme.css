@@ -793,3 +793,20 @@
 .table-row-cell .text-field {
   -fx-padding: 2 6;
 }
+
+/* Game editor (docs/ui-design.md, "Game editor"). */
+.mist-cover-frame:error {
+  -fx-border-color: -mist-danger;
+  -fx-border-width: 2;
+}
+
+.button.mist-chip-remove {
+  -fx-background-color: transparent;
+  -fx-text-fill: -mist-ash;
+  -fx-padding: 0 2;
+  -fx-font-size: 13px;
+}
+
+.button.mist-chip-remove:hover {
+  -fx-text-fill: -mist-danger;
+}

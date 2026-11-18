@@ -8,6 +8,7 @@ import com.mist.service.SalesReport;
 import com.mist.ui.I18n;
 import com.mist.ui.NavigationAware;
 import com.mist.ui.UiContext;
+import com.mist.ui.View;
 import com.mist.ui.support.Dialogs;
 import com.mist.ui.support.Formats;
 import com.mist.ui.support.GameForms;
@@ -25,6 +26,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.MouseButton;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ import java.util.function.Function;
  * Controller of the developer dashboard: sales cards, the revenue chart, and the editable table of the developer's
  * games.
  *
- * <p>Implements the behaviors STUDIO-1 to STUDIO-3, STUDIO-5 and STUDIO-6 of {@code docs/ui-design.md}. The price
+ * <p>Implements the behaviors STUDIO-1 to STUDIO-6 of {@code docs/ui-design.md}. The price
  * column is edited in place: committing a cell saves the new price with {@code PublishingService#update}, and a
  * rejected price goes back to the stored one.</p>
  */
@@ -70,6 +72,9 @@ public class StudioController implements NavigationAware {
     /** Revenue per game. */
     @FXML
     private BarChart<String, Number> revenueChart;
+    /** Opens the selected game in the editor. */
+    @FXML
+    private Button editButton;
     /** Publishes the selected draft. */
     @FXML
     private Button publishButton;
@@ -103,6 +108,9 @@ public class StudioController implements NavigationAware {
     /** The actions on the selected game. */
     @FXML
     private ContextMenu gameMenu;
+    /** Opens the selected game in the editor. */
+    @FXML
+    private MenuItem editItem;
     /** Publishes the selected draft. */
     @FXML
     private MenuItem publishItem;
@@ -146,6 +154,13 @@ public class StudioController implements NavigationAware {
         revenueColumn.setCellFactory(column -> textCell(Formats::money));
         ratingColumn.setCellValueFactory(cell -> value(cell, game -> Formats.rating(game.getStats())));
         gamesTable.setItems(games);
+        // STUDIO-4: a double click on a row's name opens the editor (the price cell edits in place).
+        gamesTable.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2
+                    && gamesTable.getEditingCell() == null) {
+                onEdit();
+            }
+        });
         gamesTable.getSelectionModel().selectedItemProperty().addListener((observable, before, after) ->
                 updateActions());
         updateActions();
@@ -218,13 +233,19 @@ public class StudioController implements NavigationAware {
                 });
     }
 
-    /** STUDIO-3: opens the New game dialog; the new draft joins the table. */
+    /** STUDIO-3: opens the New game dialog; the new draft opens in the editor. */
     @FXML
     private void onNewGame() {
-        NewGameDialog.show(context, draft -> {
-            load();
-            Dialogs.info(context.navigator().window(), I18n.format("studio.created", draft.getName()));
-        });
+        NewGameDialog.show(context, draft -> context.navigator().show(View.GAME_EDITOR, draft.getId()));
+    }
+
+    /** STUDIO-4: opens the selected game in the editor. */
+    @FXML
+    private void onEdit() {
+        Game game = gamesTable.getSelectionModel().getSelectedItem();
+        if (game != null) {
+            context.navigator().show(View.GAME_EDITOR, game.getId());
+        }
     }
 
     /** STUDIO-5: publishes the selected draft after confirming. */
@@ -256,6 +277,8 @@ public class StudioController implements NavigationAware {
         Game game = gamesTable.getSelectionModel().getSelectedItem();
         boolean draft = game != null && game.getStatus() == GameStatus.DRAFT;
         boolean published = game != null && game.getStatus() == GameStatus.PUBLISHED;
+        editButton.setDisable(game == null);
+        editItem.setDisable(game == null);
         publishButton.setDisable(!draft);
         publishItem.setDisable(!draft);
         delistButton.setDisable(!published);

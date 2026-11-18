@@ -50,7 +50,10 @@ public enum View {
     ORDERS("view/orders.fxml", Placement.SHELL),
 
     /** The developer's dashboard: sales and the editable table of games. */
-    STUDIO("view/studio.fxml", Placement.SHELL);
+    STUDIO("view/studio.fxml", Placement.SHELL),
+
+    /** The editor of one of the developer's games, opened with the game's id. */
+    GAME_EDITOR("view/game-editor.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {
