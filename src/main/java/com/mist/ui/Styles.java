@@ -3,8 +3,14 @@ package com.mist.ui;
 import com.mist.model.Theme;
 import io.github.yasmramos.tailwindfx.TwFXML;
 import io.github.yasmramos.tailwindfx.TwInstall;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import org.slf4j.Logger;
@@ -80,10 +86,49 @@ public final class Styles {
     /**
      * Applies the TailwindFX utilities declared in a view's style classes.
      *
+     * <p>TailwindFX walks the children of the nodes, but the content of a scroll pane, a tab, a split pane or a titled
+     * pane only becomes a child once its skin exists, after the view is shown. So those contents are processed here
+     * as roots of their own.</p>
+     *
      * @param root the root node of a freshly loaded view
      */
     public static void process(Parent root) {
         TwFXML.process(root);
+        processHidden(root);
+    }
+
+    /**
+     * Processes the contents that are not children yet, at any depth.
+     *
+     * @param node the node to search
+     */
+    private static void processHidden(Node node) {
+        for (Node content : hiddenContents(node)) {
+            if (content instanceof Parent parent) {
+                process(parent);
+            }
+        }
+        if (node instanceof Parent parent) {
+            for (Node child : parent.getChildrenUnmodifiable()) {
+                processHidden(child);
+            }
+        }
+    }
+
+    /**
+     * Returns the contents a control holds outside its children list.
+     *
+     * @param node the node
+     * @return the scroll pane's content, the tabs' contents, the split pane's items or the titled pane's content
+     */
+    private static List<Node> hiddenContents(Node node) {
+        return switch (node) {
+            case ScrollPane scroll -> scroll.getContent() == null ? List.of() : List.of(scroll.getContent());
+            case TabPane tabs -> tabs.getTabs().stream().map(Tab::getContent).filter(Objects::nonNull).toList();
+            case SplitPane split -> List.copyOf(split.getItems());
+            case TitledPane titled -> titled.getContent() == null ? List.of() : List.of(titled.getContent());
+            default -> List.of();
+        };
     }
 
     /**

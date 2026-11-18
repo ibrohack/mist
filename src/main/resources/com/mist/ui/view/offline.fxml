@@ -28,7 +28,7 @@
     </Group>
     <Label fx:id="offlineTitle" text="%offline.title" styleClass="mist-offline-title"/>
     <Label fx:id="offlineMessage" text="%offline.message" styleClass="mist-text-ash" wrapText="true"
-           maxWidth="460" textAlignment="CENTER"/>
+           prefWidth="460" maxWidth="460" minHeight="-Infinity" textAlignment="CENTER"/>
     <Button fx:id="retryButton" text="%offline.retry" defaultButton="true" onAction="#onRetry"/>
     <Label fx:id="retryStatus" text="%offline.stillOffline" styleClass="mist-message-error"/>
   </VBox>

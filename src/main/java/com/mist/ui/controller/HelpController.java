@@ -13,6 +13,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -54,9 +55,11 @@ public class HelpController implements HelpPanel {
     @FXML
     private void initialize() {
         ResourceBundle bundle = I18n.bundle();
+        // The general topic first, then the screens in their order.
         List<View> topics = Arrays.stream(View.values())
                 .filter(view -> bundle.containsKey(key(view, "title")))
                 .filter(view -> view != View.ADMIN_LOG || context.session().hasRole(Role.ADMIN))
+                .sorted(Comparator.comparing(view -> view != View.SHELL))
                 .toList();
         topicList.getItems().setAll(topics);
         topicList.setCellFactory(list -> new ListCell<>() {

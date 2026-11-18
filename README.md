@@ -153,6 +153,8 @@ Using the layers from the UI:
   - Static utilities such as `p-24` or `font-bold` come from the stylesheet Maven generates.
   - Arbitrary values such as `w-[350px]` are applied when the view loads.
   - For `HBox` and `VBox` spacing, use `gap-[24px]`; a static `gap-6` does not reach them.
+  - Static paddings set all four sides, so `px-6,py-3` keeps only the last one; use one `p-*` utility, or
+    `<padding>` in the FXML.
   - `text-[104px]` sets the text color, not the size. Use a named size (`text-base` ... `text-9xl`), or a `mist-*`
     class when the brand needs an exact size, as `mist-wordmark` does.
 - No UI text in Java or FXML. Every string comes from `i18n/messages_{es,en}.properties`; Spanish is the default.

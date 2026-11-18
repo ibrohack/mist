@@ -1,6 +1,7 @@
 package com.mist.ui.support;
 
 import com.mist.ui.I18n;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -123,6 +124,8 @@ public final class Dialogs {
         }
         alert.setTitle(I18n.text(titleKey));
         alert.setHeaderText(null);
+        // The brand look has no stock icons; the title and the button texts say what kind of dialog it is.
+        alert.setGraphic(null);
         Label text = new Label(message);
         text.setId(MESSAGE_ID);
         text.setWrapText(true);
@@ -156,7 +159,12 @@ public final class Dialogs {
         }
         alert.getButtonTypes().setAll(types);
         for (int i = 0; i < choices.length; i++) {
-            alert.getDialogPane().lookupButton(types[i]).setId(choices[i].id());
+            Node button = alert.getDialogPane().lookupButton(types[i]);
+            button.setId(choices[i].id());
+            if (choices[i].data() == ButtonBar.ButtonData.CANCEL_CLOSE) {
+                // Only the main action is a primary button.
+                button.getStyleClass().add("mist-button-secondary");
+            }
         }
         return types[0];
     }

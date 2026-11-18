@@ -18,7 +18,7 @@
 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="mist-bg-void"
             xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.mist.ui.controller.ProfileController">
-  <VBox alignment="TOP_CENTER" styleClass="py-10,px-6">
+  <VBox alignment="TOP_CENTER" styleClass="p-10">
     <VBox maxWidth="760" styleClass="gap-[20px]">
 
       <!-- Header: avatar, name, role, member since, avatar buttons. -->

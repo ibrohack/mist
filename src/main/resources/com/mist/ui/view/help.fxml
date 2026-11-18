@@ -24,7 +24,7 @@
     </ScrollPane>
   </center>
   <bottom>
-    <HBox alignment="CENTER_RIGHT" styleClass="mist-bg-surface,px-6,py-3">
+    <HBox alignment="CENTER_RIGHT" styleClass="mist-bg-surface,p-3">
       <Button fx:id="closeButton" text="%help.close" cancelButton="true" onAction="#onClose"/>
     </HBox>
   </bottom>
