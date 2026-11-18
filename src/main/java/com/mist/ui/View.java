@@ -29,7 +29,10 @@ public enum View {
     PROFILE("view/profile.fxml", Placement.SHELL),
 
     /** The admins' viewer of the database operation log. */
-    ADMIN_LOG("view/admin-log.fxml", Placement.SHELL);
+    ADMIN_LOG("view/admin-log.fxml", Placement.SHELL),
+
+    /** The store: featured games, new releases, top sellers, free games and the search. */
+    STORE("view/store.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {

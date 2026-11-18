@@ -47,7 +47,7 @@ class HelpTest extends MistUiTest {
 
         menu("userMenu", "helpItem");
 
-        assertEquals(msg("help.profile.title"), text("topicTitle"));
+        assertEquals(msg("help.store.title"), text("topicTitle"));
         ListView<View> topics = node("topicList");
         assertFalse(topics.getItems().contains(View.ADMIN_LOG));
     }
@@ -89,6 +89,6 @@ class HelpTest extends MistUiTest {
         assertFalse(navigator.isHelpShowing());
 
         shortcut(new KeyCodeCombination(KeyCode.F1));
-        assertEquals("Your profile", text("topicTitle"));
+        assertEquals("The store", text("topicTitle"));
     }
 }

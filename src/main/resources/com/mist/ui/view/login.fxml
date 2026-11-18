@@ -69,5 +69,6 @@
       <Label text="%login.noAccount" styleClass="mist-caption"/>
       <Hyperlink fx:id="registerLink" text="%login.register" onAction="#onRegister"/>
     </HBox>
+    <Hyperlink fx:id="guestLink" text="%login.guest" onAction="#onGuest"/>
   </VBox>
 </HBox>

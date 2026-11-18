@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Store: the featured carousel and the New / Top sellers / Free tabs, or the search results.
+     See docs/ui-design.md, "Store". -->
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="mist-bg-void"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mist.ui.controller.StoreController">
+  <VBox styleClass="p-8,gap-[20px]">
+    <HBox alignment="CENTER_LEFT" styleClass="gap-[16px]">
+      <Label text="%store.title" styleClass="mist-title"/>
+      <Label fx:id="statusLabel" styleClass="mist-message-ok"/>
+      <Region HBox.hgrow="ALWAYS"/>
+      <TextField fx:id="searchField" promptText="%store.search" prefWidth="320"/>
+    </HBox>
+
+    <!-- Browsing: the carousel and the tabs. -->
+    <VBox fx:id="browseBox" styleClass="gap-[20px]">
+      <Pagination fx:id="featured" maxPageIndicatorCount="5" prefHeight="300" styleClass="mist-featured"/>
+      <TabPane fx:id="tabs" tabClosingPolicy="UNAVAILABLE" prefHeight="520">
+        <tabs>
+          <Tab fx:id="newTab" text="%store.tab.new">
+            <ListView fx:id="newList" styleClass="mist-game-list"/>
+          </Tab>
+          <Tab fx:id="topTab" text="%store.tab.top">
+            <ListView fx:id="topList" styleClass="mist-game-list"/>
+          </Tab>
+          <Tab fx:id="freeTab" text="%store.tab.free">
+            <ListView fx:id="freeList" styleClass="mist-game-list"/>
+          </Tab>
+        </tabs>
+      </TabPane>
+    </VBox>
+
+    <!-- Searching: the results. -->
+    <VBox fx:id="resultsBox" styleClass="gap-[12px]">
+      <Label fx:id="resultsTitle" styleClass="mist-subtitle"/>
+      <ListView fx:id="resultsList" prefHeight="560" styleClass="mist-game-list"/>
+    </VBox>
+  </VBox>
+</ScrollPane>

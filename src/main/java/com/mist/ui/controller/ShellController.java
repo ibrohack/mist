@@ -211,6 +211,8 @@ public class ShellController implements ShellHost, NavigationAware {
         User user = context.session().user().orElse(null);
         profileItem.setVisible(user != null);
         logItem.setVisible(context.session().hasRole(Role.ADMIN));
+        // A guest leaves through the same item, to log in.
+        logoutItem.setText(I18n.text(user == null ? "menu.login" : "menu.logout"));
         if (user == null) {
             userMenu.setText(I18n.text("shell.guest"));
             avatarInitials.setText("?");

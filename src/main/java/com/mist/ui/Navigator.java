@@ -196,7 +196,7 @@ public final class Navigator {
     public void home() {
         history.clear();
         current = null;
-        show(context.session().hasRole(Role.ADMIN) ? View.ADMIN_LOG : View.PROFILE);
+        show(context.session().hasRole(Role.ADMIN) ? View.ADMIN_LOG : View.STORE);
     }
 
     /**

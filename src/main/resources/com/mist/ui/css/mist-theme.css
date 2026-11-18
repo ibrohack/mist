@@ -585,3 +585,78 @@
   -fx-border-color: -mist-acid;
   -fx-text-fill: -mist-fog;
 }
+
+/* Store: game lists, prices, the featured carousel and tabs (docs/ui-design.md, "Store"). */
+.mist-game-list .list-cell {
+  -fx-padding: 8 14;
+}
+
+.mist-game-name {
+  -fx-font-size: 15px;
+  -fx-font-weight: 500;
+}
+
+.mist-price {
+  -fx-text-fill: -mist-acid;
+  -fx-font-weight: 700;
+}
+
+.mist-cover-frame {
+  -fx-background-color: -mist-track;
+  -fx-background-radius: 3;
+}
+
+.mist-banner {
+  -fx-background-color: -mist-surface;
+  -fx-background-radius: 3;
+  -fx-padding: 20;
+}
+
+.pagination .pagination-control .button,
+.pagination .pagination-control .toggle-button {
+  -fx-background-color: transparent;
+  -fx-text-fill: -mist-ash;
+}
+
+.pagination .pagination-control .toggle-button:selected {
+  -fx-text-fill: -mist-acid;
+}
+
+.pagination .pagination-control .left-arrow,
+.pagination .pagination-control .right-arrow {
+  -fx-background-color: -mist-ash;
+}
+
+.pagination .pagination-control .bullet-button {
+  -fx-background-color: -mist-track;
+}
+
+.pagination .pagination-control .bullet-button:selected {
+  -fx-background-color: -mist-acid;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+  -fx-background-color: transparent;
+  -fx-padding: 6 14;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab .tab-label {
+  -fx-text-fill: -mist-ash;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+  -fx-border-color: transparent transparent -mist-acid transparent;
+  -fx-border-width: 0 0 3 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label {
+  -fx-text-fill: -mist-fog;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+  -fx-background-color: transparent;
+}
+
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
+  -fx-border-color: transparent;
+}

@@ -38,7 +38,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void playerSeesTheirValuesAndNoDeveloperRows() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         assertEquals(View.PROFILE, navigator.current());
         assertEquals("Lucía Romero", text("nameValue"));
@@ -50,7 +50,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void developerSeesStudioAndAMaskedIban() throws Exception {
-        loginAs(DemoData.DEVELOPER_EMAIL);
+        openProfile(DemoData.DEVELOPER_EMAIL);
 
         assertEquals("Nebula Forge", text("studioValue"));
         assertEquals("ES91 •••• 1332", text("bankValue"));
@@ -59,7 +59,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void nameIsEditedInPlaceAndSaved() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         click("nameEdit");
         assertTrue(visible("nameEditor"));
@@ -76,7 +76,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void onlyOneEditorIsOpenAndCancelDiscards() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         click("nameEdit");
         type("firstNameField", "Changed");
@@ -91,7 +91,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void takenEmailIsMarkedOnItsField() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         click("emailEdit");
         type("emailField", DemoData.SECOND_PLAYER_EMAIL);
@@ -103,7 +103,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void takenNicknameIsMarkedOnItsField() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         click("nicknameEdit");
         type("nicknameField", "marc_f");
@@ -115,7 +115,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void newCardReplacesTheSavedOne() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         click("cardEdit");
         type("cardNumberField", "5555 5555 5555 4444");
@@ -129,7 +129,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void wrongCurrentPasswordIsMarkedAndTheSessionStays() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         changePassword("not-my-password1", "brandnew123");
 
@@ -141,7 +141,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void passwordIsChanged() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
 
         changePassword(DemoData.PASSWORD, "brandnew123");
 
@@ -151,7 +151,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void avatarIsUploadedAndShownInTheUserMenu() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
         files.answerImage(png("me.png"));
 
         click("changeAvatarButton");
@@ -166,7 +166,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void oversizedAvatarIsRefused() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
         Path big = folder.resolve("big.png");
         Files.write(big, new byte[3 * 1024 * 1024]);
         files.answerImage(big);
@@ -179,7 +179,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void unreadableFileIsReported() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
         files.answerImage(folder.resolve("gone.png"));
 
         click("changeAvatarButton");
@@ -189,7 +189,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void cancelledFileChooserDoesNothing() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
         int calls = db.calls();
 
         click("changeAvatarButton");
@@ -200,7 +200,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void deactivationAsksFirstThenSignsOut() throws Exception {
-        loginAs(DemoData.DEVELOPER_EMAIL);
+        openProfile(DemoData.DEVELOPER_EMAIL);
 
         click("deactivateButton");
         assertEquals(msg("profile.deactivate.confirmDeveloper"), dialogMessage());
@@ -220,7 +220,7 @@ class ProfileTest extends MistUiTest {
 
     @Test
     void databaseFailureWhileSavingOffersARetry() throws Exception {
-        loginAs(DemoData.PLAYER_EMAIL);
+        openProfile(DemoData.PLAYER_EMAIL);
         click("nameEdit");
         type("lastNameField", "Romera");
         db.failNextCall();
@@ -230,6 +230,17 @@ class ProfileTest extends MistUiTest {
         click("dialogRetry");
 
         assertEquals("Lucía Romera", text("nameValue"));
+    }
+
+    /**
+     * Logs in and opens the profile from the user menu.
+     *
+     * @param email the demo account's email
+     * @throws Exception if the login fails
+     */
+    private void openProfile(String email) throws Exception {
+        loginAs(email);
+        menu("userMenu", "profileItem");
     }
 
     /**

@@ -65,6 +65,9 @@ public class LoginController implements NavigationAware {
     /** Opens the help window. */
     @FXML
     private Button helpButton;
+    /** Enters the store without an account. */
+    @FXML
+    private Hyperlink guestLink;
 
     /**
      * Creates the controller.
@@ -148,6 +151,14 @@ public class LoginController implements NavigationAware {
     @FXML
     private void onHelp() {
         context.navigator().showHelp();
+    }
+
+    /** LOGIN-5: enters the store as a guest, who can browse but not buy. */
+    @FXML
+    private void onGuest() {
+        LOG.info("Entered as a guest");
+        context.session().startGuest();
+        context.navigator().home();
     }
 
     /** LOGIN-2: opens the registration screen. */
