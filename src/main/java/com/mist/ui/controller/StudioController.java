@@ -9,6 +9,7 @@ import com.mist.ui.I18n;
 import com.mist.ui.NavigationAware;
 import com.mist.ui.UiContext;
 import com.mist.ui.View;
+import com.mist.ui.report.Reports;
 import com.mist.ui.support.Dialogs;
 import com.mist.ui.support.Formats;
 import com.mist.ui.support.GameForms;
@@ -40,7 +41,7 @@ import java.util.function.Function;
  * Controller of the developer dashboard: sales cards, the revenue chart, and the editable table of the developer's
  * games.
  *
- * <p>Implements the behaviors STUDIO-1 to STUDIO-6 of {@code docs/ui-design.md}. The price
+ * <p>Implements the behaviors STUDIO-1 to STUDIO-7 of {@code docs/ui-design.md}. The price
  * column is edited in place: committing a cell saves the new price with {@code PublishingService#update}, and a
  * rejected price goes back to the stored one.</p>
  */
@@ -53,10 +54,15 @@ public class StudioController implements NavigationAware {
     private final UiContext context;
     /** The developer's games. */
     private final ObservableList<Game> games = FXCollections.observableArrayList();
+    /** The figures on screen, for the PDF report; {@code null} until they load. */
+    private SalesReport shown;
 
     /** The studio's name. */
     @FXML
     private Label studioTitle;
+    /** Exports the sales report as a PDF. */
+    @FXML
+    private Button salesReportButton;
     /** Creates a draft. */
     @FXML
     private Button newGameButton;
@@ -187,6 +193,7 @@ public class StudioController implements NavigationAware {
      */
     private void render(SalesReport report) {
         Game selected = gamesTable.getSelectionModel().getSelectedItem();
+        shown = report;
         games.setAll(report.games());
         revenueLabel.setText(Formats.money(report.totalRevenue()));
         unitsLabel.setText(Formats.count(report.unitsSold()));
@@ -224,9 +231,8 @@ public class StudioController implements NavigationAware {
         LOG.info("Changing the price of {} to {}", game.getName(), price);
         context.tasks().run(gamesTable, () -> context.services().publishing().update(context.session().userId(),
                 game.getId(), GameForms.withPrice(game, price)), saved -> {
-                    // R1: the row shows the saved game.
-                    games.set(games.indexOf(game), saved);
-                    gamesTable.getSelectionModel().select(saved);
+                    // R1: the row shows the saved game; the cards and the report read the new figures.
+                    load();
                 }, error -> {
                     gamesTable.refresh();
                     context.errors().report(context.navigator().window(), error);
@@ -270,6 +276,24 @@ public class StudioController implements NavigationAware {
         Dialogs.confirm(context.navigator().window(), I18n.format("studio.delist.confirm", game.getName()),
                 "studio.delist", () -> context.tasks().run(delistButton, () -> context.services().publishing()
                         .delist(context.session().userId(), game.getId()), delisted -> load()));
+    }
+
+    /** STUDIO-7: saves the figures on screen as a PDF where the developer chooses. */
+    @FXML
+    private void onSalesReport() {
+        SalesReport report = shown;
+        if (report == null || !(context.session().requireUser() instanceof Developer developer)) {
+            return;
+        }
+        // R3: a cancelled chooser does nothing.
+        context.files().savePdf(context.navigator().window(),
+                        I18n.format("report.sales.file", LocalDate.now().toString()))
+                .ifPresent(target -> context.tasks().run(salesReportButton, () -> {
+                    Reports.sales(developer, report, target);
+                    return target;
+                }, saved -> Dialogs.info(context.navigator().window(), I18n.format("report.saved", saved)),
+                        // R2: a ReportException is reported as a file error.
+                        error -> context.errors().report(context.navigator().window(), error)));
     }
 
     /** Enables the actions that fit the selected game. */

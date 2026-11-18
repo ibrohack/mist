@@ -1,9 +1,13 @@
 package com.mist.ui.report;
 
+import com.mist.model.Developer;
+import com.mist.model.Game;
+import com.mist.model.GameStatus;
 import com.mist.model.Order;
 import com.mist.model.OrderItem;
 import com.mist.model.PaymentCard;
 import com.mist.model.User;
+import com.mist.service.SalesReport;
 import com.mist.ui.I18n;
 import com.mist.ui.support.Formats;
 import net.sf.jasperreports.engine.JRException;
@@ -21,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +83,39 @@ public final class Reports {
                     "price", Formats.money(item.price())));
         }
         write("receipt", parameters, rows, target);
+    }
+
+    /**
+     * Writes a developer's sales report as a PDF: the studio, when it was made, the dashboard's three figures, one
+     * line per game (status, price, units, revenue and rating) and the totals.
+     *
+     * @param developer the developer the report is about
+     * @param report    the figures the dashboard shows
+     * @param target    the PDF file to write
+     * @throws ReportException if the report cannot be built or the file cannot be written
+     */
+    public static void sales(Developer developer, SalesReport report, Path target) throws ReportException {
+        Objects.requireNonNull(developer, "developer");
+        Objects.requireNonNull(report, "report");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("studio", developer.getStudioName());
+        parameters.put("developer", developer.fullName() + " · " + developer.getEmail());
+        parameters.put("generatedAt", Formats.dateTime(Instant.now()));
+        parameters.put("totalRevenue", Formats.money(report.totalRevenue()));
+        parameters.put("totalUnits", Formats.count(report.unitsSold()));
+        parameters.put("onSale", Formats.count(report.games().stream()
+                .filter(game -> game.getStatus() == GameStatus.PUBLISHED).count()));
+        List<Map<String, ?>> rows = new ArrayList<>();
+        for (Game game : report.games()) {
+            rows.add(Map.of(
+                    "name", game.getName(),
+                    "status", Formats.label(game.getStatus()),
+                    "price", Formats.money(game.getPrice()),
+                    "units", Formats.count(game.getStats().unitsSold()),
+                    "revenue", Formats.money(game.getStats().revenue()),
+                    "rating", Formats.rating(game.getStats())));
+        }
+        write("sales", parameters, rows, target);
     }
 
     /**

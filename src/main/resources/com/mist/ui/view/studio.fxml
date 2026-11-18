@@ -26,6 +26,8 @@
         <Label text="%studio.subtitle" styleClass="mist-caption"/>
       </VBox>
       <Region HBox.hgrow="ALWAYS"/>
+      <Button fx:id="salesReportButton" text="%studio.salesReport" styleClass="mist-button-secondary"
+              onAction="#onSalesReport"/>
       <Button fx:id="newGameButton" text="%studio.newGame" onAction="#onNewGame"/>
     </HBox>
 
