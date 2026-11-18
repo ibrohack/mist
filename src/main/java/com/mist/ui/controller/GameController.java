@@ -117,6 +117,9 @@ public class GameController implements NavigationAware {
     /** Adds the game to the cart. */
     @FXML
     private Button addToCartButton;
+    /** Opens the cart, once the game is in it. */
+    @FXML
+    private Button goToCartButton;
     /** Says the player owns the game. */
     @FXML
     private Label ownedLabel;
@@ -270,9 +273,8 @@ public class GameController implements NavigationAware {
         boolean wished = player != null && player.getWishlistGameIds().contains(game.getId());
         show(notOnSaleLabel, !onSale && !owned);
         show(ownedLabel, owned);
-        show(addToCartButton, onSale && !owned && (guest || player != null));
-        addToCartButton.setDisable(inCart);
-        addToCartButton.setText(I18n.text(inCart ? "game.inCart" : "game.addToCart"));
+        show(addToCartButton, onSale && !owned && !inCart && (guest || player != null));
+        show(goToCartButton, onSale && inCart);
         show(wishlistButton, onSale && !owned && player != null);
         wishlistButton.setDisable(wished);
         wishlistButton.setText(I18n.text(wished ? "game.onWishlist" : "game.addToWishlist"));
@@ -293,6 +295,12 @@ public class GameController implements NavigationAware {
                     statusLabel.setText(I18n.format("store.addedToCart", game.getName()));
                     updateBuyBox();
                 });
+    }
+
+    /** GAME-4: opens the cart. */
+    @FXML
+    private void onGoToCart() {
+        context.navigator().show(View.CART);
     }
 
     /** GAME-5: puts the game on the wishlist. */

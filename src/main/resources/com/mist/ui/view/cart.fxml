@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Cart, following the navigation diagram's Cart view: the games on the left, the summary and checkout on the
+     right. See docs/ui-design.md, "Cart". -->
+<HBox styleClass="mist-bg-void,p-8,gap-[24px]"
+      xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mist.ui.controller.CartController">
+  <VBox HBox.hgrow="ALWAYS" styleClass="gap-[16px]">
+    <Label text="%cart.title" styleClass="mist-title"/>
+    <ListView fx:id="cartList" VBox.vgrow="ALWAYS" styleClass="mist-game-list">
+      <placeholder>
+        <VBox alignment="CENTER" styleClass="gap-[8px]">
+          <Label text="%cart.empty" styleClass="mist-caption"/>
+          <Hyperlink fx:id="browseLink" text="%cart.browse" onAction="#onBrowse"/>
+        </VBox>
+      </placeholder>
+      <contextMenu>
+        <ContextMenu>
+          <items>
+            <MenuItem fx:id="openItem" text="%store.open" onAction="#onOpen"/>
+            <MenuItem fx:id="moveItem" text="%cart.moveToWishlist" onAction="#onMoveToWishlist"/>
+            <MenuItem fx:id="removeItem" text="%cart.remove" onAction="#onRemove"/>
+          </items>
+        </ContextMenu>
+      </contextMenu>
+    </ListView>
+  </VBox>
+
+  <!-- Summary -->
+  <VBox prefWidth="340" minWidth="300" styleClass="mist-bg-surface,mist-rounded,p-6,gap-[14px]">
+    <Label fx:id="totalLabel" styleClass="mist-subtitle"/>
+    <Label text="%cart.summary" styleClass="mist-caption"/>
+    <VBox fx:id="summaryList" styleClass="gap-[4px]"/>
+    <Label fx:id="cardLabel" styleClass="mist-caption" wrapText="true"/>
+    <HBox alignment="CENTER_LEFT" styleClass="gap-[4px]">
+      <CheckBox fx:id="termsCheck" text="%cart.accept"/>
+      <Hyperlink fx:id="termsLink" text="%cart.terms" onAction="#onTerms"/>
+    </HBox>
+    <Button fx:id="checkoutButton" text="%cart.checkout" maxWidth="Infinity" onAction="#onCheckout"/>
+  </VBox>
+</HBox>

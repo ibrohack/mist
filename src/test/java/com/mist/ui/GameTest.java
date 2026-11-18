@@ -77,8 +77,8 @@ class GameTest extends MistUiTest {
         openGame("Pixel Pantry");
 
         click("addToCartButton");
-        assertTrue(this.<javafx.scene.control.Button>node("addToCartButton").isDisable());
-        assertEquals(msg("game.inCart"), text("addToCartButton"));
+        assertFalse(visible("addToCartButton"));
+        assertTrue(visible("goToCartButton"));
 
         click("wishlistButton");
         assertEquals(msg("game.onWishlist"), text("wishlistButton"));

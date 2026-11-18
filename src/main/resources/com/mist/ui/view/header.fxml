@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
@@ -14,6 +15,12 @@
   </fx:define>
   <ToggleButton fx:id="storeLink" text="%nav.store" toggleGroup="$links" styleClass="mist-nav-link"
                 onAction="#onLink"/>
+  <ToggleButton fx:id="cartLink" text="%nav.cart" toggleGroup="$links" styleClass="mist-nav-link"
+                contentDisplay="RIGHT" graphicTextGap="8" onAction="#onLink">
+    <graphic>
+      <Label fx:id="cartBadge" styleClass="mist-badge"/>
+    </graphic>
+  </ToggleButton>
   <ToggleButton fx:id="logLink" text="%nav.log" toggleGroup="$links" styleClass="mist-nav-link"
                 onAction="#onLink"/>
 </HBox>

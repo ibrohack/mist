@@ -723,3 +723,13 @@
   -fx-text-fill: -mist-acid;
   -fx-font-size: 15px;
 }
+
+/* Cart (docs/ui-design.md, "Cart"). */
+.mist-badge {
+  -fx-background-color: -mist-acid;
+  -fx-background-radius: 10;
+  -fx-text-fill: #0a0c0b;
+  -fx-font-size: 11px;
+  -fx-font-weight: 700;
+  -fx-padding: 1 7;
+}

@@ -1,5 +1,6 @@
 package com.mist.ui.controller;
 
+import com.mist.model.Player;
 import com.mist.model.Role;
 import com.mist.ui.UiContext;
 import com.mist.ui.View;
@@ -8,6 +9,7 @@ import javafx.beans.value.WeakChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 
@@ -37,6 +39,12 @@ public class HeaderController {
     /** Opens the store. */
     @FXML
     private ToggleButton storeLink;
+    /** Opens the cart, for players. */
+    @FXML
+    private ToggleButton cartLink;
+    /** How many games are in the cart. */
+    @FXML
+    private Label cartBadge;
     /** Opens the operation log, for admins. */
     @FXML
     private ToggleButton logLink;
@@ -54,13 +62,19 @@ public class HeaderController {
     @FXML
     private void initialize() {
         targets.put(storeLink, View.STORE);
+        targets.put(cartLink, View.CART);
         targets.put(logLink, View.ADMIN_LOG);
         context.session().versionProperty().addListener(new WeakChangeListener<>(sessionListener));
         refresh();
     }
 
-    /** HEADER-1: shows the links of the user's role. */
+    /** HEADER-1: shows the links of the user's role and the size of the cart. */
     public void refresh() {
+        Player player = context.session().user().orElse(null) instanceof Player p ? p : null;
+        show(cartLink, player != null);
+        int inCart = player == null ? 0 : player.getCartGameIds().size();
+        cartBadge.setText(String.valueOf(inCart));
+        cartBadge.setVisible(inCart > 0);
         show(logLink, context.session().hasRole(Role.ADMIN));
     }
 

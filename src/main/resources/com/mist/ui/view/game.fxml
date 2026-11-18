@@ -57,6 +57,7 @@
       <Button fx:id="wishlistButton" text="%game.addToWishlist" styleClass="mist-button-secondary"
               onAction="#onAddToWishlist"/>
       <Button fx:id="addToCartButton" text="%game.addToCart" onAction="#onAddToCart"/>
+      <Button fx:id="goToCartButton" text="%game.goToCart" onAction="#onGoToCart"/>
       <Label fx:id="ownedLabel" text="%game.owned" styleClass="mist-message-ok"/>
       <Label fx:id="notOnSaleLabel" text="%game.notOnSale" styleClass="mist-caption"/>
     </HBox>
