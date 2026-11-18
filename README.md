@@ -68,6 +68,17 @@ with Maven, or run `./mvnw process-resources` once after changing the style clas
 
 Without Docker, `verify` fails instead of skipping the integration tests.
 
+## Packaging
+
+```sh
+./mvnw -Ppackage package
+```
+
+The `package` profile builds a Windows app image with `jpackage`: `target/jpackage/out/MIST/MIST.exe` with its own
+Java runtime, zipped to `target/MIST-0.1.0-windows.zip`. Unzip it anywhere and run `MIST.exe`; no Java or installer
+is needed. It is a classpath app image (`jlink` cannot take Hibernate's automatic modules), and it is not an installer,
+so WiX is not required. The app still needs MongoDB as described above.
+
 ## Layout
 
 ```

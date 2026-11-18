@@ -37,6 +37,11 @@
     <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
     <javafx-maven-plugin.version>0.0.8</javafx-maven-plugin.version>
+    <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+    <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
+    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+    <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
+    <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -257,4 +262,144 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- ./mvnw -Ppackage package: a Windows app image of MIST with its own Java runtime, built by jpackage, zipped to
+         target/MIST-<version>-windows.zip. A classpath app image, because jlink cannot take Hibernate's automatic
+         modules; no installer, so WiX is not needed. -->
+    <profile>
+      <id>package</id>
+      <properties>
+        <!-- jpackage needs a numeric version. -->
+        <app.version>0.1.0</app.version>
+        <jpackage.input>${project.build.directory}/jpackage/input</jpackage.input>
+        <jpackage.output>${project.build.directory}/jpackage/out</jpackage.output>
+      </properties>
+      <build>
+        <plugins>
+          <!-- jpackage refuses to write over an earlier image. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>${maven-clean-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>clean-app-image</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>clean</goal>
+                </goals>
+                <configuration>
+                  <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                  <filesets>
+                    <fileset>
+                      <directory>${project.build.directory}/jpackage</directory>
+                    </fileset>
+                  </filesets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- The runtime libraries go next to MIST's jar; jpackage puts every jar of its input on the classpath. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>${maven-dependency-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>copy-runtime-libraries</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                  <includeScope>runtime</includeScope>
+                  <outputDirectory>${jpackage.input}</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>${maven-jar-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>app-image-jar</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <classifier>app</classifier>
+                  <outputDirectory>${jpackage.input}</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>jpackage-app-image</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${java.home}/bin/jpackage</executable>
+                  <arguments>
+                    <argument>--type</argument>
+                    <argument>app-image</argument>
+                    <argument>--name</argument>
+                    <argument>MIST</argument>
+                    <argument>--app-version</argument>
+                    <argument>${app.version}</argument>
+                    <argument>--vendor</argument>
+                    <argument>MIST</argument>
+                    <argument>--description</argument>
+                    <argument>${project.description}</argument>
+                    <argument>--icon</argument>
+                    <argument>${project.basedir}/src/main/packaging/mist.ico</argument>
+                    <argument>--input</argument>
+                    <argument>${jpackage.input}</argument>
+                    <argument>--main-jar</argument>
+                    <argument>${project.build.finalName}-app.jar</argument>
+                    <argument>--main-class</argument>
+                    <argument>${main.class}</argument>
+                    <argument>--java-options</argument>
+                    <argument>--enable-native-access=ALL-UNNAMED</argument>
+                    <argument>--dest</argument>
+                    <argument>${jpackage.output}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>${maven-assembly-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>zip-app-image</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>MIST-${app.version}</finalName>
+                  <descriptors>
+                    <descriptor>src/main/packaging/app-image.xml</descriptor>
+                  </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
