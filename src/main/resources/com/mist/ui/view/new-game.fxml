@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
 <!-- New game dialog: the name and price of a draft. See docs/ui-design.md, "Developer dashboard" (STUDIO-3). -->
 <VBox prefWidth="420" styleClass="gap-[10px]"
       xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.mist.ui.controller.NewGameDialog">
-  <Label text="%studio.newGame.hint" styleClass="mist-caption" wrapText="true"/>
+  <HBox alignment="CENTER_LEFT" styleClass="gap-[8px]">
+    <Label text="%studio.newGame.hint" styleClass="mist-caption" wrapText="true" maxWidth="Infinity"
+           HBox.hgrow="ALWAYS"/>
+    <Button fx:id="newGameHelpButton" text="?" styleClass="mist-toggle,mist-help-button" onAction="#onHelp"/>
+  </HBox>
   <Label text="%studio.column.name" labelFor="$nameField"/>
   <TextField fx:id="nameField"/>
   <Label text="%studio.column.price" labelFor="$priceField"/>

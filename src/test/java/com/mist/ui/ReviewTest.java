@@ -125,6 +125,16 @@ class ReviewTest extends MistUiTest {
         assertFalse(visible("yourReviewLabel"));
     }
 
+    @Test
+    void theQuestionMarkOpensTheLibraryHelp() throws Exception {
+        openReview("Metroid Prime");
+
+        click("reviewHelpButton");
+
+        assertTrue(navigator.isHelpShowing());
+        assertEquals(msg("help.library.title"), text("topicTitle"));
+    }
+
     /**
      * Logs in as the demo player, opens the library and the review dialog of an owned game.
      *

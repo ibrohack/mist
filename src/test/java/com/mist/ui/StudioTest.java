@@ -203,6 +203,17 @@ class StudioTest extends MistUiTest {
         assertEquals(GameStatus.DRAFT, db.gameByName("Hollow Echo").getStatus());
     }
 
+    @Test
+    void theNewGameDialogsQuestionMarkOpensTheStudioHelp() throws Exception {
+        loginAs(DemoData.DEVELOPER_EMAIL);
+        click("newGameButton");
+
+        click("newGameHelpButton");
+
+        assertTrue(navigator.isHelpShowing());
+        assertEquals(msg("help.studio.title"), text("topicTitle"));
+    }
+
     /**
      * Edits a game's price in the table: starts editing the cell, types and presses Enter.
      *

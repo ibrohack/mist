@@ -212,4 +212,10 @@ public class ReviewDialog {
     private List<ToggleButton> stars() {
         return List.of(star1, star2, star3, star4, star5);
     }
+
+    /** HELP-1: opens the help on the screen the dialog was opened from (library or game page). */
+    @FXML
+    private void onHelp() {
+        context.navigator().showHelp();
+    }
 }

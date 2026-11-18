@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Startup with MongoDB stopped: the splash shows the offline state (SPLASH-1.R2), whose Retry connects again
- * (OFFLINE-1).
+ * (OFFLINE-1) and whose "?" opens the help (HELP-1).
  */
 class OfflineTest extends MistUiTest {
 
@@ -42,5 +42,13 @@ class OfflineTest extends MistUiTest {
 
         assertEquals(View.LOGIN, navigator.current());
         assertTrue(context.isConnected());
+    }
+
+    @Test
+    void theQuestionMarkOpensTheOfflineHelp() {
+        click("helpButton");
+
+        assertTrue(navigator.isHelpShowing());
+        assertEquals(msg("help.offline.title"), text("topicTitle"));
     }
 }
