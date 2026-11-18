@@ -39,6 +39,9 @@ public class HeaderController {
     /** Opens the store. */
     @FXML
     private ToggleButton storeLink;
+    /** Opens the library, for players. */
+    @FXML
+    private ToggleButton libraryLink;
     /** Opens the wishlist, for players. */
     @FXML
     private ToggleButton wishlistLink;
@@ -65,6 +68,7 @@ public class HeaderController {
     @FXML
     private void initialize() {
         targets.put(storeLink, View.STORE);
+        targets.put(libraryLink, View.LIBRARY);
         targets.put(wishlistLink, View.WISHLIST);
         targets.put(cartLink, View.CART);
         targets.put(logLink, View.ADMIN_LOG);
@@ -75,6 +79,7 @@ public class HeaderController {
     /** HEADER-1: shows the links of the user's role and the size of the cart. */
     public void refresh() {
         Player player = context.session().user().orElse(null) instanceof Player p ? p : null;
+        show(libraryLink, player != null);
         show(wishlistLink, player != null);
         show(cartLink, player != null);
         int inCart = player == null ? 0 : player.getCartGameIds().size();

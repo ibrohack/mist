@@ -1,47 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
 
-<!-- Rebuilt from docs/brand/mist-splash.svg (1280 x 720). -->
-
-<StackPane minHeight="480" minWidth="800" prefHeight="720" prefWidth="1280"
-           styleClass="mist-bg-void, library-root" stylesheets="@library.css"
-           xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1"
+<!-- Library, following the navigation diagram's Library view: the sidebar with the filters and the names, and the
+     grid of covers. With no games, the brand's empty-library art (docs/brand/mist-empty-library.svg).
+     See docs/ui-design.md, "Library". -->
+<StackPane styleClass="mist-bg-void,library-root" stylesheets="@library.css"
+           xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.mist.ui.controller.LibraryController">
-   <children>
-      <SplitPane dividerPositions="0.24" styleClass="library-split">
-         <items>
+  <SplitPane fx:id="librarySplit" dividerPositions="0.26" styleClass="library-split">
+    <items>
+      <!-- Sidebar: the filters and the names. Keeps its width when the window resizes. -->
+      <VBox minWidth="240" maxWidth="420" prefWidth="300" styleClass="sidebar,gap-[12px]"
+            SplitPane.resizableWithParent="false">
+        <Label text="%library.title" styleClass="mist-title"/>
+        <TextField fx:id="searchField" promptText="%library.search"/>
+        <HBox styleClass="gap-[8px]">
+          <ComboBox fx:id="sortBox" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+          <ComboBox fx:id="tagFilter" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        </HBox>
+        <ListView fx:id="gameList" VBox.vgrow="ALWAYS" styleClass="game-list">
+          <placeholder>
+            <Label text="%library.noMatches" styleClass="mist-caption"/>
+          </placeholder>
+          <contextMenu>
+            <ContextMenu fx:id="gameMenu">
+              <items>
+                <MenuItem fx:id="openItem" text="%store.open" onAction="#onOpen"/>
+              </items>
+            </ContextMenu>
+          </contextMenu>
+        </ListView>
+      </VBox>
 
-            <!-- Sidebar: search + game list. Keeps its width when the window resizes. -->
-            <VBox minWidth="220" maxWidth="420" prefWidth="300" spacing="12"
-                  styleClass="sidebar" SplitPane.resizableWithParent="false">
-               <children>
-                  <TextField fx:id="searchField" promptText="Search library…" styleClass="search-field" />
-                  <ListView fx:id="gameList" styleClass="game-list" VBox.vgrow="ALWAYS">
-                     <placeholder>
-                        <Label styleClass="empty-label" text="No games found" />
-                     </placeholder>
-                  </ListView>
-               </children>
-            </VBox>
+      <!-- The covers, re-wrapped as the width changes. -->
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" minWidth="400" styleClass="grid-scroll">
+        <TilePane fx:id="gameGrid" hgap="18" vgap="18" prefTileWidth="170" prefTileHeight="276"
+                  tileAlignment="TOP_LEFT" styleClass="game-grid"/>
+      </ScrollPane>
+    </items>
+  </SplitPane>
 
-            <!-- Content: scrollable grid that re-wraps tiles as the width changes. -->
-            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER"
-                        minWidth="400" styleClass="grid-scroll">
-               <content>
-                  <TilePane fx:id="gameGrid" hgap="18" vgap="18" prefTileWidth="180"
-                            prefTileHeight="260" tileAlignment="TOP_LEFT" styleClass="game-grid" />
-               </content>
-            </ScrollPane>
-
-         </items>
-      </SplitPane>
-   </children>
+  <!-- Empty state, rebuilt from the brand kit. -->
+  <VBox fx:id="emptyState" alignment="CENTER">
+    <VBox alignment="CENTER" maxWidth="640" maxHeight="420" prefWidth="640" prefHeight="420"
+          styleClass="mist-bg-surface,mist-offline-card,gap-[18px]">
+      <Group>
+        <Circle radius="100" styleClass="mist-empty-ring"/>
+        <Circle radius="64" styleClass="mist-fill-acid"/>
+        <SVGPath content="M-60 -37H56M-41 0H60M-60 37H27" styleClass="mist-empty-lines"/>
+      </Group>
+      <Label fx:id="emptyTitle" text="%library.empty.title" styleClass="mist-offline-title"/>
+      <Label text="%library.empty.message" styleClass="mist-text-ash"/>
+      <Button fx:id="browseButton" text="%cart.browse" onAction="#onBrowse"/>
+    </VBox>
+  </VBox>
 </StackPane>

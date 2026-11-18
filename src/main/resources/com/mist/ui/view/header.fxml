@@ -15,6 +15,8 @@
   </fx:define>
   <ToggleButton fx:id="storeLink" text="%nav.store" toggleGroup="$links" styleClass="mist-nav-link"
                 onAction="#onLink"/>
+  <ToggleButton fx:id="libraryLink" text="%nav.library" toggleGroup="$links" styleClass="mist-nav-link"
+                onAction="#onLink"/>
   <ToggleButton fx:id="wishlistLink" text="%nav.wishlist" toggleGroup="$links" styleClass="mist-nav-link"
                 onAction="#onLink"/>
   <ToggleButton fx:id="cartLink" text="%nav.cart" toggleGroup="$links" styleClass="mist-nav-link"
