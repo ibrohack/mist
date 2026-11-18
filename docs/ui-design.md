@@ -136,6 +136,7 @@ caller handles it.
 |---|---|
 | `ValidationException(model.*, service.*)` | Shown inline on the bound field when the screen has a form ([C-3](#c-3-validation)); otherwise a warning dialog with the message. |
 | `DuplicateEntityException(service.user.*Taken, service.review.alreadyExists, dao.duplicate)` | Same as a validation error. Checked before `DataAccessException`, which it extends. |
+| `InvalidDocumentException(dao.invalidDocument)` | A collection validator refused the write: warning dialog with the message, without Retry, because the same data would be refused again. Checked before `DataAccessException`, which it extends. |
 | `NotFoundException(service.*.notFound)` | Warning dialog with the message. |
 | `UnauthorizedException(service.account.deactivated)` | The session ends; Login opens with the message. |
 | `UnauthorizedException(other keys)` | Warning dialog with the message; the session stays. |
@@ -235,6 +236,7 @@ flowchart LR
 | Login | `LOGIN` | `login.fxml` | `LoginController` | guest | UC-02 Log in, UC-13 Change language, UC-22 Browse as guest |
 | Register | `REGISTER` | `register.fxml` | `RegisterController` | guest | UC-01 Register as player or developer |
 | Shell | `SHELL` | `shell.fxml` | `ShellController` | logged in, guest | UC-03 Log out, UC-13 Change language and theme, UC-20 Get help |
+| Header (inside the shell) | none | `header.fxml` | `HeaderController` | all | Moves between the screens of the role: store, wishlist, library, cart (with its size), dashboard, operation log |
 | Profile | `PROFILE` | `profile.fxml` | `ProfileController` | player, developer, admin | UC-12 Edit profile, UC-14 Deactivate account |
 | Operation log | `ADMIN_LOG` | `admin-log.fxml` | `AdminLogController` | admin | UC-19 View and filter the database log |
 | Help | (window) | `help.fxml` | `HelpController` | all | UC-20 Get help |
@@ -243,8 +245,10 @@ flowchart LR
 | Cart | `CART` | `cart.fxml` | `CartController` | player | UC-06 Manage the cart, UC-07 Check out, UC-21 Download receipt |
 | Wishlist | `WISHLIST` | `wishlist.fxml` | `WishlistController` | player | UC-08 Manage the wishlist |
 | Library | `LIBRARY` | `library.fxml` | `LibraryController` | player | UC-09 View the library, UC-11 Rate a game |
+| Review dialog | (dialog) | `review.fxml` | `ReviewDialog` | player | UC-11 Rate a game |
 | Orders | `ORDERS` | `orders.fxml` | `OrdersController` | player | UC-10 Return a game, UC-21 Download receipt |
 | Developer dashboard | `STUDIO` | `studio.fxml` | `StudioController` | developer | UC-18 View sales and export the report, UC-17 Delist a game |
+| New game dialog | (dialog) | `new-game.fxml` | `NewGameDialog` | developer | UC-15 Create a game |
 | Game editor | `GAME_EDITOR` | `game-editor.fxml` | `GameEditorController` | developer | UC-15 Create and edit a game, UC-16 Publish a game |
 
 Every screen is detailed below, with the reports and the help window after the screens that use them.
@@ -406,12 +410,12 @@ and a full-height table that scrolls. Details are in a fixed-width font.
 
 ```
 Operation log                                                        312 of 1,204 entries   [Refresh]
-Day [2026-11-18 v]  User [________]  Operation [All v]  [x] Failed only
-+---------------------+------------------+-----------+-------------+-------------------------------+---------+
-| Time                | User             | Operation | Collection  | Details                       | Outcome |
-+---------------------+------------------+-----------+-------------+-------------------------------+---------+
-| 18:41:07            | lucia@mist.com   | INSERT    | orders      | id=6721f3...                  | OK      |
-| 18:42:13            | marc@mist.com    | ROLLBACK  | -           | DuplicateKey...               | FAILED  |
+Day [2026-11-18 v]  User [________]  Operation [All v]  Transaction [____]  [x] Failed only
++----------+------------------+-----+-----------+-------------+-------------------------------+---------+
+| Time     | User             | Tx  | Operation | Collection  | Details                       | Outcome |
++----------+------------------+-----+-----------+-------------+-------------------------------+---------+
+| 18:41:07 | lucia@mist.com   | 12  | INSERT    | orders      | id=6721f3...                  | OK      |
+| 18:42:13 | marc@mist.com    | 13  | ROLLBACK  | -           | dao.duplicate (DuplicateKey…) | FAILED  |
 ```
 
 | fx:id | Control | Format |
@@ -419,25 +423,27 @@ Day [2026-11-18 v]  User [________]  Operation [All v]  [x] Failed only
 | `dayPicker` | `DatePicker` | Only days with a log file can be picked |
 | `userFilter` | `TextField` | Contains, case-insensitive |
 | `operationFilter` | `ComboBox<String>` | "All" plus the day's operations |
+| `transactionFilter` | `TextField` | A transaction number, exact |
 | `failedOnly` | `CheckBox` | |
 | `refreshButton` | `Button` (secondary) | |
 | `countLabel` | `Label` | `log.count` = "{0} of {1} entries" |
 | `logTable` | `TableView<LogEntry>` | Sorted by time, newest first |
 | `timeColumn` | `TableColumn<LogEntry, LocalDateTime>` | `HH:mm:ss` |
-| `userColumn`, `operationColumn`, `collectionColumn` | `TableColumn<LogEntry, String>` | |
+| `userColumn`, `transactionColumn`, `operationColumn`, `collectionColumn` | `TableColumn<LogEntry, String>` | `transactionColumn`: the number, or `-` outside a transaction |
 | `detailsColumn` | `TableColumn<LogEntry, String>` | Ellipsis, full text in a tooltip |
 | `outcomeColumn` | `TableColumn<LogEntry, Boolean>` | "OK" in acid, "FAILED" in danger |
 
 Row context menu: **Copy line** (`copyItem`), **Show only this user** (`filterUserItem`), **Show only this
-operation** (`filterOperationItem`).
+operation** (`filterOperationItem`), **Show only this transaction** (`filterTransactionItem`).
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
 | LOG-1 | `AdminLogController#onNavigatedTo` | admin | `LogService#days(ObjectId)` | **R1** `dayPicker` enables only those days and selects the newest, which runs LOG-2. **R2** No log yet: the table placeholder shows `log.empty`. **R3** `UnauthorizedException(service.user.notAdmin)`: C-2. |
 | LOG-2 | `dayPicker.value` changes `→ AdminLogController#onDayChanged` | none | `LogService#entries(ObjectId, LocalDate)` | **R1** The table lists the day's entries; the filters apply. **R2** `DataAccessException(service.log.unreadable)`: C-2 retry dialog; the table is emptied. |
-| LOG-3 | `userFilter.text`, `operationFilter.value`, `failedOnly.selected` change `→ AdminLogController#applyFilters` | none | none (`FilteredList#setPredicate`) | The table and `countLabel` update at once. |
+| LOG-3 | `userFilter.text`, `operationFilter.value`, `transactionFilter.text`, `failedOnly.selected` change `→ AdminLogController#applyFilters` | none | none (`FilteredList#setPredicate`) | The table and `countLabel` update at once. |
 | LOG-4 | `refreshButton.onAction → AdminLogController#onRefresh` | none | `LogService#days`, `LogService#entries` | As LOG-1 and LOG-2, keeping the chosen day. |
 | LOG-5 | `copyItem`, `filterUserItem`, `filterOperationItem` `.onAction` | A row is selected | `Clipboard#setContent` | Copies the row as a log line, or fills the matching filter. |
+| LOG-6 | `filterTransactionItem.onAction → AdminLogController#onFilterTransaction` | The selected row ran in a transaction (`LogEntry#inTransaction`); otherwise the item is disabled | none | `transactionFilter` gets the row's number: the table keeps that transaction's lines, from `BEGIN` to `COMMIT` or `ROLLBACK`. |
 
 ### Header
 
@@ -494,8 +500,8 @@ Each list has a context menu: **Open** (`openItem`), **Add to cart** (`cartItem`
 | STORE-1 | `StoreController#onNavigatedTo` | none | `StoreService#newReleases(int)`, `#topSellers(int)`, `#freeGames(int)` | **R1** The carousel and the three lists fill. **R2** errors: C-2. |
 | STORE-2 | `searchField` text changes (300 ms pause) or `searchField.onAction` `→ StoreController#search` | none | `StoreService#search(String, int)` | **R1** `resultsBox` lists the matches (placeholder `store.noResults`). **R2** Blank text: the carousel and tabs come back. |
 | STORE-3 | Double click or Enter on a list, `openItem`, or the banner's Open button `→ StoreController#open` | a game is selected | none | `Navigator#show(GAME, ObjectId)` |
-| STORE-4 | `cartItem.onAction → StoreController#onAddToCart` | player | `StoreService#addToCart(ObjectId, ObjectId)` | **R1** `UserSession#update(User)`; the header badge grows; `store.addedToCart`. **R2** `ValidationException(model.player.alreadyOwned, model.order.items)`: C-2 warning. |
-| STORE-5 | `wishlistItem.onAction → StoreController#onAddToWishlist` | player | `StoreService#addToWishlist(ObjectId, ObjectId)` | As STORE-4, with `store.addedToWishlist`. |
+| STORE-4 | `cartItem.onAction → StoreController#addToCart(ListView)` | player | `StoreService#addToCart(ObjectId, ObjectId)` | **R1** `UserSession#update(User)`; the header badge grows; `store.addedToCart`. **R2** `ValidationException(model.player.alreadyOwned, model.order.items)`: C-2 warning. |
+| STORE-5 | `wishlistItem.onAction → StoreController#addToWishlist(ListView)` | player | `StoreService#addToWishlist(ObjectId, ObjectId)` | As STORE-4, with `store.addedToWishlist`. |
 
 ### Game page
 
@@ -600,7 +606,7 @@ Context menu of the list and of each card: **Open** (`openItem`), **Write a revi
 |---|---|---|---|---|
 | LIB-1 | `LibraryController#onNavigatedTo` | player | `LibraryService#ownedGames(ObjectId)` | **R1** The list and the grid, newest first. **R2** Empty: `emptyState`. |
 | LIB-2 | `searchField`, `sortBox`, `tagFilter` change `→ LibraryController#applyFilters` | none | none (`FilteredList`, `SortedList`) | The list and the grid update at once. |
-| LIB-3 | Double click on a card or the list, Enter, or `openItem` `→ LibraryController#open` | a game is selected | none | `Navigator#show(GAME, ObjectId)` |
+| LIB-3 | Double click on a card or the list, Enter, or `openItem` `→ LibraryController#onOpen` | a game is selected | none | `Navigator#show(GAME, ObjectId)` |
 | LIB-4 | `reviewItem.onAction → LibraryController#onReview` | a game is selected | the review dialog (REVIEW-1) | |
 | LIB-5 | `returnItem.onAction → LibraryController#onReturn` | the game is returnable | Confirmation `library.return.confirm` (the amount), then `LibraryService#returnGame(ObjectId, ObjectId)` | **R1** `library.returned` with the amount; the library reloads. **R2** `ValidationException(service.library.refundClosed)`: C-2 warning. |
 | LIB-6 | `ordersButton.onAction` or `browseButton.onAction` | none | none | `Navigator#show(ORDERS)` or `Navigator#show(STORE)` |
@@ -671,6 +677,23 @@ Context menu of the table: **Edit** (`editItem`), **Publish** (`publishItem`), *
 | STUDIO-5 | `publishButton` or `publishItem` `→ StudioController#onPublish` | a draft is selected | Confirmation, then `PublishingService#publish(ObjectId, ObjectId)` | **R1** The row shows Published. **R2** `ValidationException(model.game.incomplete)`: warning; the editor shows what is missing. |
 | STUDIO-6 | `delistButton` or `delistItem` `→ StudioController#onDelist` | a published game is selected | Confirmation `studio.delist.confirm`, then `PublishingService#delist(ObjectId, ObjectId)` | **R1** The row shows Delisted. |
 | STUDIO-7 | `salesReportButton.onAction → StudioController#onSalesReport` | none | `FilePicker#savePdf`, then `Reports#sales(Developer, SalesReport, Path)` | As CART-6. |
+
+### New game dialog
+
+**Aspect.** A themed, window-modal dialog over the dashboard: a hint, **Name** (`nameField`) and **Price**
+(`priceField`, prompt `19,99`), a message line (`formMessage`), and the buttons **Create** (`dialogConfirm`) and
+**Cancel** (`dialogCancel`).
+
+| fx:id | Control | Format |
+|---|---|---|
+| `nameField` | `TextField` | Required, at most `Game.MAX_NAME_LENGTH` characters |
+| `priceField` | `TextField` | Required; a price in either language (`12,99`, `12.99`, `12,99 €`), parsed by `GameForms#parsePrice` |
+| `formMessage` | `Label` | The first error, in the danger color |
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| NEW-1 | `NewGameDialog#show(UiContext, Consumer)` from STUDIO-3 | developer | none | The dialog opens with empty fields. |
+| NEW-2 | `dialogConfirm` (an event filter consumes the action, so the dialog stays open) `→ NewGameDialog#onCreate` | `FormValidator`: name required and not too long (`model.game.name`), price parsed (`model.game.price`) | `PublishingService#createDraft(ObjectId, String, BigDecimal)` | **R1** The dialog closes and the draft opens: `Navigator#show(GAME_EDITOR, ObjectId)`. **R2** `ValidationException(model.game.*)`: `FormValidator#showServiceError` marks the field in the dialog. **R3** Other errors: C-2, with Retry for a database failure. |
 
 ### Game editor
 
