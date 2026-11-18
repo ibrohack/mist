@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Wishlist: the games the player wants, with Add to cart and Remove. See docs/ui-design.md, "Wishlist". -->
+<VBox styleClass="mist-bg-void,p-8,gap-[16px]"
+      xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mist.ui.controller.WishlistController">
+  <HBox alignment="CENTER_LEFT" styleClass="gap-[16px]">
+    <Label text="%wishlist.title" styleClass="mist-title"/>
+    <Label fx:id="statusLabel" styleClass="mist-message-ok"/>
+  </HBox>
+  <HBox VBox.vgrow="ALWAYS" styleClass="gap-[16px]">
+    <ListView fx:id="wishlistList" HBox.hgrow="ALWAYS" styleClass="mist-game-list">
+      <placeholder>
+        <Label text="%wishlist.empty" styleClass="mist-caption"/>
+      </placeholder>
+      <contextMenu>
+        <ContextMenu>
+          <items>
+            <MenuItem fx:id="openItem" text="%store.open" onAction="#onOpen"/>
+            <MenuItem fx:id="cartItem" text="%store.addToCart" onAction="#onAddToCart"/>
+            <MenuItem fx:id="removeItem" text="%wishlist.remove" onAction="#onRemove"/>
+          </items>
+        </ContextMenu>
+      </contextMenu>
+    </ListView>
+    <VBox prefWidth="220" styleClass="gap-[10px]">
+      <Button fx:id="addToCartButton" text="%store.addToCart" maxWidth="Infinity" onAction="#onAddToCart"/>
+      <Button fx:id="removeButton" text="%wishlist.remove" styleClass="mist-button-secondary" maxWidth="Infinity"
+              onAction="#onRemove"/>
+    </VBox>
+  </HBox>
+</VBox>

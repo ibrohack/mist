@@ -38,7 +38,10 @@ public enum View {
     GAME("view/game.fxml", Placement.SHELL),
 
     /** The player's cart and the checkout. */
-    CART("view/cart.fxml", Placement.SHELL);
+    CART("view/cart.fxml", Placement.SHELL),
+
+    /** The player's wishlist. */
+    WISHLIST("view/wishlist.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {
