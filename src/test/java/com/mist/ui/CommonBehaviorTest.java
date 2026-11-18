@@ -111,7 +111,7 @@ class CommonBehaviorTest extends MistUiTest {
         assertEquals(msg("model.user.email"), message.getText());
 
         robot.interact(() -> {
-            email.setText("ana@mist.local");
+            email.setText("ana@mist.com");
             password.setText("longer123");
             repeat.setText("longer123");
         });
@@ -122,7 +122,7 @@ class CommonBehaviorTest extends MistUiTest {
 
     @Test
     void serviceRejectionsAreMarkedOnTheBoundField() {
-        TextField email = new TextField("ana@mist.local");
+        TextField email = new TextField("ana@mist.com");
         Label message = new Label();
         FormValidator form = new FormValidator(message).bind(ServiceKeys.USER_EMAIL_TAKEN, email);
 

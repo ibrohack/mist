@@ -31,10 +31,10 @@ class StoreTest extends MistUiTest {
         loginAs(DemoData.PLAYER_EMAIL);
 
         assertEquals(View.STORE, navigator.current());
-        assertEquals(11, list("newList").getItems().size());
-        assertEquals("Starlit Drift", list("newList").getItems().getFirst().getName());
-        assertEquals("Ashen Lanterns", list("topList").getItems().getFirst().getName());
-        assertEquals(List.of("Moss & Marrow", "Paper Kites"), names(list("freeList")));
+        assertEquals(15, list("newList").getItems().size());
+        assertEquals("Red Dead Redemption 2", list("newList").getItems().getFirst().getName());
+        assertEquals("Grand Theft Auto V", list("topList").getItems().getFirst().getName());
+        assertTrue(list("freeList").getItems().isEmpty());
         assertEquals(5, this.<Pagination>node("featured").getPageCount());
     }
 
@@ -42,10 +42,10 @@ class StoreTest extends MistUiTest {
     void searchShowsTheMatchesAndClearingItGoesBack() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
 
-        search("ashen");
+        search("auto v");
         assertTrue(visible("resultsList"));
         assertFalse(visible("newList"));
-        assertEquals(List.of("Ashen Lanterns"), names(list("resultsList")));
+        assertEquals(List.of("Grand Theft Auto V"), names(list("resultsList")));
 
         search("");
         assertFalse(visible("resultsList"));
@@ -65,30 +65,30 @@ class StoreTest extends MistUiTest {
     @Test
     void contextMenuPutsAGameInTheCart() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        select("newList", "Starlit Drift");
+        select("newList", "Red Dead Redemption 2");
 
         contextItem("newList", "cartItem");
 
         Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
-        assertTrue(lucia.getCartGameIds().contains(db.gameByName("Starlit Drift").getId()));
-        assertEquals(I18n.format("store.addedToCart", "Starlit Drift"), text("statusLabel"));
+        assertTrue(lucia.getCartGameIds().contains(db.gameByName("Red Dead Redemption 2").getId()));
+        assertEquals(I18n.format("store.addedToCart", "Red Dead Redemption 2"), text("statusLabel"));
     }
 
     @Test
     void contextMenuPutsAGameOnTheWishlist() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        select("freeList", "Moss & Marrow");
+        select("newList", "Tony Hawk's Pro Skater 2");
 
-        contextItem("freeList", "wishlistItem");
+        contextItem("newList", "wishlistItem");
 
         Player lucia = (Player) db.userByEmail(DemoData.PLAYER_EMAIL);
-        assertTrue(lucia.getWishlistGameIds().contains(db.gameByName("Moss & Marrow").getId()));
+        assertTrue(lucia.getWishlistGameIds().contains(db.gameByName("Tony Hawk's Pro Skater 2").getId()));
     }
 
     @Test
     void anOwnedGameCannotBeAddedAgain() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        select("topList", "Ashen Lanterns");
+        select("topList", "Grand Theft Auto V");
         ContextMenu menu = list("topList").getContextMenu();
         robot.interact(() -> menu.getOnShowing().handle(null));
         assertTrue(item(menu, "cartItem").isDisable());
@@ -137,7 +137,7 @@ class StoreTest extends MistUiTest {
         assertTrue(list("newList").getItems().isEmpty());
 
         click("dialogRetry");
-        assertEquals(11, list("newList").getItems().size());
+        assertEquals(15, list("newList").getItems().size());
     }
 
     /**

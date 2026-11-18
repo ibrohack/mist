@@ -25,33 +25,33 @@ class ReviewTest extends MistUiTest {
 
     @Test
     void aPlayerReviewsAGameFromTheLibrary() throws Exception {
-        openReview("Neon Courier 2088");
+        openReview("Metroid Prime");
 
         click("star4");
         type("commentArea", "Fast and loud.");
         click("dialogConfirm");
 
-        Review review = review("Neon Courier 2088").orElseThrow();
+        Review review = review("Metroid Prime").orElseThrow();
         assertEquals(4, review.getRating());
         assertEquals("Fast and loud.", review.getComment());
         assertEquals(msg("review.published"), dialogMessage());
-        assertEquals(4, db.gameByName("Neon Courier 2088").getStats().ratingSum());
+        assertEquals(4, db.gameByName("Metroid Prime").getStats().ratingSum());
     }
 
     @Test
     void aRatingIsRequired() throws Exception {
-        openReview("Neon Courier 2088");
+        openReview("Metroid Prime");
 
         click("dialogConfirm");
 
         assertEquals(msg("review.ratingRequired"), text("formMessage"));
         assertTrue(visible("commentArea"));
-        assertTrue(review("Neon Courier 2088").isEmpty());
+        assertTrue(review("Metroid Prime").isEmpty());
     }
 
     @Test
     void theCounterFollowsTheTextAndStopsAtTheLimit() throws Exception {
-        openReview("Neon Courier 2088");
+        openReview("Metroid Prime");
 
         type("commentArea", "Great");
         assertEquals(I18n.format("review.counter", 5, Review.MAX_COMMENT_LENGTH), text("commentCounter"));
@@ -63,29 +63,29 @@ class ReviewTest extends MistUiTest {
 
     @Test
     void aSecondReviewIsRefusedInsideTheDialog() throws Exception {
-        openReview("Ashen Lanterns");
+        openReview("Grand Theft Auto V");
 
         click("star3");
         click("dialogConfirm");
 
         assertEquals(msg(ServiceKeys.REVIEW_ALREADY_EXISTS), text("formMessage"));
-        assertEquals(5, review("Ashen Lanterns").orElseThrow().getRating());
+        assertEquals(5, review("Grand Theft Auto V").orElseThrow().getRating());
     }
 
     @Test
     void cancellingWritesNothing() throws Exception {
-        openReview("Neon Courier 2088");
+        openReview("Metroid Prime");
 
         click("star5");
         click("dialogCancel");
 
         assertFalse(visible("commentArea"));
-        assertTrue(review("Neon Courier 2088").isEmpty());
+        assertTrue(review("Metroid Prime").isEmpty());
     }
 
     @Test
     void aDatabaseFailureWhilePublishingOffersARetry() throws Exception {
-        openReview("Neon Courier 2088");
+        openReview("Metroid Prime");
         click("star2");
         db.failNextCall();
 
@@ -93,13 +93,13 @@ class ReviewTest extends MistUiTest {
         assertEquals(msg(DaoKeys.FAILURE), dialogMessage());
         click("dialogRetry");
 
-        assertEquals(2, review("Neon Courier 2088").orElseThrow().getRating());
+        assertEquals(2, review("Metroid Prime").orElseThrow().getRating());
     }
 
     @Test
     void theGamePageOffersAReviewToOwnersAndShowsItAfterwards() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
-        openGame("Neon Courier 2088");
+        openGame("Metroid Prime");
         assertTrue(visible("reviewButton"));
 
         click("reviewButton");
@@ -116,11 +116,11 @@ class ReviewTest extends MistUiTest {
     void theGamePageShowsAnExistingReviewAndNothingToNonOwners() throws Exception {
         loginAs(DemoData.PLAYER_EMAIL);
 
-        openGame("Ashen Lanterns");
+        openGame("Grand Theft Auto V");
         assertEquals(I18n.format("game.yourReview", "★★★★★"), text("yourReviewLabel"));
         assertFalse(visible("reviewButton"));
 
-        openGame("Starlit Drift");
+        openGame("Red Dead Redemption 2");
         assertFalse(visible("reviewButton"));
         assertFalse(visible("yourReviewLabel"));
     }

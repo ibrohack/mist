@@ -36,7 +36,7 @@ class LoginTest extends MistUiTest {
 
     @Test
     void emailIsAcceptedInAnyCaseAndWithSpaces() {
-        logIn("  Lucia@MIST.local ", DemoData.PASSWORD);
+        logIn("  Lucia@MIST.com ", DemoData.PASSWORD);
 
         assertTrue(context.session().isLoggedIn());
     }
@@ -60,7 +60,7 @@ class LoginTest extends MistUiTest {
         assertEquals("", text("passwordField"));
         assertFalse(context.session().isLoggedIn());
 
-        logIn("nobody@mist.local", DemoData.PASSWORD);
+        logIn("nobody@mist.com", DemoData.PASSWORD);
         assertEquals(msg(ServiceKeys.AUTH_BAD_CREDENTIALS), text("formMessage"));
     }
 
@@ -99,12 +99,12 @@ class LoginTest extends MistUiTest {
 
     @Test
     void languageToggleTranslatesTheScreenAndKeepsTheEmail() {
-        type("emailField", "lucia@mist.local");
+        type("emailField", "lucia@mist.com");
 
         click("enToggle");
 
         assertEquals("Log in", text("loginTitle"));
-        assertEquals("lucia@mist.local", text("emailField"));
+        assertEquals("lucia@mist.com", text("emailField"));
         click("esToggle");
         assertEquals("Inicia sesión", text("loginTitle"));
     }
