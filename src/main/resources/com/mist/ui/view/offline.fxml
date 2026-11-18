@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
+
+<!-- Offline state, rebuilt from docs/brand/mist-offline.svg (640 x 420 card) with bundle texts.
+     See docs/ui-design.md, "Offline". -->
+<StackPane prefWidth="1280" prefHeight="800" styleClass="mist-bg-void"
+           xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.mist.ui.controller.OfflineController">
+  <VBox fx:id="offlineCard" alignment="CENTER" maxWidth="640" maxHeight="420" prefWidth="640" prefHeight="420"
+        styleClass="mist-bg-surface,mist-offline-card,gap-[20px]">
+    <!-- The MIST mark with the crossed acid dot of the kit. -->
+    <Group>
+      <SVGPath styleClass="mist-fill-fog"
+               content="M0 18C0 8.059 8.059 0 18 0H126C135.941 0 144 8.059 144 18C144 27.941 135.941 36 126 36H18C8.059 36 0 27.941 0 18Z"/>
+      <SVGPath styleClass="mist-fill-fog"
+               content="M33 62C33 51.507 41.507 43 52 43H128C138.493 43 147 51.507 147 62C147 72.493 138.493 81 128 81H52C41.507 81 33 72.493 33 62Z"/>
+      <SVGPath styleClass="mist-fill-fog"
+               content="M0 106C0 95.507 8.507 87 19 87H95C105.493 87 114 95.507 114 106C114 116.493 105.493 125 95 125H19C8.507 125 0 116.493 0 106Z"/>
+      <Circle centerX="141" centerY="121" radius="19" styleClass="mist-offline-dot"/>
+      <SVGPath content="M132 112L150 130M150 112L132 130" styleClass="mist-offline-cross"/>
+    </Group>
+    <Label fx:id="offlineTitle" text="%offline.title" styleClass="mist-offline-title"/>
+    <Label fx:id="offlineMessage" text="%offline.message" styleClass="mist-text-ash" wrapText="true"
+           maxWidth="460" textAlignment="CENTER"/>
+    <Button fx:id="retryButton" text="%offline.retry" defaultButton="true" onAction="#onRetry"/>
+    <Label fx:id="retryStatus" text="%offline.stillOffline" styleClass="mist-message-error"/>
+  </VBox>
+</StackPane>

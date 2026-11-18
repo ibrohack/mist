@@ -101,6 +101,10 @@
   -fx-fill: -mist-acid;
 }
 
+.mist-fill-fog {
+  -fx-fill: -mist-fog;
+}
+
 .mist-ring {
   -fx-fill: transparent;
   -fx-stroke: -mist-acid;
@@ -403,4 +407,26 @@
 .scroll-bar > .decrement-button > .decrement-arrow {
   -fx-shape: " ";
   -fx-padding: 0;
+}
+
+/* Offline state (docs/ui-design.md, "Offline"). */
+.mist-offline-card {
+  -fx-background-radius: 20;
+  -fx-padding: 48;
+}
+
+.mist-offline-dot {
+  -fx-fill: -mist-acid;
+  -fx-stroke: -mist-surface;
+  -fx-stroke-width: 5;
+}
+
+.mist-offline-cross {
+  -fx-stroke: #0a0c0b;
+  -fx-stroke-width: 4;
+}
+
+.mist-offline-title {
+  -fx-font-size: 25px;
+  -fx-font-weight: 600;
 }

@@ -13,6 +13,9 @@ public enum View {
     /** First screen: the brand art, the tagline and a loading bar while MIST connects. */
     SPLASH("view/splash.fxml", Placement.WINDOW),
 
+    /** Shown when MongoDB cannot be reached, with a way to retry. */
+    OFFLINE("view/offline.fxml", Placement.WINDOW),
+
     /** The frame of a session: the header with the user menu, around the in-shell screens. */
     SHELL("view/shell.fxml", Placement.WINDOW),
 
