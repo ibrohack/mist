@@ -30,8 +30,15 @@ public record Address(String street, String details, String postalCode, String c
     /** Longest province accepted. */
     public static final int MAX_PROVINCE_LENGTH = 80;
 
-    private static final Pattern POSTAL_CODE = Pattern.compile("[A-Z0-9][A-Z0-9 -]{1,8}[A-Z0-9]");
-    private static final Pattern COUNTRY = Pattern.compile("[A-Z]{2}");
+    /** The shape of a postal code, upper case, 3 to 10 characters; the {@code users} validator uses it too. */
+    public static final String POSTAL_CODE_REGEX = "[A-Z0-9][A-Z0-9 -]{1,8}[A-Z0-9]";
+    /** The shape of an ISO 3166-1 alpha-2 country code; the {@code users} validator uses it too. */
+    public static final String COUNTRY_REGEX = "[A-Z]{2}";
+
+    /** {@link #POSTAL_CODE_REGEX}, compiled. */
+    private static final Pattern POSTAL_CODE = Pattern.compile(POSTAL_CODE_REGEX);
+    /** {@link #COUNTRY_REGEX}, compiled. */
+    private static final Pattern COUNTRY = Pattern.compile(COUNTRY_REGEX);
 
     /**
      * Checks every part; blank optional parts become {@code null}.

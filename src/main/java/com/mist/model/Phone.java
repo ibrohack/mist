@@ -15,8 +15,15 @@ import java.util.regex.Pattern;
 @Struct(name = "Phone")
 public record Phone(String countryCode, String number) {
 
-    private static final Pattern COUNTRY_CODE = Pattern.compile("\\+[1-9][0-9]{0,2}");
-    private static final Pattern NUMBER = Pattern.compile("[0-9]{4,14}");
+    /** The shape of a country calling code, such as {@code +34}; the {@code users} validator uses it too. */
+    public static final String COUNTRY_CODE_REGEX = "\\+[1-9][0-9]{0,2}";
+    /** The shape of a national number, 4 to 14 digits; the {@code users} validator uses it too. */
+    public static final String NUMBER_REGEX = "[0-9]{4,14}";
+
+    /** {@link #COUNTRY_CODE_REGEX}, compiled. */
+    private static final Pattern COUNTRY_CODE = Pattern.compile(COUNTRY_CODE_REGEX);
+    /** {@link #NUMBER_REGEX}, compiled. */
+    private static final Pattern NUMBER = Pattern.compile(NUMBER_REGEX);
 
     /**
      * Checks both parts.

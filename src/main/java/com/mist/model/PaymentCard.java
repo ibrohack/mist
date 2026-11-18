@@ -33,8 +33,13 @@ public record PaymentCard(String holderName, @Enumerated(EnumType.STRING) CardBr
     /** Latest expiry year accepted. */
     public static final int MAX_EXPIRY_YEAR = 2099;
 
+    /** The shape of the last four digits that are stored; the {@code users} and {@code orders} validators use it. */
+    public static final String LAST4_REGEX = "[0-9]{4}";
+
+    /** The shape of a full card number as typed, 12 to 19 digits; it is never stored. */
     private static final Pattern NUMBER = Pattern.compile("[0-9]{12,19}");
-    private static final Pattern LAST4 = Pattern.compile("[0-9]{4}");
+    /** {@link #LAST4_REGEX}, compiled. */
+    private static final Pattern LAST4 = Pattern.compile(LAST4_REGEX);
 
     /**
      * Checks the stored parts of a card.

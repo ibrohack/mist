@@ -38,8 +38,11 @@ public abstract class User {
     /** Longest email address accepted. */
     public static final int MAX_EMAIL_LENGTH = 254;
 
-    /** The shape of an email address. */
-    private static final Pattern EMAIL = Pattern.compile("[^@\\s]++@[^@\\s.]++(?:\\.[^@\\s.]++)++");
+    /** The shape of an email address; the {@code users} validator uses it too. */
+    public static final String EMAIL_REGEX = "[^@\\s]++@[^@\\s.]++(?:\\.[^@\\s.]++)++";
+
+    /** {@link #EMAIL_REGEX}, compiled. */
+    private static final Pattern EMAIL = Pattern.compile(EMAIL_REGEX);
     /** The start of every stored password hash. */
     private static final String ARGON2ID_PREFIX = "$argon2id$";
 
