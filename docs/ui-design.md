@@ -186,7 +186,8 @@ flowchart LR
     REGISTER -->|account created / Back| LOGIN
     LOGIN -->|Enter as guest| STORE
     LOGIN -->|Log in| HOME{{Home by role}}
-    HOME -->|player, developer| STORE[Store]
+    HOME -->|player| STORE[Store]
+    HOME -->|developer| STUDIO
     HOME -->|admin| ADMIN_LOG[Operation log]
 
     subgraph SHELL [Shell: header + user menu]
@@ -434,13 +435,15 @@ cart link shows a badge with the number of games in the cart.
 |---|---|---|
 | `storeLink` | `ToggleButton` in `links` | all |
 | `wishlistLink` | `ToggleButton` in `links` | player |
+| `libraryLink` | `ToggleButton` in `links` | player |
 | `cartLink` | `ToggleButton` in `links`, with `cartBadge` (`Label`) as graphic | player |
+| `studioLink` | `ToggleButton` in `links` | developer |
 | `logLink` | `ToggleButton` in `links` | admin |
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
 | HEADER-1 | `HeaderController#refresh` (the session changes) | none | none | Shows the links of the user's role and the cart size from `Player#getCartGameIds()`. |
-| HEADER-2 | `storeLink`, `wishlistLink`, `cartLink`, `logLink` `.onAction → HeaderController#onLink` | none | none | `Navigator#show(STORE / WISHLIST / CART / ADMIN_LOG)`. |
+| HEADER-2 | `storeLink`, `libraryLink`, `wishlistLink`, `cartLink`, `studioLink`, `logLink` `.onAction → HeaderController#onLink` | none | none | `Navigator#show(STORE / LIBRARY / WISHLIST / CART / STUDIO / ADMIN_LOG)`. |
 | HEADER-3 | `ShellController#showContent(View, Node)` | none | none | `HeaderController#highlight(View)` selects the link of the screen on display. |
 
 ### Store
@@ -559,6 +562,140 @@ and Remove (`removeButton`) for the selected game, and a context menu with **Ope
 shows: the buyer, the date, the card, one line per game with its price and refund state, and the total. Labels come
 from the bundles through `REPORT_RESOURCE_BUNDLE` (`$R{...}`), so the receipt is in the UI language; amounts and dates
 are formatted by `Formats`.
+
+### Library
+
+**Aspect.** Follows the diagram's Library view: on the left, a sidebar with the search, the sort and the tag filter
+over the list of owned game names; on the right, a grid of cards (cover, name, and "returnable until..." when it
+applies). With no games, the brand's empty-library art (rebuilt in FXML from `docs/brand/mist-empty-library.svg`)
+replaces both, with a link to the store.
+
+| fx:id | Control | Format |
+|---|---|---|
+| `searchField` | `TextField` | Filters by name as the user types |
+| `sortBox` | `ComboBox<String>` | Recently added, Name |
+| `tagFilter` | `ComboBox<String>` | All tags, then the tags of the owned games |
+| `gameList` | `ListView<OwnedGame>` | Names |
+| `gameGrid` | `TilePane` of cards | Cover 150 x 200, name, `library.returnableUntil` |
+| `ordersButton` | `Button` (secondary) | Opens the orders |
+| `emptyState`, `browseButton` | `VBox`, `Button` | Shown when the library is empty |
+
+Context menu of the list and of each card: **Open** (`openItem`), **Write a review** (`reviewItem`), **Return**
+(`returnItem`, only for a returnable game).
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| LIB-1 | `LibraryController#onNavigatedTo` | player | `LibraryService#ownedGames(ObjectId)` | **R1** The list and the grid, newest first. **R2** Empty: `emptyState`. |
+| LIB-2 | `searchField`, `sortBox`, `tagFilter` change `→ LibraryController#applyFilters` | none | none (`FilteredList`, `SortedList`) | The list and the grid update at once. |
+| LIB-3 | Double click on a card or the list, Enter, or `openItem` `→ LibraryController#open` | a game is selected | none | `Navigator#show(GAME, ObjectId)` |
+| LIB-4 | `reviewItem.onAction → LibraryController#onReview` | a game is selected | the review dialog (REVIEW-1) | |
+| LIB-5 | `returnItem.onAction → LibraryController#onReturn` | the game is returnable | Confirmation `library.return.confirm` (the amount), then `LibraryService#returnGame(ObjectId, ObjectId)` | **R1** `library.returned` with the amount; the library reloads. **R2** `ValidationException(service.library.refundClosed)`: C-2 warning. |
+| LIB-6 | `ordersButton.onAction` or `browseButton.onAction` | none | none | `Navigator#show(ORDERS)` or `Navigator#show(STORE)` |
+
+### Review dialog
+
+**Aspect.** A themed dialog: the game's name, five star buttons, a text area with a character counter
+(`commentCounter`, "{0}/2000"), a message line, and the buttons **Publish** (`dialogConfirm`) and **Cancel**.
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| REVIEW-1 | `ReviewDialog#show(Game)` from LIB-4 or the game page's `reviewButton` (GAME-8) | the player owns the game | none | The dialog opens with no stars chosen. |
+| REVIEW-2 | `star1`..`star5` `.onAction` | none | none | The chosen star and those before it light up. |
+| REVIEW-3 | `commentArea` text changes | at most `Review.MAX_COMMENT_LENGTH` characters (a `TextFormatter` refuses more) | none | `commentCounter` updates. |
+| REVIEW-4 | `dialogConfirm` | a rating is chosen (`review.ratingRequired`) | `ReviewService#rate(ObjectId, ObjectId, int, String)` | **R1** The dialog closes; `review.published`; the game page reloads its reviews. **R2** `DuplicateEntityException(service.review.alreadyExists)` or `UnauthorizedException(service.game.notOwned)`: the message shows in the dialog. **R3** `DataAccessException`: C-2 retry. |
+
+On the game page, an owner sees **Write a review** (`reviewButton`, GAME-8) until they have written one; afterwards
+`yourReviewLabel` shows their stars (`ReviewService#reviewOf(ObjectId, ObjectId)`).
+
+### Orders and returns
+
+**Aspect.** A `TreeTableView` with one row per order (date, total, status) and, under it, one row per game (name,
+price, refund date); the buttons **Return** and **Download receipt** act on the selected row.
+
+| fx:id | Control | Format |
+|---|---|---|
+| `ordersTable` | `TreeTableView<OrderRow>` | Orders expanded, newest first |
+| `dateColumn`, `gameColumn`, `priceColumn`, `statusColumn`, `refundColumn` | `TreeTableColumn<OrderRow, String>` | Localized date and time, money, status label, refund date |
+| `returnButton` | `Button` | Enabled for a returnable game row |
+| `receiptButton` | `Button` (secondary) | Enabled for any row |
+
+Context menu: **Return** (`returnItem`), **Download receipt** (`receiptItem`), **Open game** (`openItem`).
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| ORD-1 | `OrdersController#onNavigatedTo` | player | `LibraryService#orders(ObjectId)`, `LibraryService#ownedGames(ObjectId)` (which games are returnable) | **R1** The tree. **R2** No orders: placeholder `orders.empty`. |
+| ORD-2 | `returnButton` or `returnItem` `.onAction → OrdersController#onReturn` | a returnable game row | Confirmation (the amount), then `LibraryService#returnGame(ObjectId, ObjectId)` | **R1** The row shows its refund date; the order its new status. **R2** `service.library.refundClosed`: C-2 warning. |
+| ORD-3 | `receiptButton` or `receiptItem` `.onAction → OrdersController#onReceipt` | a row is selected | `FilePicker#savePdf`, then `Reports#receipt(Order, User, Path)` | As CART-6. |
+| ORD-4 | `openItem.onAction` or a double click on a game row | a game row | none | `Navigator#show(GAME, ObjectId)` |
+
+### Developer dashboard
+
+**Aspect.** Summary cards (revenue, units sold, games on sale), a `BarChart` of the revenue per game, and an
+editable table of the developer's games, with the actions **New game**, **Edit**, **Publish**, **Delist** and
+**Sales report**.
+
+| fx:id | Control | Format |
+|---|---|---|
+| `revenueLabel`, `unitsLabel`, `publishedLabel` | `Label` | Money, count, count |
+| `revenueChart` | `BarChart<String, Number>` | One bar per game, in euros |
+| `gamesTable` | `TableView<Game>`, editable | |
+| `nameColumn` | `TableColumn<Game, String>` | |
+| `statusColumn` | `TableColumn<Game, GameStatus>` | Label in a colored chip |
+| `priceColumn` | `TableColumn<Game, BigDecimal>`, `TextFieldTableCell` with a money converter | **Editable** |
+| `releaseColumn` | `TableColumn<Game, LocalDate>` | Localized date |
+| `unitsColumn`, `revenueColumn`, `ratingColumn` | `TableColumn<Game, ...>` | Count, money, average |
+
+Context menu of the table: **Edit** (`editItem`), **Publish** (`publishItem`), **Delist** (`delistItem`).
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| STUDIO-1 | `StudioController#onNavigatedTo` | developer | `PublishingService#sales(ObjectId)` | **R1** Cards, chart and table. **R2** No games: placeholder `studio.empty`. |
+| STUDIO-2 | `priceColumn.onEditCommit → StudioController#onPriceCommit` | a number from 0 to 999.99 (`model.game.price`) | `PublishingService#update(ObjectId, ObjectId, GameForm)` with the game's other values unchanged | **R1** The row and the cards update. **R2** Invalid text or a rejection: the cell goes back to the old price; warning. |
+| STUDIO-3 | `newGameButton.onAction → StudioController#onNewGame` | name and price | `PublishingService#createDraft(ObjectId, String, BigDecimal)` | **R1** `Navigator#show(GAME_EDITOR, ObjectId)`. **R2** `ValidationException(model.game.*)`: message in the dialog. |
+| STUDIO-4 | `editButton`, `editItem` or a double click `→ StudioController#onEdit` | a game is selected | none | `Navigator#show(GAME_EDITOR, ObjectId)` |
+| STUDIO-5 | `publishButton` or `publishItem` `→ StudioController#onPublish` | a draft is selected | Confirmation, then `PublishingService#publish(ObjectId, ObjectId)` | **R1** The row shows Published. **R2** `ValidationException(model.game.incomplete)`: warning; the editor shows what is missing. |
+| STUDIO-6 | `delistButton` or `delistItem` `→ StudioController#onDelist` | a published game is selected | Confirmation `studio.delist.confirm`, then `PublishingService#delist(ObjectId, ObjectId)` | **R1** The row shows Delisted. |
+| STUDIO-7 | `salesReportButton.onAction → StudioController#onSalesReport` | none | `FilePicker#savePdf`, then `Reports#sales(Developer, SalesReport, Path)` | As CART-6. |
+
+### Game editor
+
+**Aspect.** A scrollable form in groups: **Details** (name, price, release date, PEGI, description with a counter),
+**Media** (the cover and the screenshots, each with its button), **Requirements** (five fields), **Tags** (chips with
+a remove cross and a field to add one), **Languages** (check boxes), and **Achievements** (an editable table with Add
+and Remove). The bottom bar holds **Back**, **Save**, **Publish** and **Delist**, and the status of the game.
+
+| fx:id | Control | Format |
+|---|---|---|
+| `nameField`, `priceField` | `TextField` | Required, up to 120; 0 to 999.99 |
+| `releasePicker` | `DatePicker` | |
+| `pegiBox` | `ComboBox<Pegi>` | PEGI 3 to 18 |
+| `descriptionArea`, `descriptionCounter` | `TextArea`, `Label` | Up to 4000 characters |
+| `coverView`, `changeCoverButton` | `ImageView`, `Button` | |
+| `screenshotsPane`, `addScreenshotButton` | `TilePane` of `ImageView`, `Button` | Up to 8; each has a Remove context menu |
+| `osField` ... `storageField` | `TextField` | All five or none, up to 80 each |
+| `tagsPane`, `tagField`, `addTagButton` | `FlowPane` of chips, `TextField`, `Button` | Up to 10 tags of up to 24 characters |
+| `languagesPane` | `FlowPane` of `CheckBox` | Two-letter codes, named in the UI language |
+| `achievementsTable` | `TableView<AchievementRow>`, editable | **Editable** name (up to 80) and description (up to 300) cells |
+| `addAchievementButton`, `removeAchievementButton` | `Button` | |
+| `statusLabel`, `formMessage` | `Label` | |
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| EDIT-1 | `GameEditorController#onNavigatedTo(ObjectId)` | the developer owns the game | `StoreService#game(ObjectId)` | **R1** The form shows the game. **R2** Another developer's game: `service.game.notOwner` warning; back to the dashboard. |
+| EDIT-2 | `saveButton.onAction → GameEditorController#onSave` | Every field check above | `PublishingService#update(ObjectId, ObjectId, GameForm)` | **R1** `editor.saved`. **R2** `ValidationException(model.game.*, model.requirements, model.achievement)`: marked on the bound field. |
+| EDIT-3 | `achievementsTable` name or description `.onEditCommit → GameEditorController#onAchievementCommit`; `addAchievementButton`, `removeAchievementButton` | 1 to 80 / 1 to 300 characters | none until Save | **R1** The cell keeps the new text. **R2** Out of range: the cell keeps the old text; `formMessage` shows `model.achievement`. |
+| EDIT-4 | `addTagButton.onAction` (or Enter in `tagField`); a chip's cross | 1 to 24 characters, at most 10 | none until Save | The chips update. |
+| EDIT-5 | `changeCoverButton.onAction → GameEditorController#onChangeCover` | a file is picked | `Uploads#image(Path)`, then `PublishingService#changeCover(ObjectId, ObjectId, ImageUpload)` | **R1** The new cover shows. **R2** `model.media.*`, file errors: C-2. |
+| EDIT-6 | `addScreenshotButton.onAction`; a screenshot's Remove item | at most 8 | `PublishingService#addScreenshot`, `#removeScreenshot` | The screenshots update. |
+| EDIT-7 | `publishButton.onAction → GameEditorController#onPublish` | a draft | Confirmation, then `#update` (the form) and `PublishingService#publish(ObjectId, ObjectId)` | **R1** Status Published. **R2** `ValidationException(model.game.incomplete)`: the missing fields (cover, description, release date, PEGI, requirements) are marked. |
+| EDIT-8 | `delistButton.onAction → GameEditorController#onDelist` | published | Confirmation, then `PublishingService#delist(ObjectId, ObjectId)` | **R1** Status Delisted. |
+| EDIT-9 | `backButton.onAction` | none | none | `Navigator#show(STUDIO)` |
+
+### Sales report (PDF)
+
+`Reports#sales(Developer, SalesReport, Path)` fills `com/mist/ui/report/sales.jrxml` with the dashboard's data: the
+studio, the date, the totals, and one line per game with its status, price, units, revenue and rating, in the UI
+language.
 
 ### Help
 
