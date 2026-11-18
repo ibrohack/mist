@@ -32,7 +32,10 @@ public enum View {
     ADMIN_LOG("view/admin-log.fxml", Placement.SHELL),
 
     /** The store: featured games, new releases, top sellers, free games and the search. */
-    STORE("view/store.fxml", Placement.SHELL);
+    STORE("view/store.fxml", Placement.SHELL),
+
+    /** A game's page, opened with the game's id. */
+    GAME("view/game.fxml", Placement.SHELL);
 
     /** Where a screen is shown. */
     public enum Placement {

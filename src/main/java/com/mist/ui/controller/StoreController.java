@@ -6,12 +6,14 @@ import com.mist.model.Role;
 import com.mist.ui.I18n;
 import com.mist.ui.NavigationAware;
 import com.mist.ui.UiContext;
+import com.mist.ui.View;
 import com.mist.ui.component.GameCell;
 import com.mist.ui.support.Formats;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -20,6 +22,8 @@ import javafx.scene.control.Pagination;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -33,7 +37,7 @@ import java.util.List;
 /**
  * Controller of the store: the featured carousel, the New releases, Top sellers and Free tabs, and the search.
  *
- * <p>Implements the behaviors STORE-1, STORE-2, STORE-4 and STORE-5 of {@code docs/ui-design.md}.</p>
+ * <p>Implements the behaviors STORE-1 to STORE-5 of {@code docs/ui-design.md}.</p>
  */
 public class StoreController implements NavigationAware {
 
@@ -117,6 +121,17 @@ public class StoreController implements NavigationAware {
             list.setCellFactory(view -> new GameCell(context.images()));
             list.setPlaceholder(new Label(I18n.text("store.empty")));
             list.setContextMenu(menuFor(list));
+            // STORE-3: a double click or Enter opens the selected game.
+            list.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                    open(list.getSelectionModel().getSelectedItem());
+                }
+            });
+            list.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ENTER) {
+                    open(list.getSelectionModel().getSelectedItem());
+                }
+            });
         }
         resultsList.setPlaceholder(new Label(I18n.text("store.noResults")));
         featured.setPageFactory(this::banner);
@@ -166,6 +181,17 @@ public class StoreController implements NavigationAware {
     }
 
     /**
+     * STORE-3: opens a game's page.
+     *
+     * @param game the game, or {@code null} when nothing is selected
+     */
+    private void open(Game game) {
+        if (game != null) {
+            context.navigator().show(View.GAME, game.getId());
+        }
+    }
+
+    /**
      * STORE-4: puts the selected game of a list in the player's cart.
      *
      * @param list the list the context menu belongs to
@@ -201,14 +227,17 @@ public class StoreController implements NavigationAware {
     }
 
     /**
-     * Builds the context menu of a list: Add to cart and Add to wishlist for players, nothing for anyone else.
+     * Builds the context menu of a list: Open for everyone, and Add to cart and Add to wishlist for players.
      *
      * @param list the list
-     * @return the menu, or {@code null} when the user cannot buy
+     * @return the menu
      */
     private ContextMenu menuFor(ListView<Game> list) {
+        MenuItem openItem = new MenuItem(I18n.text("store.open"));
+        openItem.setId("openItem");
+        openItem.setOnAction(event -> open(list.getSelectionModel().getSelectedItem()));
         if (!context.session().hasRole(Role.PLAYER)) {
-            return null;
+            return new ContextMenu(openItem);
         }
         MenuItem cartItem = new MenuItem(I18n.text("store.addToCart"));
         cartItem.setId("cartItem");
@@ -216,7 +245,7 @@ public class StoreController implements NavigationAware {
         MenuItem wishlistItem = new MenuItem(I18n.text("store.addToWishlist"));
         wishlistItem.setId("wishlistItem");
         wishlistItem.setOnAction(event -> addToWishlist(list));
-        ContextMenu menu = new ContextMenu(cartItem, wishlistItem);
+        ContextMenu menu = new ContextMenu(openItem, cartItem, wishlistItem);
         menu.setOnShowing(event -> {
             Game game = list.getSelectionModel().getSelectedItem();
             boolean owned = game == null || context.session().user()
@@ -252,7 +281,11 @@ public class StoreController implements NavigationAware {
         Label description = new Label(game.getDescription());
         description.setWrapText(true);
         description.setMaxHeight(80);
-        VBox text = new VBox(10, name, tags, price, description);
+        Button openButton = new Button(I18n.text("store.view"));
+        openButton.setId("featuredOpen");
+        // STORE-3: the banner's button opens the game.
+        openButton.setOnAction(event -> open(game));
+        VBox text = new VBox(10, name, tags, price, description, openButton);
         text.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(text, Priority.ALWAYS);
         HBox banner = new HBox(24, cover, text);

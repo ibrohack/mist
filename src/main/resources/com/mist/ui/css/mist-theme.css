@@ -686,3 +686,40 @@
 .mist-brand {
   -fx-cursor: hand;
 }
+
+/* Game page (docs/ui-design.md, "Game page"). */
+.mist-media-frame {
+  -fx-background-color: #000000;
+  -fx-background-radius: 3;
+}
+
+.mist-thumbnail {
+  -fx-cursor: hand;
+}
+
+.mist-chip {
+  -fx-background-color: -mist-void;
+  -fx-border-color: -mist-border;
+  -fx-border-radius: 3;
+  -fx-background-radius: 3;
+  -fx-padding: 3 8;
+  -fx-font-size: 12px;
+  -fx-text-fill: -mist-ash;
+}
+
+.mist-price-large {
+  -fx-font-size: 22px;
+}
+
+.mist-pegi {
+  -fx-background-color: -mist-fog;
+  -fx-text-fill: -mist-void;
+  -fx-font-weight: 700;
+  -fx-padding: 4 10;
+  -fx-background-radius: 3;
+}
+
+.mist-stars {
+  -fx-text-fill: -mist-acid;
+  -fx-font-size: 15px;
+}

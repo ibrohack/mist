@@ -19,7 +19,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -100,15 +99,15 @@ class StoreTest extends MistUiTest {
     }
 
     @Test
-    void developersAndGuestsGetNoBuyingMenu() throws Exception {
+    void developersAndGuestsCanOnlyOpenGames() throws Exception {
         loginAs(DemoData.DEVELOPER_EMAIL);
-        assertNull(list("newList").getContextMenu());
+        assertEquals(List.of("openItem"), itemIds(list("newList").getContextMenu()));
 
         menu("userMenu", "logoutItem");
         click("guestLink");
         assertEquals(View.STORE, navigator.current());
         assertTrue(context.session().isGuest());
-        assertNull(list("newList").getContextMenu());
+        assertEquals(List.of("openItem"), itemIds(list("newList").getContextMenu()));
         assertEquals(msg("shell.guest"), text("userMenu"));
     }
 
@@ -195,6 +194,16 @@ class StoreTest extends MistUiTest {
      */
     private static MenuItem item(ContextMenu menu, String id) {
         return menu.getItems().stream().filter(i -> id.equals(i.getId())).findFirst().orElseThrow();
+    }
+
+    /**
+     * Returns the ids of a menu's items.
+     *
+     * @param menu the menu
+     * @return the ids, in order
+     */
+    private static List<String> itemIds(ContextMenu menu) {
+        return menu.getItems().stream().map(MenuItem::getId).toList();
     }
 
     /**
