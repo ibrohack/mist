@@ -42,6 +42,7 @@
             <ContextMenu fx:id="gameMenu">
               <items>
                 <MenuItem fx:id="openItem" text="%store.open" onAction="#onOpen"/>
+                <MenuItem fx:id="reviewItem" text="%game.writeReview" onAction="#onReview"/>
               </items>
             </ContextMenu>
           </contextMenu>

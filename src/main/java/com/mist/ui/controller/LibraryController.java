@@ -6,6 +6,7 @@ import com.mist.ui.I18n;
 import com.mist.ui.NavigationAware;
 import com.mist.ui.UiContext;
 import com.mist.ui.View;
+import com.mist.ui.support.Dialogs;
 import com.mist.ui.support.Formats;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -39,7 +40,7 @@ import java.util.Objects;
 /**
  * Controller of the library: the games the player owns, as a filtered list of names and a grid of covers.
  *
- * <p>Implements the behaviors LIB-1 to LIB-3 of {@code docs/ui-design.md}.</p>
+ * <p>Implements the behaviors LIB-1 to LIB-4 of {@code docs/ui-design.md}.</p>
  */
 public class LibraryController implements NavigationAware {
 
@@ -84,6 +85,9 @@ public class LibraryController implements NavigationAware {
     /** Opens the selected game. */
     @FXML
     private MenuItem openItem;
+    /** Opens the review dialog for the selected game. */
+    @FXML
+    private MenuItem reviewItem;
     /** The covers of the kept games. */
     @FXML
     private TilePane gameGrid;
@@ -190,6 +194,16 @@ public class LibraryController implements NavigationAware {
         OwnedGame item = gameList.getSelectionModel().getSelectedItem();
         if (item != null) {
             context.navigator().show(View.GAME, item.game().getId());
+        }
+    }
+
+    /** LIB-4: opens the review dialog for the selected game. */
+    @FXML
+    private void onReview() {
+        OwnedGame item = selected();
+        if (item != null) {
+            ReviewDialog.show(context, item.game(),
+                    () -> Dialogs.info(context.navigator().window(), I18n.text("review.published")));
         }
     }
 

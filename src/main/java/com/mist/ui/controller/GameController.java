@@ -41,7 +41,7 @@ import java.util.Locale;
  * Controller of a game's page: media, description and facts, the buy box, requirements, languages, achievements and
  * reviews.
  *
- * <p>Implements the behaviors GAME-1 to GAME-7 of {@code docs/ui-design.md}; it is opened with the game's
+ * <p>Implements the behaviors GAME-1 to GAME-8 of {@code docs/ui-design.md}; it is opened with the game's
  * {@link ObjectId}.</p>
  */
 public class GameController implements NavigationAware {
@@ -152,6 +152,12 @@ public class GameController implements NavigationAware {
     /** The achievements. */
     @FXML
     private ListView<Achievement> achievementsList;
+    /** The player's own rating, once they reviewed the game. */
+    @FXML
+    private Label yourReviewLabel;
+    /** Opens the review dialog, for an owner who has not reviewed the game. */
+    @FXML
+    private Button reviewButton;
     /** The reviews of the current page. */
     @FXML
     private ListView<GameReview> reviewsList;
@@ -184,8 +190,15 @@ public class GameController implements NavigationAware {
 
     @Override
     public void onNavigatedTo(Object parameter) {
-        // GAME-1: load the game and its studio.
-        ObjectId gameId = (ObjectId) parameter;
+        load((ObjectId) parameter);
+    }
+
+    /**
+     * GAME-1: loads the game and its studio.
+     *
+     * @param gameId the game
+     */
+    private void load(ObjectId gameId) {
         context.tasks().run(null, () -> {
             Game loaded = context.services().store().game(gameId);
             User developer = context.services().users().get(loaded.getDeveloperId());
@@ -229,6 +242,33 @@ public class GameController implements NavigationAware {
         reviewsPages.setPageCount(pages);
         reviewsPages.setCurrentPageIndex(0);
         loadReviews(0);
+        loadOwnReview();
+    }
+
+    /** GAME-8: shows the player's own rating, or offers an owner to write a review. */
+    private void loadOwnReview() {
+        show(reviewButton, false);
+        show(yourReviewLabel, false);
+        Player player = context.session().user().orElse(null) instanceof Player p ? p : null;
+        if (player == null || !player.owns(game.getId())) {
+            return;
+        }
+        ObjectId gameId = game.getId();
+        context.tasks().run(null, () -> context.services().reviews().reviewOf(player.getId(), gameId), mine -> {
+            if (mine.isPresent()) {
+                yourReviewLabel.setText(I18n.format("game.yourReview", stars(mine.get().getRating())));
+                show(yourReviewLabel, true);
+            } else {
+                show(reviewButton, true);
+            }
+        });
+    }
+
+    /** GAME-8: opens the review dialog; once published, the page reloads with the new review. */
+    @FXML
+    private void onWriteReview() {
+        ObjectId gameId = game.getId();
+        ReviewDialog.show(context, game, () -> load(gameId));
     }
 
     /** Builds the thumbnails of the cover and the screenshots, and shows the first one large. */
@@ -373,6 +413,16 @@ public class GameController implements NavigationAware {
     }
 
     /**
+     * Draws a rating as filled and empty stars.
+     *
+     * @param rating 1 to 5
+     * @return the stars, such as ★★★★☆
+     */
+    private static String stars(int rating) {
+        return "★".repeat(rating) + "☆".repeat(STARS - rating);
+    }
+
+    /**
      * Builds a tag chip.
      *
      * @param tag the tag
@@ -434,8 +484,7 @@ public class GameController implements NavigationAware {
                 setGraphic(null);
                 return;
             }
-            int rating = item.review().getRating();
-            Label stars = new Label("★".repeat(rating) + "☆".repeat(STARS - rating));
+            Label stars = new Label(stars(item.review().getRating()));
             stars.getStyleClass().add("mist-stars");
             String author = item.authorNickname() == null ? I18n.text("game.anonymous") : item.authorNickname();
             Label byline = new Label(author + " · " + Formats.date(item.review().getCreatedAt()));

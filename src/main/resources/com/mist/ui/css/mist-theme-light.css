@@ -28,3 +28,8 @@
 .mist-ring {
   -fx-opacity: 0.35;
 }
+
+.toggle-button.mist-star:hover,
+.toggle-button.mist-star:selected {
+  -fx-text-fill: #3f6600;
+}

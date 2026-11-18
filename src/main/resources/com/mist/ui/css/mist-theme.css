@@ -734,3 +734,21 @@
   -fx-font-weight: 700;
   -fx-padding: 1 7;
 }
+
+/* Review dialog (docs/ui-design.md, "Review dialog"). */
+.toggle-button.mist-star {
+  -fx-background-color: transparent;
+  -fx-text-fill: -mist-border;
+  -fx-font-size: 26px;
+  -fx-padding: 0 2;
+  -fx-cursor: hand;
+}
+
+.toggle-button.mist-star:hover,
+.toggle-button.mist-star:selected {
+  -fx-text-fill: -mist-acid;
+}
+
+.dialog-pane.mist-dialog .text-area .content {
+  -fx-background-color: -mist-surface;
+}

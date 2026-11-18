@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Review dialog: five stars, an optional text with its counter, and the message line.
+     See docs/ui-design.md, "Review dialog". -->
+<VBox prefWidth="480" styleClass="gap-[12px]"
+      xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mist.ui.controller.ReviewDialog">
+  <Label fx:id="gameNameLabel" styleClass="mist-subtitle" wrapText="true"/>
+  <Label text="%review.rating" styleClass="mist-caption"/>
+  <HBox fx:id="starsBox" styleClass="gap-[4px]">
+    <ToggleButton fx:id="star1" text="★" styleClass="mist-star" onAction="#onStar"/>
+    <ToggleButton fx:id="star2" text="★" styleClass="mist-star" onAction="#onStar"/>
+    <ToggleButton fx:id="star3" text="★" styleClass="mist-star" onAction="#onStar"/>
+    <ToggleButton fx:id="star4" text="★" styleClass="mist-star" onAction="#onStar"/>
+    <ToggleButton fx:id="star5" text="★" styleClass="mist-star" onAction="#onStar"/>
+  </HBox>
+  <Label text="%review.comment" styleClass="mist-caption"/>
+  <TextArea fx:id="commentArea" wrapText="true" prefRowCount="5"/>
+  <Label fx:id="commentCounter" styleClass="mist-caption"/>
+  <Label fx:id="formMessage" wrapText="true"/>
+</VBox>
