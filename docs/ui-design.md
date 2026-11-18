@@ -283,12 +283,14 @@ the primary button `retryButton` (`%offline.retry`) and a caption `retryStatus` 
 | `loginButton` | `Button` (default) | Disabled while the login runs |
 | `formMessage` | `Label` | Error or notice text |
 | `registerLink` | `Hyperlink` | |
+| `guestLink` | `Hyperlink` | |
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
 | LOGIN-1 | `loginButton.onAction` (or Enter) `→ LoginController#onLogin` | `required(emailField)`, `email(emailField)`, `required(passwordField)` | `AuthService#login(String email, char[] password)` | **R1** `UserSession#start(User)`; the user's `Preferences` are applied (C-4, C-5); `Navigator#home()`. **R2** `UnauthorizedException(service.auth.badCredentials)`: `formMessage` shows it, the password is cleared and focused. **R3** `UnauthorizedException(service.account.deactivated)`: `formMessage` shows it. **R4** `DataAccessException`: C-2 retry dialog. |
 | LOGIN-2 | `registerLink.onAction → LoginController#onRegister` | none | none | `Navigator#show(REGISTER)` |
 | LOGIN-3 | `esToggle`/`enToggle` selected `→ LoginController#onLanguage` | none | `I18n#use(Locale)` | The screen reloads in the chosen language and keeps the typed email (C-4). |
+| LOGIN-5 | `guestLink.onAction → LoginController#onGuest` | none | none | `UserSession#startGuest()`; `Navigator#home()` opens the store. A guest can browse; buying asks to log in. |
 | LOGIN-4 | `LoginController#onNavigatedTo(LoginNotice)` | none | none | `emailField` is filled and `formMessage` shows the notice (`register.done`, `profile.deactivated`, `service.account.deactivated`). |
 
 ### Register
@@ -324,7 +326,8 @@ country), and **Account type** (radio buttons Player / Developer). Choosing Play
 ### Shell
 
 **Aspect.** A `BorderPane`: the top bar (64 px, surface) holds the MIST mark and wordmark, the navigation links
-(`navBar`) and the user menu on the right; the center (`content`) holds the current screen.
+(`header.fxml`, included as `header`) and the user menu on the right; the center (`content`) holds the current
+screen.
 
 The user menu `userMenu` (`MenuButton`) shows the avatar (circle) and the user's name, or "Guest". Its items:
 
@@ -335,7 +338,7 @@ The user menu `userMenu` (`MenuButton`) shows the avatar (circle) and the user's
 | `themeMenu` → `darkItem`, `lightItem` | Theme (radio items) | | all |
 | `helpItem` | Help | F1 | all |
 | `logItem` | Operation log | Ctrl+L | admin |
-| `logoutItem` | Log out (guest: Log in) | Ctrl+Shift+Q | all |
+| `logoutItem` | Log out; for a guest, Log in | Ctrl+Shift+Q | all |
 
 | ID | Trigger | Checks | Calls | Responses |
 |---|---|---|---|---|
@@ -421,6 +424,141 @@ operation** (`filterOperationItem`).
 | LOG-3 | `userFilter.text`, `operationFilter.value`, `failedOnly.selected` change `→ AdminLogController#applyFilters` | none | none (`FilteredList#setPredicate`) | The table and `countLabel` update at once. |
 | LOG-4 | `refreshButton.onAction → AdminLogController#onRefresh` | none | `LogService#days`, `LogService#entries` | As LOG-1 and LOG-2, keeping the chosen day. |
 | LOG-5 | `copyItem`, `filterUserItem`, `filterOperationItem` `.onAction` | A row is selected | `Clipboard#setContent` | Copies the row as a log line, or fills the matching filter. |
+
+### Header
+
+**Aspect.** Text links in the top bar, styled as tabs: the link of the current screen has the acid underline. The
+cart link shows a badge with the number of games in the cart.
+
+| fx:id | Control | Visible for |
+|---|---|---|
+| `storeLink` | `ToggleButton` in `links` | all |
+| `wishlistLink` | `ToggleButton` in `links` | player |
+| `cartLink` | `ToggleButton` in `links`, with `cartBadge` (`Label`) as graphic | player |
+| `logLink` | `ToggleButton` in `links` | admin |
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| HEADER-1 | `HeaderController#refresh` (the session changes) | none | none | Shows the links of the user's role and the cart size from `Player#getCartGameIds()`. |
+| HEADER-2 | `storeLink`, `wishlistLink`, `cartLink`, `logLink` `.onAction → HeaderController#onLink` | none | none | `Navigator#show(STORE / WISHLIST / CART / ADMIN_LOG)`. |
+| HEADER-3 | `ShellController#showContent(View, Node)` | none | none | `HeaderController#highlight(View)` selects the link of the screen on display. |
+
+### Store
+
+**Aspect.** A scrollable page: the title and the search field; a carousel of featured games (`Pagination`, one banner
+per page: cover, name, tags, price, description and an Open button); and three tabs of game lists (New releases, Top
+sellers, Free). While a search is active, the results replace the carousel and the tabs.
+
+```
+Store                                                        [ Search games...        ]
++-----------------------------------------------------------------------------------+
+| [cover]  Starlit Drift                                                             |
+|          space · exploration · open world                     59,99 EUR   [Open]   |
+|          Chart a galaxy that drifts while you sleep...                             |
++-----------------------------------------------------------------------------------+
+                                 <  1 2 3 4 5  >
+[ New releases ] [ Top sellers ] [ Free ]
+ [img] Starlit Drift        space · exploration              4,5 *   59,99 EUR
+ [img] Gravewind Tactics    tactics · turn-based                 -   34,99 EUR
+```
+
+| fx:id | Control | Format |
+|---|---|---|
+| `searchField` | `TextField` | Searches as the user types (300 ms pause) and on Enter |
+| `featured` | `Pagination` | Up to 5 newest games with a cover |
+| `tabs` | `TabPane` with `newTab`, `topTab`, `freeTab` | |
+| `newList`, `topList`, `freeList`, `resultsList` | `ListView<Game>` with `GameCell` | Cover, name, tags, rating, price ("Free" for 0) |
+| `resultsBox` | `VBox` | Shown while searching, with `resultsTitle` |
+
+Each list has a context menu: **Open** (`openItem`), **Add to cart** (`cartItem`), **Add to wishlist**
+(`wishlistItem`); the last two are hidden for anyone but a player. A double click or Enter opens the game.
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| STORE-1 | `StoreController#onNavigatedTo` | none | `StoreService#newReleases(int)`, `#topSellers(int)`, `#freeGames(int)` | **R1** The carousel and the three lists fill. **R2** errors: C-2. |
+| STORE-2 | `searchField` text changes (300 ms pause) or `searchField.onAction` `→ StoreController#search` | none | `StoreService#search(String, int)` | **R1** `resultsBox` lists the matches (placeholder `store.noResults`). **R2** Blank text: the carousel and tabs come back. |
+| STORE-3 | Double click or Enter on a list, `openItem`, or the banner's Open button `→ StoreController#open` | a game is selected | none | `Navigator#show(GAME, ObjectId)` |
+| STORE-4 | `cartItem.onAction → StoreController#onAddToCart` | player | `StoreService#addToCart(ObjectId, ObjectId)` | **R1** `UserSession#update(User)`; the header badge grows; `store.addedToCart`. **R2** `ValidationException(model.player.alreadyOwned, model.order.items)`: C-2 warning. |
+| STORE-5 | `wishlistItem.onAction → StoreController#onAddToWishlist` | player | `StoreService#addToWishlist(ObjectId, ObjectId)` | As STORE-4, with `store.addedToWishlist`. |
+
+### Game page
+
+**Aspect.** Follows the diagram's Game view: a back button and the name; the media (the selected image large, the
+cover and screenshots as thumbnails) next to the description and the facts (overall rating, release date, studio,
+tags as chips); the buy box (price and buttons); languages and the PEGI badge; the system requirements; the
+achievements; and the reviews with paging.
+
+| fx:id | Control | Format |
+|---|---|---|
+| `backButton` | `Button` (secondary) | |
+| `nameTitle` | `Label` | Title |
+| `mainImage`, `thumbnails` | `ImageView`, `HBox` of `ImageView` | 640 px wide; thumbnails 96 x 54 |
+| `descriptionText`, `ratingText`, `releaseText`, `studioText` | `Label` | `game.rating` = "{0} of 5 · {1} reviews"; localized date |
+| `tagsPane` | `FlowPane` of chips | |
+| `priceLabel`, `addToCartButton`, `wishlistButton`, `ownedLabel` | `Label`, `Button`, `Button`, `Label` | Price or "Free"; buttons by state |
+| `languagesText`, `pegiBadge` | `Label` | Language names in the UI language; "PEGI 16" |
+| `requirementsGrid` | `GridPane` | OS, processor, memory, graphics, storage |
+| `achievementsList` | `ListView<Achievement>` | Name and description |
+| `reviewsList`, `reviewsPages` | `ListView<GameReview>`, `Pagination` | Stars, nickname, date, text; 5 per page |
+
+The buy box by state: a guest sees Add to cart, which asks to log in; a player sees Add to cart or "In your cart"
+(`goToCartButton`), Add to wishlist or "On your wishlist", or "In your library" when the game is owned; developers and
+admins see only the price.
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| GAME-1 | `GameController#onNavigatedTo(ObjectId)` | none | `StoreService#game(ObjectId)`, `UserService#get(ObjectId)` (the studio), `ReviewService#reviews(ObjectId, int, int)` | **R1** The page shows the game. **R2** `NotFoundException(service.game.notFound)`: C-2 warning; `Navigator#back()`. |
+| GAME-2 | A thumbnail clicked `→ GameController#showImage` | none | `Images#load` | The image shows large. |
+| GAME-3 | `addToCartButton.onAction → GameController#onAddToCart` | player; a guest gets a confirmation `game.loginToBuy` that leads to Login | `StoreService#addToCart(ObjectId, ObjectId)` | **R1** `UserSession#update(User)`; the button becomes `goToCartButton`. **R2** `ValidationException(service.game.notPurchasable, model.player.alreadyOwned, model.order.items)`: C-2 warning. |
+| GAME-4 | `goToCartButton.onAction → GameController#onGoToCart` | player | none | `Navigator#show(CART)` |
+| GAME-5 | `wishlistButton.onAction → GameController#onAddToWishlist` | player | `StoreService#addToWishlist(ObjectId, ObjectId)` | **R1** The button says "On your wishlist" and is disabled. **R2** as GAME-3. |
+| GAME-6 | `reviewsPages.currentPageIndex` changes `→ GameController#loadReviews` | none | `ReviewService#reviews(ObjectId, int, int)` | The page of reviews shows (placeholder `game.noReviews`). |
+| GAME-7 | `backButton.onAction → GameController#onBack` | none | none | `Navigator#back()`, or the store if there is no previous screen. |
+
+### Cart
+
+**Aspect.** Follows the diagram's Cart view: "My cart" with one row per game (cover, name, price, Remove) on the left;
+on the right, a summary card with the total, the names of the games being bought, the card that will be charged, the
+terms check box with its link, and the checkout button.
+
+| fx:id | Control | Format |
+|---|---|---|
+| `cartList` | `ListView<Game>` with `CartCell` | Cover, name, price, a Remove button (`removeButton` in each row) |
+| `totalLabel` | `Label` | `cart.total` = "Total: {0}" |
+| `summaryList` | `VBox` of `Label` | One name per game |
+| `cardLabel` | `Label` | `cart.card` = "Charged to {0}" (brand and last digits) |
+| `termsCheck`, `termsLink` | `CheckBox`, `Hyperlink` | The checkout button is enabled only when checked and the cart has games |
+| `checkoutButton` | `Button` (primary) | |
+
+Context menu of `cartList`: **Open** (`openItem`), **Move to wishlist** (`moveItem`), **Remove** (`removeItem`).
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| CART-1 | `CartController#onNavigatedTo` | player | `StoreService#cart(ObjectId)` | **R1** Rows, total and summary. **R2** Empty: placeholder `cart.empty`. |
+| CART-2 | A row's `removeButton` or `removeItem` `→ CartController#remove` | none | `StoreService#removeFromCart(ObjectId, ObjectId)` | **R1** `UserSession#update(User)`; the row leaves; the total updates. |
+| CART-3 | `moveItem.onAction → CartController#onMoveToWishlist` | none | `StoreService#addToWishlist`, then `StoreService#removeFromCart` | As CART-2; the game is on the wishlist. |
+| CART-4 | `termsLink.onAction → CartController#onTerms` | none | none | Information dialog with `cart.terms.text`. |
+| CART-5 | `checkoutButton.onAction → CartController#onCheckout` | `termsCheck` selected | Confirmation `cart.confirm` (total and card), then `StoreService#checkout(ObjectId)` and `UserService#get(ObjectId)` | **R1** `UserSession#update(User)`; the cart empties; the dialog `cart.done` offers the receipt (`receiptButton`). **R2** `ValidationException(service.store.emptyCart, model.player.card, model.card.expired)`: C-2 warning (an expired card is changed in the profile). **R3** `ValidationException(service.game.notPurchasable)`: warning; the cart reloads. **R4** `DataAccessException`: C-2 retry. |
+| CART-6 | `receiptButton.onAction → CartController#onReceipt` | none | `FilePicker#savePdf(Window, String)`, then `Reports#receipt(Order, User, Path)` | **R1** The PDF is written; `report.saved`. **R2** `ReportException`: error dialog `error.reportNotSaved`. **R3** Cancelled chooser: nothing happens. |
+
+### Wishlist
+
+**Aspect.** A list of the wished games (cover, name, price, rating) with the buttons Add to cart (`addToCartButton`)
+and Remove (`removeButton`) for the selected game, and a context menu with **Open**, **Add to cart** and **Remove**.
+
+| ID | Trigger | Checks | Calls | Responses |
+|---|---|---|---|---|
+| WISH-1 | `WishlistController#onNavigatedTo` | player | `StoreService#wishlist(ObjectId)` | **R1** The list. **R2** Empty: placeholder `wishlist.empty`. |
+| WISH-2 | `addToCartButton` or `cartItem` `.onAction → WishlistController#onAddToCart` | a game is selected | `StoreService#addToCart(ObjectId, ObjectId)`, then `StoreService#removeFromWishlist` | **R1** `UserSession#update(User)`; the game moves to the cart. **R2** C-2 warning (already owned, not on sale). |
+| WISH-3 | `removeButton` or `removeItem` `.onAction → WishlistController#onRemove` | a game is selected | `StoreService#removeFromWishlist(ObjectId, ObjectId)` | The game leaves the list. |
+| WISH-4 | Double click, Enter or `openItem` `→ WishlistController#onOpen` | a game is selected | none | `Navigator#show(GAME, ObjectId)` |
+
+### Purchase receipt (PDF)
+
+`Reports#receipt(Order, User, Path)` fills `com/mist/ui/report/receipt.jrxml` (JasperReports) with the order the UI
+shows: the buyer, the date, the card, one line per game with its price and refund state, and the total. Labels come
+from the bundles through `REPORT_RESOURCE_BUNDLE` (`$R{...}`), so the receipt is in the UI language; amounts and dates
+are formatted by `Formats`.
 
 ### Help
 
