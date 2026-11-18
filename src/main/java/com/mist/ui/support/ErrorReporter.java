@@ -8,6 +8,7 @@ import com.mist.exception.UnauthorizedException;
 import com.mist.exception.ValidationException;
 import com.mist.service.ServiceKeys;
 import com.mist.ui.I18n;
+import com.mist.ui.report.ReportException;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,11 @@ public final class ErrorReporter {
             case DataAccessException e -> {
                 LOG.warn("Database failure shown to the user: {}", e.getMessage(), e);
                 Dialogs.error(owner, I18n.textOrKey(e.getMessage()), retry);
+            }
+            case ReportException e -> {
+                // A report that could not be written: usually the chosen file is open or not writable.
+                LOG.warn("Report not saved: {}", e.toString(), e);
+                Dialogs.error(owner, I18n.text("error.reportNotSaved"), null);
             }
             case IOException e -> {
                 // A file the user picked could not be read or written: a platform error, not a bug.

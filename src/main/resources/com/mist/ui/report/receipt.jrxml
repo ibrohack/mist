@@ -1,0 +1,122 @@
+<!-- MIST purchase receipt (JasperReports 7). Labels come from the UI bundles through REPORT_RESOURCE_BUNDLE ($R{...});
+     amounts and dates arrive already formatted in the UI language. See docs/ui-design.md, "Purchase receipt". -->
+<jasperReport name="receipt" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40"
+              topMargin="40" bottomMargin="40">
+	<style name="Base" default="true" fontName="DejaVu Sans" fontSize="10.0" forecolor="#0A0C0B"/>
+	<style name="Caption" fontName="DejaVu Sans" fontSize="9.0" forecolor="#686E69"/>
+	<style name="Strong" fontName="DejaVu Sans" fontSize="10.0" bold="true" forecolor="#0A0C0B"/>
+	<parameter name="logo" class="java.io.InputStream"/>
+	<parameter name="orderId" class="java.lang.String"/>
+	<parameter name="orderDate" class="java.lang.String"/>
+	<parameter name="buyerName" class="java.lang.String"/>
+	<parameter name="buyerEmail" class="java.lang.String"/>
+	<parameter name="card" class="java.lang.String"/>
+	<parameter name="status" class="java.lang.String"/>
+	<parameter name="total" class="java.lang.String"/>
+	<parameter name="refunded" class="java.lang.String"/>
+	<field name="name" class="java.lang.String"/>
+	<field name="state" class="java.lang.String"/>
+	<field name="price" class="java.lang.String"/>
+	<title height="170">
+		<element kind="image" x="0" y="0" width="44" height="44" scaleImage="RetainShape">
+			<expression><![CDATA[$P{logo}]]></expression>
+		</element>
+		<element kind="staticText" x="54" y="4" width="200" height="36" fontSize="26.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[MIST]]></text>
+		</element>
+		<element kind="textField" x="255" y="4" width="260" height="36" fontSize="18.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$R{report.receipt.title}]]></expression>
+		</element>
+		<element kind="line" x="0" y="54" width="515" height="1">
+			<pen lineWidth="3.0" lineColor="#C6FF3D"/>
+		</element>
+		<element kind="textField" x="0" y="70" width="120" height="16" style="Caption">
+			<expression><![CDATA[$R{report.order}]]></expression>
+		</element>
+		<element kind="textField" x="120" y="70" width="395" height="16" style="Strong">
+			<expression><![CDATA[$P{orderId}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="88" width="120" height="16" style="Caption">
+			<expression><![CDATA[$R{report.date}]]></expression>
+		</element>
+		<element kind="textField" x="120" y="88" width="395" height="16">
+			<expression><![CDATA[$P{orderDate}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="106" width="120" height="16" style="Caption">
+			<expression><![CDATA[$R{report.buyer}]]></expression>
+		</element>
+		<element kind="textField" x="120" y="106" width="395" height="16">
+			<expression><![CDATA[$P{buyerName} + " · " + $P{buyerEmail}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="124" width="120" height="16" style="Caption">
+			<expression><![CDATA[$R{report.card}]]></expression>
+		</element>
+		<element kind="textField" x="120" y="124" width="395" height="16">
+			<expression><![CDATA[$P{card}]]></expression>
+		</element>
+		<element kind="textField" x="0" y="142" width="120" height="16" style="Caption">
+			<expression><![CDATA[$R{report.status}]]></expression>
+		</element>
+		<element kind="textField" x="120" y="142" width="395" height="16">
+			<expression><![CDATA[$P{status}]]></expression>
+		</element>
+	</title>
+	<columnHeader height="26">
+		<element kind="textField" mode="Opaque" x="0" y="0" width="300" height="24" forecolor="#F2F5EE" backcolor="#151916" bold="true" vTextAlign="Middle">
+			<expression><![CDATA[$R{report.game}]]></expression>
+			<box leftPadding="8"/>
+		</element>
+		<element kind="textField" mode="Opaque" x="300" y="0" width="115" height="24" forecolor="#F2F5EE" backcolor="#151916" bold="true" vTextAlign="Middle">
+			<expression><![CDATA[$R{report.state}]]></expression>
+		</element>
+		<element kind="textField" mode="Opaque" x="415" y="0" width="100" height="24" forecolor="#F2F5EE" backcolor="#151916" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$R{report.price}]]></expression>
+			<box rightPadding="8"/>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="22">
+			<element kind="textField" x="0" y="0" width="300" height="22" vTextAlign="Middle" textAdjust="ScaleFont">
+				<expression><![CDATA[$F{name}]]></expression>
+				<box leftPadding="8">
+					<bottomPen lineWidth="0.5" lineColor="#C9CEC5"/>
+				</box>
+			</element>
+			<element kind="textField" x="300" y="0" width="115" height="22" vTextAlign="Middle" style="Caption">
+				<expression><![CDATA[$F{state}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#C9CEC5"/>
+				</box>
+			</element>
+			<element kind="textField" x="415" y="0" width="100" height="22" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{price}]]></expression>
+				<box rightPadding="8">
+					<bottomPen lineWidth="0.5" lineColor="#C9CEC5"/>
+				</box>
+			</element>
+		</band>
+	</detail>
+	<summary height="70">
+		<element kind="textField" x="300" y="12" width="115" height="20" bold="true" vTextAlign="Middle">
+			<expression><![CDATA[$R{report.total}]]></expression>
+		</element>
+		<element kind="textField" x="415" y="12" width="100" height="20" fontSize="12.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$P{total}]]></expression>
+			<box rightPadding="8"/>
+		</element>
+		<element kind="textField" x="300" y="34" width="115" height="18" style="Caption" vTextAlign="Middle">
+			<printWhenExpression><![CDATA[$P{refunded} != null]]></printWhenExpression>
+			<expression><![CDATA[$R{report.refundedTotal}]]></expression>
+		</element>
+		<element kind="textField" x="415" y="34" width="100" height="18" style="Caption" hTextAlign="Right" vTextAlign="Middle">
+			<printWhenExpression><![CDATA[$P{refunded} != null]]></printWhenExpression>
+			<expression><![CDATA[$P{refunded}]]></expression>
+			<box rightPadding="8"/>
+		</element>
+	</summary>
+	<pageFooter height="24">
+		<element kind="textField" x="0" y="6" width="515" height="16" style="Caption" hTextAlign="Center">
+			<expression><![CDATA[$R{report.footer} + " · " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+</jasperReport>

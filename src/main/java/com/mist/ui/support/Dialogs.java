@@ -95,6 +95,26 @@ public final class Dialogs {
     }
 
     /**
+     * Tells the result of an action and offers a follow-up, such as downloading the receipt after a purchase.
+     *
+     * @param owner     the window the dialog belongs to
+     * @param message   the result, already translated
+     * @param actionKey the bundle key of the follow-up button, whose id is {@code dialogAction}
+     * @param onAction  what the follow-up does
+     */
+    public static void offer(Window owner, String message, String actionKey, Runnable onAction) {
+        Alert alert = alert(owner, Alert.AlertType.INFORMATION, "dialog.info.title", message);
+        ButtonType action = buttons(alert, new Choice(actionKey, ButtonBar.ButtonData.OK_DONE, "dialogAction"),
+                new Choice("dialog.close", ButtonBar.ButtonData.CANCEL_CLOSE, "dialogClose"));
+        alert.setOnHidden(event -> {
+            if (alert.getResult() == action) {
+                onAction.run();
+            }
+        });
+        alert.show();
+    }
+
+    /**
      * Gives a dialog the brand look of its owner: its stylesheets and the {@code mist-dialog} class.
      *
      * @param pane  the dialog's pane
