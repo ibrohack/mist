@@ -43,6 +43,7 @@
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
     <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+    <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -428,6 +429,75 @@
                   <descriptors>
                     <descriptor>src/main/packaging/app-image.xml</descriptor>
                   </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- ./mvnw -Pjar package: one executable jar, target/MIST-<version>.jar, with every runtime library inside, run
+         with java -jar on a Java 25 runtime. JavaFX's native libraries are those of the build machine's platform, so
+         a jar built on Windows runs on Windows. -->
+    <profile>
+      <id>jar</id>
+      <properties>
+        <app.version>0.1.0</app.version>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>${maven-shade-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>executable-jar</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <shadedArtifactAttached>true</shadedArtifactAttached>
+                  <finalName>MIST-${app.version}</finalName>
+                  <createDependencyReducedPom>false</createDependencyReducedPom>
+                  <filters>
+                    <!-- Signatures of signed libraries (Bouncy Castle) no longer match once merged, and the module
+                         descriptors mean nothing on the classpath. -->
+                    <filter>
+                      <artifact>*:*</artifact>
+                      <excludes>
+                        <exclude>module-info.class</exclude>
+                        <exclude>META-INF/versions/*/module-info.class</exclude>
+                        <exclude>META-INF/*.SF</exclude>
+                        <exclude>META-INF/*.DSA</exclude>
+                        <exclude>META-INF/*.RSA</exclude>
+                        <exclude>META-INF/*.EC</exclude>
+                        <exclude>META-INF/MANIFEST.MF</exclude>
+                      </excludes>
+                    </filter>
+                  </filters>
+                  <transformers>
+                    <!-- Hibernate, the MongoDB driver, Logback and JasperReports find their parts through
+                         ServiceLoader, so every library's service files are merged. -->
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    <!-- Each JasperReports jar registers its extensions (PDF exporter, fonts, JDT compiler) here. -->
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                      <resource>jasperreports_extension.properties</resource>
+                    </transformer>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <mainClass>${main.class}</mainClass>
+                      <manifestEntries>
+                        <Multi-Release>true</Multi-Release>
+                        <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+                        <Implementation-Title>${project.name}</Implementation-Title>
+                        <Implementation-Version>${app.version}</Implementation-Version>
+                      </manifestEntries>
+                    </transformer>
+                  </transformers>
                 </configuration>
               </execution>
             </executions>
